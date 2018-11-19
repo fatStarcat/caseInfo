@@ -1,0 +1,28 @@
+#exportData { /*导出按钮*/
+  float: right;
+  margin-top: 20px;
+}
+#exportData button {
+  width: 150px;
+  height: 40px;
+  background: -webkit-linear-gradient(bottom, #2c65ff 0%, #4e95ff 100%);
+  border-radius: 10px;
+  font-size: 18px;
+  font-family: 'PingFangSC-Regular';
+  font-weight: 400;
+  color: #fefefe;
+  line-height: 40px;
+  border: none;
+}
+
+/*图表下钻返回按钮*/
+.echarts-wrap  .echarts-return {
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+.echarts-return:hover {
+  color: #1e88e5;
+}

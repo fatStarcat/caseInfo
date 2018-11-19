@@ -1,0 +1,16 @@
+#exportData { /*导出按钮*/
+  float: right;
+  margin-top: 20px;
+  button {
+    width: 150px;
+    height: 40px;
+    background: red  !important;
+    border-radius: 10px;
+    font-size: 18px;
+    font-family: 'PingFangSC-Regular';
+    font-weight: 400;
+    color: #fefefe;
+    line-height: 40px;
+    border: none;
+  }
+}
