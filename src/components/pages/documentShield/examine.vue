@@ -6,7 +6,7 @@
         <h3>审核批复</h3>
         <div id="timeLine">
           <Timeline>
-            <TimelineItem color="#FDD15D" v-for="item,index in timelineData" :key="index">{{item}}</TimelineItem>
+            <TimelineItem color="#4589fd" v-for="item,index in timelineData" :key="index">{{item}}</TimelineItem>
           </Timeline>
         </div>
       </div>
@@ -23,24 +23,27 @@
         </div>
         <!--修订按钮-->
         <div class="examineBtn-wrap">
-          <button class="examine-yes" @click="examineModal=true">审核通过</button>
-          <button class="examine-no" @click="examineModal=true">审核驳回</button>
+          <button class="examine-yes btn-tabDefault-large" @click="examineModal=true">审核通过</button>
+          <button class="examine-no btn-reject-large" @click="examineModal=true">审核驳回</button>
         </div>
-        <!--批复框-->
-        <div id="examineModal" v-show="examineModal">
-          <div class="exHeader-wrap">
-            <div class="exHeader">
-              批复
-              <span class="closeExamine" @click="examineModal=false">
-                <img src="../../../assets/documentShield/close.png" alt="">
-              </span>
-            </div>
-          </div>
-          <textarea placeholder="请输入文字..."></textarea><br/>
-          <router-link tag="button" to="/docShieldAdmin">确定</router-link>
-        </div>
+
       </div>
 
+    </div>
+    <!--批复框-->
+    <div class="modal-wrap"  v-show="examineModal">
+      <div id="examineModal">
+        <div class="exHeader-wrap">
+          <div class="exHeader">
+            批复
+            <span class="closeExamine" @click="examineModal=false">
+                <img src="../../../assets/documentShield/close.png" alt="">
+              </span>
+          </div>
+        </div>
+        <textarea  v-model="text" @input="changeTextarea" placeholder="请输入文字..."></textarea><br/>
+        <router-link tag="button" to="/docShieldAdmin" :class="{hasText: text.length>0?true:false}" >确定</router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -52,6 +55,7 @@
     data() {
       return {
         examineModal: false,//批复框显示
+        text: '',//批复框内容
         breadData: ['文书屏蔽','审核'],
         docTitle: this.$route.query.title,
         editor: null,//富本文编辑器实例
@@ -62,11 +66,7 @@
       }
     },
     methods: {
-      ok () {
-        this.$Message.info('Clicked ok');
-      },
-      cancel () {
-        this.$Message.info('Clicked cancel');
+      changeTextarea() {
       }
     },
     mounted() {
@@ -78,8 +78,8 @@
 
 <style scoped lang="scss">
 
-
   #examine {
+    position: relative;
     width: 100%;
     height: 100%;
     padding: 35px;
@@ -123,94 +123,14 @@
           overflow: hidden;
           button {
             float: left;
-            width:151px;
-            height:40px;
-            background:-webkit-linear-gradient(bottom,rgba(255,161,150,1) 0%,rgba(255,121,149,1) 100%);
-            border-radius:8px 8px 8px 8px;
-            border: none;
-            font-size:18px;
-            font-family:'PingFangSC-Medium';
-            font-weight:500;
-            color:rgba(255,255,255,1);
-          }
-          .examine-yes {//审核通过
-            background:-webkit-linear-gradient(bottom,rgba(45,103,255,1) 0%,rgba(75,145,255,1) 100%);
           }
           .examine-no {//审核驳回
             float: right;
           }
         }
         /*批复框*/
-        #examineModal {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 311px;
-          height: 241px;
-          background: rgba(255,255,255,1);
-          border-radius: 10px;
-          z-index: 101;
-          text-align: center;
-          .exHeader-wrap {
-            height:52px;
-            background:rgba(81,157,204,.5);
-            border-radius:10px;
-            .exHeader {
-              position: relative;
-              height: 47px;
-              line-height: 47px;
-              background: rgba(81,157,204,1);
-              border-radius: 10px;
-              font-size:18px;
-              font-family:'PingFang-SC-Medium';
-              font-weight:500;
-              color:rgba(255,255,255,1);
-              /*关闭*/
-              .closeExamine {
-                position: absolute;
-                right: 20px;
-                top: 50%;
-                transform: translate(0, -50%);
-                cursor: pointer;
-              }
-            }
-          }
-          textarea {
-            width: 290px;
-            height:128px;
-            border:1px solid rgba(239,239,239,.9);
-            border-radius:10px;
-            resize: none;
-            margin-top: 12px;
-            padding: 10px;
-            outline: none;
-            &::-webkit-input-placeholder {
-              color:rgba(206,206,206,1);
-            }
-            &:focus {
-              border:1px solid rgba(101,224,250,.9);
-            }
-          }
-          button {
-            width: 70px;
-            height: 20px;
-            line-height: 20px;
-            background: rgba(203,202,202,0.34);
-            border-radius:10px;
-            font-size: 14px;
-            font-family:'PingFang-SC-Regular';
-            font-weight:400;
-            color:rgba(153,153,153,1);
-            border: none;
-            margin-top: 14px;
-            &:hover {
-              background:rgba(101,224,250,1);
-              color: white;
-              box-shadow:0 2px 3px 0 rgba(126,228,249,0.4);
-            }
-          }
-        }
+
+
       }
       /*审核批复*/
       #examine-result {
@@ -221,6 +141,7 @@
         box-shadow:0 10px 12px 3px rgba(12,37,95,0.15);
         border-radius:10px;
         padding: 39px 19px 19px 19px;
+        overflow-y: auto;
         h3 {//审核批复标题
           font-size:24px;
           font-family:'PingFangSC-Medium';
@@ -237,6 +158,86 @@
           font-weight:600;
           color:rgba(85,85,85,1);
         }
+      }
+    }
+    .modal-wrap {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,.4);
+      z-index: 2000;
+      #examineModal {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 311px;
+        height: 241px;
+        background: rgba(255,255,255,1);
+        border-radius: 10px;
+        z-index: 101;
+        text-align: center;
+        .exHeader-wrap {
+          height:52px;
+          background:rgba(69,137,253,.5);
+          border-radius:10px;
+          .exHeader {
+            position: relative;
+            height: 47px;
+            line-height: 47px;
+            background:rgba(69,137,253,1);
+            border-radius: 10px;
+            font-size:18px;
+            font-family:'PingFang-SC-Medium';
+            font-weight:500;
+            color:rgba(255,255,255,1);
+            /*关闭*/
+            .closeExamine {
+              position: absolute;
+              right: 20px;
+              top: 50%;
+              transform: translate(0, -50%);
+              cursor: pointer;
+            }
+          }
+        }
+        .hasText {
+          background: #4589FD;
+          color: white;
+          box-shadow:0 2px 3px 0  rgba(126,228,249,0.4);
+        }
+        button {
+          width: 70px;
+          height: 30px;
+          line-height: 30px;
+          background: rgba(203,202,202,0.34);
+          border-radius: 20px;
+          font-size: 14px;
+          font-family:'PingFang-SC-Regular';
+          font-weight:400;
+          color:rgba(153,153,153,1);
+          border: none;
+          margin-top: 7px;
+        }
+        textarea {
+          width: 290px;
+          height:128px;
+          border:1px solid rgba(239,239,239,1);
+          border-radius:10px;
+          resize: none;
+          margin-top: 12px;
+          padding: 10px;
+          outline: none;
+          &::-webkit-input-placeholder {
+            color:rgba(206,206,206,1);
+          }
+          &:focus {
+            border:1px solid #4589FD;
+          }
+        }
+
       }
     }
   }

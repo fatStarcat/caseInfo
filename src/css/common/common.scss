@@ -1,0 +1,95 @@
+
+/*按钮样式*/
+@mixin m-btn-style($styleBgColor,$style-shadowColor) {/*按钮默认基础样式*/
+  height: 40px;
+  font-size: 18px;
+  font-family: 'PingFang-SC-Medium';
+  color: rgba(255,255,255,1);
+  border-radius: 20px;
+  border: none;
+  background-color: $styleBgColor;
+  box-shadow: 0 4px 4px 0 $style-shadowColor;
+}
+
+@mixin m-btn-hover($bgColor,$shadowVal) { /*导出和查看,有移入移出效果*/
+  @include m-btn-style(transparent,transparent);
+  color: #555555;
+  border: 1px solid $bgColor;
+  &:hover {
+    color: rgba(255,255,255,1);
+    background: $bgColor;
+    box-shadow: $shadowVal;
+  }
+}
+.btn-export {/*导出全部按钮样式*/
+  width: 120px;
+  @include m-btn-style(#65E0FA,rgba(15,184,247,0.22));
+}
+.btn-export-large {
+  width: 140px;
+  @include m-btn-style(#65E0FA,rgba(15,184,247,0.22));
+}
+
+.btn-tabDefault {/*默认*/
+  width: 120px;
+  @include m-btn-style(rgba(69,137,253,1),rgba(99,188,244,0.22));
+}
+.btn-tabDefault-large {/*默认大一号*/
+  width: 140px;
+  @include m-btn-style(rgba(69,137,253,1),rgba(99,188,244,0.22));
+}
+.btn-tabDefault-small {/*小一号*/
+  @include m-btn-style(rgba(69,137,253,1),rgba(99,188,244,0.22));
+  width: 77px;
+  height: 30px;
+}
+.btn-tabDefault-not {/*默认未激活状态*/
+  @include m-btn-style(rgba(69,137,253,.4),rgba(99,188,244,0.22));
+  width: 120px;
+}
+.btn-reset {/*重置*/
+  width: 120px;
+  @include m-btn-style(rgba(231,139,40,1),rgba(214,129,37,0.22));
+}
+.btn-reset-not {/*重置未激活状态*/
+  @include m-btn-style(rgba(231,139,40,.4),rgba(214,129,37,0.22));
+  width: 120px;
+}
+.btn-reject-large {/*驳回*/
+  width: 140px;
+  @include  m-btn-style(rgba(232,191,48,1),rgba(249,194,3,0.22));
+}
+.btn-hover {/*导出和查看,有移入移出效果*/
+  @include m-btn-hover(rgba(69,137,253,1),0 4px 4px 0 rgba(99,188,244,0.22));
+  width: 120px;
+}
+.btn-hover-large {/*导出和查看,有移入移出效果*/
+  @include m-btn-hover(rgba(69,137,253,1),0 4px 4px 0 rgba(99,188,244,0.22));
+  width: 140px;
+}
+.btn-hover-export {/*导出和查看,有移入移出效果*/
+  @include m-btn-hover(#65E0FA,0 4px 4px 0 rgba(15,184,247,0.22));
+  width: 120px;
+}
+/*hr横线样式*/
+hr {
+  height: 1px;
+  background: rgba(208,208,208,.3);
+  border: none;
+  margin-top: 20px;
+}
+/*图表下钻返回按钮*/
+.echarts-wrap  .echarts-return {
+  position: absolute;
+  left: 20px;
+  top: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  img {
+    width: 26px;
+    height: 26px;
+  }
+}
+.echarts-return:hover {
+  color: #1e88e5;
+}

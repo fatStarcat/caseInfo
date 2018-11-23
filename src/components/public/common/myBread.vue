@@ -1,9 +1,9 @@
 <template>
   <!--面包屑-->
     <div id="myBread">
-      <div @click="$router.go(-1)" class="bread-item" v-for="item,index in breadData" :key="index">
+      <div @click="goBack(index)" class="bread-item" v-for="item,index in breadData" :key="index">
         <img v-if="index!=0" src="../../../assets/public/common/breadImg.png" alt="">
-        <span >
+        <span>
         {{item}}
         </span>
       </div>
@@ -25,6 +25,9 @@
         }
       },
       methods: {
+          goBack(index){
+            (index==0)&&(this.$router.go(-1))
+          }
       }
     }
 </script>
@@ -54,10 +57,11 @@
         background:rgba(69,137,253,1);
       }
       &:last-child {
-        font-weight: bold;
+        /*font-weight: bold;*/
+        color: darkgray !important;
         cursor: auto !important;
         &:hover {
-          color: #555555;
+          color: darkgray;
         }
       }
       &:hover {

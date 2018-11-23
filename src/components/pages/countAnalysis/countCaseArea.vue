@@ -1,8 +1,5 @@
 <template>
-  <div id="caseArea" class="clearfix">
-    <div id="menu">
-      <table-menu currName="countCaseArea"></table-menu>
-    </div>
+  <div id="caseArea">
     <div id="main">
       <!--图表-->
       <div id="echarts-wrap" >
@@ -18,8 +15,8 @@
 
           </div>
           <span class='echarts-return' v-show="showReturn" @click="returnCaseRatio">
-            <Icon  type="md-return-left" size="26"/>
-            返回
+            <!--<Icon  type="md-return-left" size="26"/>-->
+            <img src="../../../assets/countAnalysis/return.png" alt="">
           </span>
         </div>
 
@@ -29,7 +26,7 @@
         <Table :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
         <!--导出数据-->
         <div id="exportData">
-          <button class="export-all">导出全部数据</button>
+          <button class="export-all btn-tabDefault-large">导出全部数据</button>
         </div>
       </div>
     </div>
@@ -47,12 +44,18 @@
         tableHeight: '',//表格高度
         showTable: false,//弹出表格显示
         showReturn: false,//显示返回按钮
+        textStyle: {
+          fontSize: 16,
+          fontFamily: 'PingFang-SC-Bold',
+          fontWeight: 'bold',
+          color: 'rgba(85,85,85,1)'
+        },
         columns1: [//表头数据
           {
             title: '序号',
             key: 'order',
             align: 'center',
-            width: 60
+            width: 100
           },
           {
             title: '单位',
@@ -189,12 +192,13 @@
         ],
         pieData: {
           data:[
-            {value:100, name: '本系统已公开统一系统未公开'},
-            {value:1899, name: '不公开'},
             {value:2000, name: '已公开'},
+            {value:1899, name: '不公开'},
+            {value:100, name: '本系统已公开统一系统未公开'},
           ],
           legend: [],
-          title: '案件公开比例'
+          title: '案件公开比例',
+          color: ['#4589FD','#34ABFE','#8BB3F7']
         }
       }
     },
@@ -246,6 +250,7 @@
         var option = {
           title: {
             text: this.pieData.title,
+            textStyle: _this.textStyle,
             x: 'center'
           },
           tooltip : {
@@ -254,13 +259,30 @@
           },
           legend: {
             data: this.pieData.legend,
-            bottom: 0
+            bottom: 0,
+            itemWidth: 14,
+            itemHeight: 14
           },
+          color:this.pieData.color,
           series : [
             {
               type: 'pie',
-              radius: ['40%', '65%'],
+              /*radius : '55%',
+              center: ['50%', '50%'],*/
+              radius: ['35%', '65%'],
               selectedMode: 'single',
+              // roseType: 'radius',
+              label: {
+                fontSize:14,
+                fontFamily: 'PingFang-SC-Regular',
+                fontWeight:400,
+                color: '#555555'
+              },
+              labelLine: {
+                lineStyle: {
+                  color: '#555555'
+                }
+              },
               data: _this.pieData.data
             }
           ]
@@ -273,6 +295,7 @@
       initcaseRankEchart() {
         this.caseRankEchart = this.$echarts.init(this.$refs.caseRankEchart);
         var option;
+        var _this = this;
         var data = [
           {
             value: 48.9,
@@ -318,7 +341,8 @@
           color: ['#3398DB'],
           title: {
             text: '案件公开排行榜',
-            x: 'center'
+            textStyle: _this.textStyle,
+            x:'center'
           },
           tooltip : {
             formatter: '{b}:{c}%',
@@ -340,6 +364,10 @@
                 alignWithLabel: true
               },
               axisLabel: {
+                fontSize:14,
+                fontFamily: 'PingFang-SC-Regular',
+                fontWeight: 400,
+                color: 'rgba(85,85,85,1)',
                 formatter: '{value}%'
               }
             }
@@ -347,14 +375,32 @@
           yAxis : [
             {
               type : 'category',
+              axisLabel: {
+                fontSize:14,
+                fontFamily: 'PingFang-SC-Regular',
+                fontWeight: 400,
+                color: 'rgba(85,85,85,1)',
+              },
               data: nameData
             }
           ],
           series : [
             {
               type:'bar',
-              barWidth: '60%',
-              data: data
+              barWidth: '16px',
+              data: data,
+              itemStyle: {
+                normal: {
+                  color: new _this.$echarts.graphic.LinearGradient(0, 0, 1, 0, [{
+                    offset: 0,
+                    color: '#4589FD'
+
+                  }, {
+                    offset: 1,
+                    color: '#156AFC'
+                  }]),
+                }
+              },
             }
           ]
         };
@@ -368,7 +414,8 @@
             {value:2000, name: '已公开'},
           ],
           legend: [],
-          title: '案件公开比例'
+          title: '案件公开比例',
+          color: ['#4589FD','#34ABFE','#8BB3F7']
         };
         this.initcaseAreaEchart();
         this.showReturn = false;
@@ -389,7 +436,8 @@
             {value:500, name: '武穴市院'},
           ],
           legend: ['黄冈市院','黄冈市黄州区院','团风县院','红安县院','罗田县院','英山县院','浠水县院','蕲春县院','黄梅县院','麻城市院','武穴市院'],
-          title: param.name
+          title: param.name,
+          color: ['#f6bb42','#8cc152','#f97566','#3bafda','#4a89dc','#f8c35d','#114898','#24adf1','#aab2bd','#656d78','#da4453']
         };
         this.initcaseAreaEchart();
         this.caseAreaEchart.off('click');
@@ -407,28 +455,26 @@
 <style scoped lang="scss">
   #caseArea {
     height: 100%;
-    /*菜单*/
-    #menu {
-      width: 200px;
-      height: 100%;
-      float: left;
-    }
     /*内容区*/
     #main {
       height: 100%;
-      margin-left: 200px;
       #table {
-        height: calc( 100% - 60px);
+        height: calc( 100% - 35px - 38px - 20px);
         margin-right: 620px;
+        /*按钮*/
+        #exportData { /*导出按钮*/
+          float: right;
+          margin-top: 20px;
+        }
       }
       #echarts-wrap {
         float: right;
         width: 600px;
-        height: 100%;
+        height: calc( 100% - 35px - 38px - 20px);
         overflow-y: auto;
         .echarts-wrap {
           text-align: center;
-          margin-bottom: 30px;
+          margin-bottom: 50px;
         }
         .echarts {
           height: 500px;

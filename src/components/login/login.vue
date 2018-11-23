@@ -1,31 +1,26 @@
 <template>
-    <div id="login">
+    <div id="login" ref="login">
         <div id="login-content">
           <!--logo-->
           <div id="login-logo">
-            <img  src="../../assets/login/logo.png" alt="">
-            <p>
-              红蕲案件信息智慧
-            </p>
-            <p>
-              公开系统
-            </p>
+
           </div>
           <!--登录区-->
           <div id="login-input">
+
             <!--输入内容-->
             <div class="enter">
               <div class="enter-item">
                 <img src="../../assets/login/company.png" alt="">
-                <input type="text" placeholder="单位">
+                <input type="text" placeholder="单位" @keyup.enter="login">
               </div>
               <div class="enter-item">
                 <img src="../../assets/login/user.png" alt="">
-                <input v-model="user" type="text" placeholder="请输入登录账号">
+                <input v-model="user" type="text" placeholder="请输入登录账号" @keyup.enter="login">
               </div>
               <div class="enter-item">
                 <img src="../../assets/login/pwd.png" alt="">
-                <input type="text" placeholder="输入您的密码">
+                <input type="text" placeholder="输入您的密码" @keyup.enter="login">
               </div>
             </div>
             <!--选择自动登录-->
@@ -37,11 +32,15 @@
                 </div>
                 <span>自动登录</span>
               </div>
-              <button @click="login" class="login-btn">登录</button>
+              <button @click="login" class="login-btn">登&nbsp;&nbsp;录</button>
+              <button  class="exit-btn" @click="close">退&nbsp;&nbsp;出</button>
             </div>
             <!--登录按钮-->
           </div>
         </div>
+      <!--preload-->
+      <div id="preloadOne"></div>
+      <div id="preloadTwo"></div>
     </div>
 </template>
 
@@ -55,6 +54,9 @@
           }
       },
       methods: {
+          close() {
+
+          },
           login() {//登录
             if(this.user=='张福珍'||this.user=='余俊') {
               localStorage.setItem('setAdmin',this.user);
@@ -62,12 +64,23 @@
             }else {
               this.$Message.warning('请正确输入账户名!');
             }
-          }
+          },
+      },
+      created() {
+      },
+      mounted() {
+
       }
     }
 </script>
 
 <style scoped lang="scss">
+  #preloadOne {
+    background: url("../../../static/images/index/mainBg.png")no-repeat -9999px -9999px;
+  }
+  #preloadTwo {
+    background: url("../../../static/images/index/bg.jpg")no-repeat -9999px -9999px;
+  }
   #login {
     position: relative;
     width: 100%;
@@ -79,38 +92,24 @@
       transform: translate(-50%,-50%);
       width: 800px;
       height: 450px;
-      background: url('../../assets/login/loginBg.png') no-repeat;
+      background: url('../../assets/login/loginBg.jpg') no-repeat;
       background-size: cover;
-      /*box-shadow: 0 1px 1px 0 rgba(0,0,0,.5);*/
+      border-radius: 10px;
+      box-shadow: rgba(179,179,179,.72) 0 0 25px;
       #login-logo {
         position: relative;
         float: left;
         width: 461px;
         height: 100%;
-        font-size: 38px;
-        font-family: 'PingFang SC';
-        font-weight: 600;
-        color: rgba(255,255,255,1);
-        text-shadow: 2px 3px 5px rgba(27,128,230,0.5);
-        text-align: center;
         padding-bottom: 28px;
         padding-top: 82px;
-        img {
-          position: absolute;
-          top: 0;
-          left: 25px;
-        }
-        p {
-          margin-top: 110px;
-          &:last-child {
-            margin-top: 15px;
-          }
-        }
       }
       #login-input {
+        position: relative;
         float: right;
         width: 339px;
         height: 100%;
+
         .enter {
           width:297px;
           background:rgba(245,246,250,1);
@@ -205,17 +204,27 @@
               vertical-align: middle;
             }
           }
-          .login-btn {
-            width: 289px;
-            height: 45px;
-            margin-top: 30px;
-            margin-left: 4px;
-            font-size: 16px;
-            font-family: 'PingFangSC-Medium';
-            font-weight: bolder;
-            color: rgba(255,255,255,1);
+          button {
+            width: 125px;
+            height: 40px;
+            font-size: 18px;
+            font-family: 'PingFang-SC-Medium';
+            font-weight: 500;
+            border-radius: 20px;
             border: none;
-            background: -webkit-linear-gradient(bottom,#2D67FF 0%,#4B91FF 100%);
+            margin-top: 25px;
+          }
+          .login-btn {
+            float: left;
+            background: rgba(69,137,253,1);
+            color: rgba(255,255,255,1);
+            box-shadow:  0 0 16px rgba(77,137,238,.64);
+          }
+          .exit-btn {
+            float: right;
+            background:rgba(255,255,255,1);
+            color:rgba(69,137,253,1);
+            box-shadow:  0 0 16px rgba(208,208,208,.64);
           }
         }
       }

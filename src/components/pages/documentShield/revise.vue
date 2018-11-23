@@ -6,7 +6,7 @@
           <h3>审核批复</h3>
           <div id="timeLine">
             <Timeline>
-              <TimelineItem color="#FDD15D" v-for="item,index in timelineData" :key="index">{{item}}</TimelineItem>
+              <TimelineItem v-for="item,index in timelineData" :key="index">{{item}}</TimelineItem>
             </Timeline>
           </div>
         </div>
@@ -22,7 +22,7 @@
           <!--修订按钮-->
           <div class="reviseBtn-wrap">
             <!--<button class="revise-btn">修订</button>-->
-            <router-link tag="button" class="revise-btn" to="/documentShield">修订</router-link>
+            <router-link tag="button" :class="isEdit? 'btn-tabDefault':'btn-tabDefault-not'" class="revise-btn" to="/documentShield">修订</router-link>
           </div>
         </div>
       </div>
@@ -35,6 +35,7 @@
         name: "revise",
         data() {
           return {
+            isEdit: false,//是否修改
             breadData: ['文书屏蔽','修订'],
             docTitle: this.$route.query.title,//文书名称
             editor: null,//富本文编辑器实例
@@ -81,18 +82,6 @@
         .reviseBtn-wrap {
           text-align: center;
           margin-top: 42px;
-          .revise-btn {//修订按钮
-            display: inline-block;
-            width:151px;
-            height:40px;
-            background:-webkit-linear-gradient(bottom,rgba(255,161,150,1) 0%,rgba(255,121,149,1) 100%);
-            border-radius:8px 8px 8px 8px;
-            border: none;
-            color:rgba(255,255,255,1);
-            font-size:24px;
-            font-family:'PingFangSC-Medium';
-            font-weight:500;
-          }
         }
       }
       /*审核批复*/

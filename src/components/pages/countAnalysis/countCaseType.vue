@@ -1,8 +1,5 @@
 <template>
   <div id="caseType">
-    <div id="menu">
-      <table-menu currName="countCaseType"></table-menu>
-    </div>
     <div id="main">
       <!--图表-->
       <div id="echarts-wrap" >
@@ -16,7 +13,7 @@
         <Table :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
         <!--导出数据-->
         <div id="exportData">
-            <button class="export-all">导出全部数据</button>
+            <button class="export-all btn-tabDefault-large">导出全部数据</button>
         </div>
       </div>
     </div>
@@ -290,23 +287,22 @@
 <style scoped lang="scss">
   #caseType {
     height: 100%;
-    #menu {
-      float: left;
-      width: 200px;
-      height: 100%;
-    }
     #main {
       height: 100%;
-      margin-left: 200px;
       #table {
         position: relative;
-        height: calc(100% - 60px);
+        height: calc( 100% - 35px - 38px - 20px);
         margin-right: 920px;
+        /*按钮*/
+        #exportData { /*导出按钮*/
+          float: right;
+          margin-top: 20px;
+        }
       }
       #echarts-wrap {
         float: right;
         width: 900px;
-        height: 100%;
+        height: calc( 100% - 35px - 38px - 20px);
         overflow-y: auto;
         >div {
           height: 700px;

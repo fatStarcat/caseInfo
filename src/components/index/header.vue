@@ -14,18 +14,15 @@
       <!--用户信息-->
       <div class="infoItem">
         <img src="../../assets/index/user.png" alt="">
-        <!--<Icon type="ios-person-outline" size="24"/>-->
         <span>欢迎您，{{userName}}</span>
       </div>
       <!--消息-->
       <div class="infoItem">
-        <!--<img src="../../assets/index/tip.png" alt="">-->
         <Icon type="ios-notifications-outline" size="24"/>
         <span>消息</span>
       </div>
       <!--退出-->
       <div class="infoItem" @click="exit">
-        <!--<img src="../../assets/index/exit.png" alt="">-->
         <Icon type="ios-exit-outline" size="24" />
         <span>退出</span>
       </div>
@@ -51,6 +48,7 @@
 
 <style scoped lang="scss">
    #header {
+     position: relative;
      width: 100%;
      height: 100%;
      /*logo*/
@@ -80,9 +78,10 @@
      /*info*/
      #header-info {
        display: table;
-       float: right;
+       position: absolute;
+       top: 0;
+       right: 84px;
        height: 100%;
-       margin-right: 84px;
        font-size: 18px;
        color: #fff;
        .infoItem {
@@ -94,9 +93,10 @@
          }
          img {
            vertical-align: middle;
-           margin-top: -3px;
-           width: 20px;
-           height: 20px;
+           margin-top: -4px;
+           width: 18px;
+           height: 18px;
+           margin-right: 3px;
          }
        }
      }

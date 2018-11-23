@@ -1,8 +1,5 @@
 <template>
   <div id="docType">
-    <div id="menu">
-      <table-menu currName="countDocType"></table-menu>
-    </div>
     <div id="main">
       <!--图表-->
       <div id="echarts-wrap" >
@@ -16,7 +13,7 @@
         <Table :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
         <!--导出数据-->
         <div id="exportData">
-          <button class="export-all">导出全部数据</button>
+          <button class="export-all btn-tabDefault-large">导出全部数据</button>
         </div>
       </div>
     </div>
@@ -279,22 +276,39 @@
         var option = {
           title: {
             text: '文书公开类型占比',
-             x: 'center'
+             x: 'center',
+            textStyle: {
+              fontSize: 16,
+              fontFamily: 'PingFang-SC-Bold',
+              fontWeight: 'bold',
+              color: 'rgba(85,85,85,1)'
+            },
+            top: 70
           },
           tooltip : {
             trigger: 'item',
             formatter: "{b} : {c} ({d}%)"
           },
           legend: {
-            bottom: 10,
-            data: ['起诉书', '抗诉书','不起诉决定书','刑事申诉复查决定书']
+            bottom: 70,
+            data: ['起诉书', '抗诉书','不起诉决定书','刑事申诉复查决定书'],
+            itemWidth: 14,
+            itemHeight: 14
           },
+
+          color: ['#4589FD','#34ABFE','#8BB3F7','#31CDEF'],
           series : [
             {
               type: 'pie',
-              radius : '45%',
+              radius : '40%',
               center: ['50%', '50%'],
               selectedMode: 'single',
+              label: {
+                fontSize:14,
+                fontFamily: 'PingFang-SC-Regular',
+                fontWeight:400,
+                color: '#555555'
+              },
               data:[
                 {value:535, name: '起诉书'},
                 {value:510, name: '抗诉书'},
@@ -313,11 +327,17 @@
         var option = {
           title: {
             text: '文书公开趋势',
-            x: 'center'
+            x: 'center',
+            textStyle: {
+              fontSize: 16,
+              fontFamily: 'PingFang-SC-Bold',
+              fontWeight: 'bold',
+              color: 'rgba(85,85,85,1)'
+            }
           },
-          // tooltip: {
-          //   trigger: 'axis'
-          // },
+          tooltip: {
+            trigger: 'axis'
+          },
           legend: {
             data:['起诉书','抗诉书','不起诉决定书','刑事申述复查决定书'],
             bottom: 0,
@@ -334,13 +354,22 @@
             boundaryGap: false,
             axisLabel: {
               interval: 0,
-              rotate: "45"
+              rotate: "45",
+              fontSize:14,
+              fontFamily: 'PingFang-SC-Regular',
+              fontWeight: 400,
+              color: 'rgba(85,85,85,1)',
             },
             data: ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月']
           },
           yAxis: {
-            type: 'value'
+            type: 'value',
+            fontSize:14,
+            fontFamily: 'PingFang-SC-Regular',
+            fontWeight: 400,
+            color: 'rgba(85,85,85,1)',
           },
+          color: ['#4589FD','#34ABFE','#8BB3F7','#31CDEF'],
           series: [
             {
               name:'起诉书',
@@ -382,26 +411,26 @@
 <style scoped lang="scss">
   #docType {
     height: 100%;
-    #menu {
-      float: left;
-      width: 200px;
-      height: 100%;
-    }
     #main {
-      margin-left: 200px;
       height: 100%;
       #table {
-        height: calc(100% - 60px);
+        height: calc( 100% - 35px - 38px - 20px);
         margin-right: 520px;
+        /*按钮*/
+        #exportData { /*导出按钮*/
+          float: right;
+          margin-top: 20px;
+        }
       }
       #echarts-wrap {
         float: right;
         width: 500px;
-        height: 100%;
+        height: calc( 100% - 35px - 38px - 20px);
+        /*height: 100%;*/
         overflow-y: auto;
         >div {
           height: 500px;
-          margin-bottom: 30px;
+          margin-bottom: 0;
         }
       }
     }

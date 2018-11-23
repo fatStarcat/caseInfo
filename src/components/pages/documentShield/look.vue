@@ -6,7 +6,7 @@
         <h3>审核批复</h3>
         <div id="timeLine">
           <Timeline>
-            <TimelineItem color="#FDD15D" v-for="item,index in timelineData" :key="index">{{item}}</TimelineItem>
+            <TimelineItem color="#4589fd" v-for="item,index in timelineData" :key="index">{{item}}</TimelineItem>
           </Timeline>
         </div>
       </div>

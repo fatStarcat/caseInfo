@@ -8,26 +8,25 @@
               <img  src="../../../assets/countAnalysis/close.png" alt="">
             </span>
           </div>
-          <div id="tableSelect">
-            <!--查询-->
-            <div class="select-item">
+          <select-group>
+            <select-item>
               <label>当前类型: </label>
               <RadioGroup v-model="status" @on-change="changeStatus">
                 <Radio v-for="item,index in statusData"  :key="index" :label="item"></Radio>
               </RadioGroup>
-            </div>
-            <hr/>
-          </div>
+            </select-item>
+          </select-group>
+          <hr/>
           <!--表格-->
           <div id="infoTable" ref="table">
-            <Table :height="tableHeight" border stripe :columns="columnsData" :data="infoData" ></Table>
+            <Table ref="iTable" :height="tableHeight" border stripe :columns="columnsData" :data="infoData" ></Table>
           </div>
           <!--表格分页-->
           <div id="tablePage">
             <Page :total="infoData.length" show-sizer show-total show-elevator />
             <!--导出数据-->
             <div id="exportData">
-              <button class="export-all">导出全部数据</button>
+              <button class="export-all btn-hover-large" @click="exportAll">导出全部数据</button>
             </div>
           </div>
         </div>
@@ -922,6 +921,12 @@
           })
       },
       methods: {
+        exportAll() {//导出数据
+          let table = this.$refs.iTable;
+          table.exportCsv({
+            filename: 'testData'
+          });
+        },
         changeStatus(status) {//改变状态
           var _this = this;
           if(status=='本系统已公开统一系统未公开'){
@@ -937,6 +942,7 @@
         }
       },
         mounted() {
+          let _this = this;
           this.setTableHeight(this);//设置表格高度
         },
       watch: {
@@ -955,13 +961,13 @@
     width: 100%;
     height: 100%;
     background: rgba(0,0,0,.5);
-    padding: 30px 40px;
+    padding: 30px;
     #content {
       width: 100%;
       height: 100%;
       overflow-y: auto;
       background: white;
-      padding: 30px 40px;
+      padding: 30px;
       /*标题*/
       #content-header {
         position: relative;
@@ -975,39 +981,10 @@
           cursor: pointer;
         }
       }
-      #tableSelect {
-        overflow: hidden;
-        .select-item {
-          &>label {
-            display: inline-block;
-            width: 141px;
-            height: 44px;
-            line-height: 44px;
-            text-align: right;
-            padding-right: 12px;
-            background-color: rgba(243,251,255,1);
-            font-family: 'PingFangSC-Regular';
-            font-weight: 400;
-            color: rgba(85,85,85,1);
-          }
-          div {
-            &>label {
-              margin-right: 44px;
-            }
-          }
-        }
-        hr {
-          clear: both;
-          height:2px;
-          background:rgba(239,239,239,1);
-          border: none;
-          margin-top: 6px;
-          margin-bottom: 6px;
-        }
-      }
       /*表格*/
       #infoTable {
-        height: calc(100% - 40px - 58px - 65px);
+        margin-top: 20px;
+        height: calc(100% - 20px - 40px - 35px - 1px - 20px  - 65px);
       }
       /*表格分页*/
       #tablePage {
@@ -1019,19 +996,6 @@
           right: 0;
           top: 50%;
           transform: translate(0,-50%);
-          button {
-            width: 150px;
-            height: 39px;
-            background: -webkit-linear-gradient(bottom, #2c65ff 0%, #4e95ff 100%);
-            border-radius: 10px;
-            font-size: 18px;
-            font-family: 'PingFangSC-Regular';
-            font-weight: 400;
-            color: #fefefe;
-            line-height: 39px;
-            border: none;
-            margin-left: 37px;
-          }
         }
       }
     }

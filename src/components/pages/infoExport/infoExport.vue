@@ -2,49 +2,42 @@
     <div id="infoExport">
       <div id="infoContent">
         <!--条件选择区-->
-        <div id="infoSelect">
-          <!--查询-->
-          <div id="info-search">
-            <div class="select-item">
-              <label>单位: </label>
-              <Select v-model="company" style="width:228px;height: 35px;">
-                <Option v-for="item in companyList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-              </Select>
-            </div>
-            <div class="select-item">
-              <label>时间: </label>
-              <DatePicker type="daterange" split-panels placeholder="请选择时间" :value="dateTime" style="width: 200px"></DatePicker>
-            </div>
-            <button class="search-btn">
-              <img src="../../../assets/infoExport/search.png" alt="">
-              查询
-            </button>
-          </div>
-          <hr/>
-          <!--导出-->
-          <div id="info-export">
-            <div class="select-item">
-              <label>当前阶段: </label>
-              <RadioGroup v-model="exportStatus" @on-change="changeStatus">
-                <Radio label="全部"></Radio>
-                <Radio label="待导出"></Radio>
-                <Radio label="已导出"></Radio>
-              </RadioGroup>
-            </div>
-            <div class="select-item">
-              <label>导出内容: </label>
-              <CheckboxGroup v-model="exportContent" style="display: inline-block">
-                <Checkbox label="案件信息"></Checkbox>
-                <Checkbox label="法律文书"></Checkbox>
-              </CheckboxGroup>
-            </div>
-            <button class="export-btn">
-              <img src="../../../assets/infoExport/export.png" alt="">
-              导出
-            </button>
-          </div>
-          <hr/>
-        </div>
+        <select-group>
+          <select-item>
+            <label>单位: </label>
+            <Select v-model="company" style="width:228px;height: 35px;">
+              <Option v-for="item in companyList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+            </Select>
+          </select-item>
+          <select-item>
+            <label>时间: </label>
+            <DatePicker type="daterange" split-panels placeholder="请选择时间" :value="dateTime" style="width: 200px"></DatePicker>
+          </select-item>
+          <button class="search-btn btn-hover">
+            查询
+          </button>
+        </select-group>
+        <select-group mar-top="20">
+          <select-item>
+            <label>当前阶段: </label>
+            <RadioGroup v-model="exportStatus" @on-change="changeStatus">
+              <Radio label="全部"></Radio>
+              <Radio label="待导出"></Radio>
+              <Radio label="已导出"></Radio>
+            </RadioGroup>
+          </select-item>
+          <select-item>
+            <label>导出内容: </label>
+            <CheckboxGroup v-model="exportContent" style="display: inline-block">
+              <Checkbox label="案件信息"></Checkbox>
+              <Checkbox label="法律文书"></Checkbox>
+            </CheckboxGroup>
+          </select-item>
+          <button class="export-btn btn-hover-export" >
+            导出
+          </button>
+        </select-group>
+        <hr/>
         <!--切换表格-->
         <div id="checkTable">
           <input checked @click="toggleTable($event,'case')" type="radio" id="caseInfoRadio" name="toggleTable">
@@ -299,82 +292,12 @@
     #infoContent {/*内容区*/
       width: 100%;
       height: 100%;
-      padding: 28px 22px 39px ;
+      padding: 30px;
       background: rgba(255,255,255,1);
       box-shadow: 0 10px 12px 3px rgba(19,38,88,0.15);
-      /*条件选择*/
-      #infoSelect {
-        overflow: hidden;
-        #info-search  {
-          overflow: hidden;
-          .select-item:nth-child(2) {
-            margin-left: 130px;
-          }
-        }
-        #info-export  {
-          overflow: hidden;
-          .select-item:nth-child(2) {
-            margin-left: 69px;
-          }
-        }
-        .select-item {
-          /*display: inline-block;*/
-          float: left;
-          &>label {
-            display: inline-block;
-            width: 141px;
-            height: 44px;
-            line-height: 44px;
-            text-align: right;
-            padding-right: 12px;
-            background-color: rgba(243,251,255,1);
-            font-family: 'PingFangSC-Regular';
-            font-weight: 400;
-            color: rgba(85,85,85,1);
-          }
-          div {
-            &>label {
-              margin-right: 44px;
-            }
-          }
-        }
-        /*按钮*/
-        button {
-          float: right;
-          width: 130px;
-          height: 34px;
-          border: 1px solid rgba(255, 99, 102, 1);
-          border-radius: 6px;
-          font-size: 19px;
-          font-family: 'PingFangSC-Regular';
-          font-weight: 400;
-          color: rgba(246,92,95,1);
-          background: transparent;
-          margin-right: 93px;
-          img {
-            vertical-align: middle;
-            margin-top: -3px;
-            width: 22px;
-            height: 22px;
-          }
-        }
-        .search-btn {/*查询按钮*/
-        }
-        .export-btn {/*导出按钮*/
-          border: 1px solid rgba(17,158,227,1);
-          color:rgba(17,158,227,1);
-        }
-        hr {
-          clear: both;
-          height:2px;
-          background:rgba(239,239,239,1);
-          border: none;
-          margin-top: 6px;
-          margin-bottom: 6px;
-        }
-      }
+      overflow-y: auto;
       #checkTable {//切换表格
-        margin-top: -6px;
+        margin-top: 10px;
         height: 41px;
         input {
           display: none;
@@ -383,36 +306,37 @@
           display: inline-block;
           position: relative;
           float: left;
-          width:152px;
-          height:41px;
-          background:-webkit-linear-gradient(bottom,rgba(36,160,253,1) 0%,rgba(44,172,241,1) 100%);
-          border-radius:10px;
-          font-size: 18px;
-          font-family:  'PingFangSC-Regular';
-          font-weight: 400;
-          color: rgba(254,254,254,1);
-          line-height: 41px;
+          width: 140px;
+          height: 40px;
+          line-height: 40px;
+          background: transparent;
           text-align: center;
-          border: none;
+          font-size:18px;
+          font-family:'PingFang-SC-Medium';
+          font-weight: 500;
+          color: rgba(69,137,253,1);
+          box-shadow: 0 3px 3px rgba(69,137,253,.2);
+          border: 1px solid rgba(69,137,253,1);
           cursor: pointer;
+          text-shadow: 0 3px 2px rgba(69,137,253,.5);
         }
         .doc-radio {//法律文书
-          margin-left: -15px;
-          background:-webkit-linear-gradient(0deg,rgba(249,142,26,1) 0%,rgba(247,164,28,1) 100%);
+          border-radius: 0 20px 20px 0;
         }
-        #caseInfoRadio:checked + .caseInfo-radio {//案件信息
-          z-index: 1;
-          box-shadow:0 6px 9px 0 rgba(10,41,95,0.29);
+        .caseInfo-radio {
+          border-radius: 20px 0 0 20px;
         }
+        #caseInfoRadio:checked + .caseInfo-radio,
         #docRadio:checked + .doc-radio{
-          z-index: 1;
-          box-shadow: 0 6px 8px 1px rgba(199,117,20,0.29);
+          color: #FFFFFF;
+          background: #4589FD;
+          box-shadow: 0 3px 3px rgba(69,137,253,.6);
         }
       }
       //表格
       #infoTable {
-        margin-top: 27px;
-        height: calc(100% - 27px - 41px - 106px - 65px);
+        margin-top: 20px;
+        height: calc(100% - 20px - 35px - 35px - 20px - 1px - 20px - 10px -  60px - 65px);
       }
       /*表格分页*/
       #tablePage {

@@ -23,7 +23,7 @@
       </Menu-item>
       <Menu-item name="relevantRegulations" to="relevantRegulations">
         <Icon type="ios-copy-outline" size="36"/>
-        <span>相关法律法规</span>
+        <span>相关文件</span>
       </Menu-item>
     </Menu>
   </div>
@@ -68,7 +68,7 @@
           (admin)&&(this.admin = admin)
         },
         mounted() {
-          if(this.$route.path == "/index"||this.$router.path == '/caseNotOpen'||this.$router.path == '/caseOpen'||this.$router.path == '/caseUndisclosed'||this.$route.path == "/docNotOpen"||this.$route.path == "/docOpen"||this.$route.path == "/docUndisclosed") {
+          if(this.$route.path == "/index"||this.$route.path == '/caseNotOpen'||this.$route.path == '/caseOpen'||this.$route.path == '/caseUndisclosed'||this.$route.path == "/docNotOpen"||this.$route.path == "/docOpen"||this.$route.path == "/docUndisclosed") {
             this.currNum = 'index';
           }else if(this.$route.path == "/documentShield" || this.$route.path == "/docShieldAdmin" ||this.$route.path == '/revise'|| this.$route.path == '/drafting'|| this.$route.path == '/examine'|| this.$route.path == '/look') {
             this.currNum = '1';

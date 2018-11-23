@@ -103,8 +103,9 @@
 <style scoped lang="scss">
   #reminding {
     width: 100%;
+    height: 100%;
     padding: 35px;
-    overflow: hidden;
+    overflow-y: auto;
     /*信息情况*/
     #re-info {
       float: left;
@@ -242,6 +243,14 @@
         top: 50%;
         transform: translate(-50%,-50%);
       }
+    }
+  }
+  @media screen and (max-width: 1200px) {
+    #map {
+      position: absolute;
+      right: 0;
+      top: 20px;
+      width: 100% !important;
     }
   }
 </style>

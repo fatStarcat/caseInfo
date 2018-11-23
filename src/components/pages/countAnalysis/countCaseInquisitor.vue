@@ -1,8 +1,5 @@
 <template>
   <div id="caseInquisitor">
-    <div id="menu">
-      <table-menu currName="countCaseInquisitor"></table-menu>
-    </div>
     <div id="main">
       <!--图表-->
       <div id="echarts-wrap">
@@ -17,7 +14,7 @@
         <Table :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
         <!--导出数据-->
         <div id="exportData">
-          <button class="export-all">导出全部数据</button>
+          <button class="export-all btn-tabDefault-large">导出全部数据</button>
         </div>
       </div>
     </div>
@@ -33,12 +30,18 @@
         inquisitorEchart: null,//检察官图表
         tableHeight: '',//表格高度
         showTable: false,//显示表格
+        textStyle: {
+          fontSize: 16,
+          fontFamily: 'PingFang-SC-Bold',
+          fontWeight: 'bold',
+          color: 'rgba(85,85,85,1)'
+        },
         columns1: [//表头数据
           {
             title: '序号',
             key: 'order',
             align: 'center',
-            width: 60
+            width: 100
           },
           {
             title: '检察官',
@@ -215,6 +218,7 @@
       //检察官公开文书排行榜
       initInquisitorEchart() {
         this.inquisitorEchart = this.$echarts.init(this.$refs.inquisitorEchart);
+        var _this = this;
         var option;
         var data = [
           {
@@ -258,7 +262,8 @@
           color: ['#3398DB'],
           title: {
             text: '检察官公开案件排行榜',
-            x: 'center',
+            textStyle: _this.textStyle,
+            x:'center'
           },
           tooltip : {
             formatter: '{b}:{c}%',
@@ -280,7 +285,11 @@
                 alignWithLabel: true
               },
               axisLabel: {
-                formatter: '{value}%'
+                formatter: '{value}%',
+                fontSize:14,
+                fontFamily: 'PingFang-SC-Regular',
+                fontWeight: 400,
+                color: 'rgba(85,85,85,1)',
               }
             }
           ],
@@ -288,13 +297,31 @@
             {
               type : 'category',
               // data : ['张一', '张二', '张三', '张四', '张五', '张六', '张七', '张八', '张九', '张十'],
+              axisLabel: {
+                fontSize:14,
+                fontFamily: 'PingFang-SC-Regular',
+                fontWeight: 400,
+                color: 'rgba(85,85,85,1)',
+              },
               data : nameData,
             }
           ],
           series : [
             {
               type:'bar',
-              barWidth: '60%',
+              barWidth: '16px',
+              itemStyle: {
+                normal: {
+                  color: new _this.$echarts.graphic.LinearGradient(0, 0, 1, 0, [{
+                    offset: 0,
+                    color: '#4589FD'
+
+                  }, {
+                    offset: 1,
+                    color: '#156AFC'
+                  }]),
+                }
+              },
               data: data
               // data:[32.26, 50, 28.57, 32.26, 62.5, 20, 90, 60,100, 87.5].sort(),
             }
@@ -314,19 +341,17 @@
 <style scoped lang="scss">
   #caseInquisitor {
     height: 100%;
-    /*菜单*/
-    #menu {
-      float: left;
-      height: 100%;
-      width: 200px;
-    }
     /*内容*/
     #main {
-      margin-left: 200px;
       height: 100%;
       #table {
-        height: calc(100% - 60px);
+        height: calc( 100% - 35px - 38px - 20px);
         margin-right: 520px;
+        /*按钮*/
+        #exportData { /*导出按钮*/
+          float: right;
+          margin-top: 20px;
+        }
       }
       #echarts-wrap {
         position: relative;

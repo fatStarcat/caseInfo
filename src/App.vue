@@ -10,10 +10,11 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
   @import 'css/common/layout.css';
-  @import 'css/common/common.css';
-  @import 'css/common/test.scss';
+  @import 'css/common/common.scss';
+  @import 'css/common/font.css';
+  @import 'css/common/resetIvi';
   * {
     margin: 0;
     padding: 0;
@@ -22,8 +23,8 @@ export default {
   html,body {
     height: 100%;
     font-size: 14px;
-    min-width: 1600px;
-    min-height: 900px;
+    /*min-width: 1600px;*/
+    /*min-height: 900px;*/
   }
   input {
     outline: none;

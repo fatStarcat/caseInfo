@@ -14,14 +14,14 @@
               <!--屏蔽前-->
               <div class="shield-before">
                 <label>屏蔽前:</label>
-                <Select  v-model="selectName" style="width:298px" @on-change="selectShield($event,'name')">
+                <Select  v-model="selectName" style="width:225px;" @on-change="selectShield($event,'name')">
                   <Option v-for="item in shieldName" :value="item.value" :key="item.value">{{ item.value }}</Option>
                 </Select>
               </div>
               <!--屏蔽后-->
               <div class="shield-before">
                 <label>屏蔽后:</label>
-                <Input v-model="shieldNameAfter" placeholder="请输入屏蔽后内容" style="width: 298px" />
+                <Input @input="isEdit=true" v-model="shieldNameAfter" placeholder="请输入屏蔽后内容" style="width: 225px" />
               </div>
             </div>
           </li>
@@ -34,14 +34,14 @@
               <!--屏蔽前-->
               <div class="shield-before">
                 <label>屏蔽前:</label>
-                <Select  v-model="selectIdCard" style="width:298px" @on-change="selectShield($event,'IdCard')">
+                <Select  v-model="selectIdCard" style="width:225px" @on-change="selectShield($event,'IdCard')">
                   <Option v-for="item in shieldIdCard" :value="item.value" :key="item.value">{{ item.value }}</Option>
                 </Select>
               </div>
               <!--屏蔽后-->
               <div class="shield-before">
                 <label>屏蔽后:</label>
-                <Input v-model="shieldIdCardAfter" placeholder="请输入屏蔽后内容" style="width: 298px" />
+                <Input @input="isEdit=true" v-model="shieldIdCardAfter" placeholder="请输入屏蔽后内容" style="width: 225px" />
               </div>
             </div>
           </li>
@@ -54,14 +54,14 @@
               <!--屏蔽前-->
               <div class="shield-before">
                 <label>屏蔽前:</label>
-                <Select  v-model="selectBirth" style="width:298px" @on-change="selectShield($event,'birthday')">
+                <Select  v-model="selectBirth" style="width:225px" @on-change="selectShield($event,'birthday')">
                   <Option v-for="item in shieldBirth" :value="item.value" :key="item.value">{{ item.value }}</Option>
                 </Select>
               </div>
               <!--屏蔽后-->
               <div class="shield-before">
                 <label>屏蔽后:</label>
-                <Input v-model="shieldBirthAfter" placeholder="请输入屏蔽后内容" style="width: 298px" />
+                <Input  @input="isEdit=true" v-model="shieldBirthAfter" placeholder="请输入屏蔽后内容" style="width: 225px" />
               </div>
             </div>
           </li>
@@ -74,24 +74,34 @@
               <!--屏蔽前-->
               <div class="shield-before">
                 <label>屏蔽前:</label>
-                <Select v-model="selectAddress" style="width:298px" @on-change="selectShield($event,'address')">
+                <Select v-model="selectAddress" style="width:225px" @on-change="selectShield($event,'address')">
                   <Option  v-for="item in shieldAddress" :value="item.value" :key="item.value">{{ item.value }}</Option>
                 </Select>
               </div>
               <!--屏蔽后-->
               <div class="shield-before">
                 <label>屏蔽后:</label>
-                <Input v-model="shieldAddressAfter" placeholder="请输入屏蔽后内容" style="width: 298px" />
+                <Input @input="isEdit=true" v-model="shieldAddressAfter" placeholder="请输入屏蔽后内容" style="width: 225px" />
               </div>
             </div>
           </li>
+          <li class="shield-item">
+            <button class="reset-btn" :class="isEdit?'btn-reset':'btn-reset-not'">重置</button>
+            <!--<button class="save-btn">保存</button>-->
+            <router-link  class="save-btn" :class="isEdit?'btn-tabDefault':'btn-tabDefault-not'" tag="button" to="/documentShield">保存</router-link>
+          </li>
+          <li class="shield-item">
+            <a>上一篇</a>
+            <a>下一篇</a>
+          </li>
         </ul>
         <!--按钮-->
-        <div class="btn">
-          <button class="reset-btn">重置</button>
-          <!--<button class="save-btn">保存</button>-->
-          <router-link  class="save-btn" tag="button" to="/documentShield">保存</router-link>
-        </div>
+        <!--<div class="btn">-->
+          <!--<button class="reset-btn" :class="isEdit?'btn-reset':'btn-reset-not'">重置</button>-->
+          <!--&lt;!&ndash;<button class="save-btn">保存</button>&ndash;&gt;-->
+          <!--<router-link  class="save-btn" :class="isEdit?'btn-tabDefault':'btn-tabDefault-not'" tag="button" to="/documentShield">保存</router-link>-->
+        <!--</div>-->
+        <!--切换文书-->
       </div>
       <!--富文本编辑器-->
       <div id="editor-wrap">
@@ -112,6 +122,7 @@
       name: "drafting",
       data() {
         return {
+          isEdit: false,//是否编辑
           breadData: ['文书屏蔽','拟制'],
           docTitle: this.$route.query.title,//文书名称
           editor: null,//富本文编辑器实例
@@ -201,9 +212,10 @@
       background:rgba(255,255,255,1);
       box-shadow:0 10px 12px 3px rgba(11,39,95,0.18);
       border-radius:10px;
+      overflow-y: auto;
       #editor-wrap {
         height: 100%;
-        margin-right: 568px;
+        margin-right: 468px;
         padding: 24px;
         overflow-y: auto;
       }
@@ -214,59 +226,78 @@
       #shield-content {//屏蔽内容
         position: relative;
         float: right;
-        width: 568px;
+        /*width: 568px;*/
+        width: 468px;
         height: 100%;
         padding: 24px 24px 24px 0;
+        overflow-y: auto;
         h4 {
           text-align: center;
           font-size:18px;
           font-family:'PingFangSC-Medium';
-          font-weight:500;
+          height: 38px;
+          line-height: 38px;
           color:rgba(98,98,98,1);
-          margin-bottom: 15px;
+          margin-top: 24px;
+          margin-bottom: 20px;
         }
         .btn {//按钮
-          position: absolute;
-          bottom: 24px;
-          left: 21px;
-          button {
-            width:151px;
-            height:40px;
-            background:-webkit-linear-gradient(bottom,rgba(255,161,150,1) 0%,rgba(255,121,149,1) 100%);
-            border-radius:8px 8px 8px 8px;
-            cursor: pointer;
-            font-size:20px;
-            font-family:'PingFangSC-Regular';
-            font-weight:400;
-            color:rgba(255,255,255,1);
-            border: none;
-          }
-          .reset-btn {//重置按钮
-
-          }
           .save-btn {//保存按钮
             margin-left: 109px;
-            background:-webkit-linear-gradient(bottom,rgba(45,103,255,1) 0%,rgba(75,145,255,1) 100%);
           }
         }
         .shield-item {
-          border-top: 1px solid rgba(223,223,223,1);
-          padding: 17px 35px 20px;
+          width: 280px;
           overflow: hidden;
-          .shield-name {
-            float: left;
-            font-size:18px;
-            font-family:'PingFangSC-Regular';
-            font-weight:400;
-            color:rgba(98,98,98,1);
+          margin:  15px auto;
+          color: rgba(85,85,85,1);
+          +.shield-item {
+            margin-top: 20px;
           }
-          .shield-change {
-            float: right;
-            .shield-before {
-              margin-bottom: 13px;
+          &:last-child {
+            margin-top: 0;
+            font-size: 16px;
+            a {
+              margin-right: 20px;
             }
           }
-
+          .shield-name {
+            position: relative;
+            font-size: 16px;
+            font-family: 'PingFang-SC-Medium';
+            font-weight:500;
+            padding-left: 14px;
+            &:before {
+              content: '';
+              position: absolute;
+              top: 50%;
+              left: 0;
+              transform: translate(0,-50%);
+              display: inline-block;
+              width: 6px;
+              height: 6px;
+              border-radius: 50%;
+              background-color: #4589FD;
+            }
+          }
+          .shield-change {
+            font-size: 14px;
+            font-family: 'PingFang-SC-Regular';
+            font-weight:400;
+            .shield-before {
+              margin-top: 15px;
+              >label {
+                margin-right: 4px;
+              }
+            }
+          }
+          /*按钮*/
+          .reset-btn {
+            float: left;
+          }
+          .save-btn {
+            float: right;
+          }
         }
       }
     }

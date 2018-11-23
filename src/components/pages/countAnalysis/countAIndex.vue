@@ -1,8 +1,5 @@
 <template>
   <div id="count-index">
-    <div id="menu">
-      <table-menu currName=""></table-menu>
-    </div>
     <div id="main">
       <div class="count-data">
         <div class="count-item" @click="showTable('case','案件总量')">
@@ -175,15 +172,22 @@
           var option = {
             title: {
               text: '信息发送量',
-              x: 'center'
+              x: 'center',
+              textStyle: {
+                fontSize: 16,
+                fontFamily: 'PingFang-SC-Bold',
+                fontWeight: 'bold',
+                color: 'rgba(85,85,85,1)'
+              }
             },
             legend: {
               data: ['黄冈市院','黄冈市黄州区院','团风县院','红安县院','罗田县院','英山县院','浠水县院','蕲春县院','黄梅县院','麻城市院','武穴市院'],
-              bottom: 0
+              bottom: 0,
+              itemHeight: 14,
+              itemWidth: 14,
+              left: 90,
             },
             grid: {
-              // left: '3%',
-              // right: '6%',
               bottom: '15%',
               containLabel: true
             },
@@ -194,12 +198,23 @@
               axisLabel: {
                 // alignWithLabel: true
                 interval: 0,
-                rotate: "45"
+                rotate: "45",
+                fontSize:14,
+                fontFamily: 'PingFang-SC-Regular',
+                fontWeight: 400,
+                color: 'rgba(85,85,85,1)',
               }
+
             },
             yAxis : [
               {
-                type : 'value'
+                type : 'value',
+                axisLabel: {
+                  fontSize:14,
+                  fontFamily: 'PingFang-SC-Regular',
+                  fontWeight: 400,
+                  color: 'rgba(85,85,85,1)',
+                },
               }
             ],
             series : [
@@ -339,11 +354,20 @@
           var option = {
             title: {
               text: '导出间隔',
-              x: 'center'
+              x: 'center',
+              textStyle: {
+                fontSize: 16,
+                fontFamily: 'PingFang-SC-Bold',
+                fontWeight: 'bold',
+                color: 'rgba(85,85,85,1)'
+              }
             },
             legend: {
               data: ['黄冈市院','黄冈市黄州区院','团风县院','红安县院','罗田县院','英山县院','浠水县院','蕲春县院','黄梅县院','麻城市院','武穴市院'],
-              bottom: 0
+              bottom: 0,
+              itemHeight: 14,
+              itemWidth: 14,
+              left: 90,
             },
             grid: {
               // left: '3%',
@@ -351,6 +375,7 @@
               bottom: '15%',
               containLabel: true
             },
+            // color: ['#f6bb42','#8cc152','#f97566','#3bafda','#4a89dc','#f8c35d','#114898','#24adf1','#aab2bd','#656d78','#da4453'],
             xAxis : {
               type : 'category',
               boundaryGap: true,
@@ -358,12 +383,22 @@
               axisLabel: {
                 // alignWithLabel: true
                 interval: 0,
-                rotate: "45"
+                rotate: "45",
+                fontSize:14,
+                fontFamily: 'PingFang-SC-Regular',
+                fontWeight: 400,
+                color: 'rgba(85,85,85,1)',
               }
             },
             yAxis : [
               {
-                type : 'value'
+                type : 'value',
+                axisLabel: {
+                  fontSize:14,
+                  fontFamily: 'PingFang-SC-Regular',
+                  fontWeight: 400,
+                  color: 'rgba(85,85,85,1)',
+                },
               }
             ],
             series : [
@@ -391,7 +426,7 @@
                 barGap: '-100%',
                 barCategoryGap: 0,
                 itemStyle: {
-                  color: '#8cc152 '
+                  color: '#8cc152'
                 }
               },
               {
@@ -435,7 +470,7 @@
                 barGap: '-100%',
                 barCategoryGap: 0,
                 itemStyle: {
-                  color: '#f8c35d '
+                  color: '#f8c35d'
                 }
               },
               {
@@ -500,11 +535,18 @@
           //初始化文书公开排行榜
         initDocRank() {
           this.docRank = this.$echarts.init(this.$refs.docRank);
+          var _this = this;
           var option = {
             color: ['#3398DB'],
             title: {
               text: '文书公开排行榜',
-              x: 'center'
+              x: 'center',
+              textStyle: {
+                fontSize: 16,
+                fontFamily: 'PingFang-SC-Bold',
+                fontWeight: 'bold',
+                color: 'rgba(85,85,85,1)'
+              }
             },
             tooltip : {
               trigger: 'axis',
@@ -523,19 +565,43 @@
                 type : 'value',
                 axisTick: {
                   alignWithLabel: true
-                }
+                },
+                axisLabel: {
+                  fontSize:14,
+                  fontFamily: 'PingFang-SC-Regular',
+                  fontWeight: 400,
+                  color: 'rgba(85,85,85,1)',
+                },
               }
             ],
             yAxis : [
               {
                 type : 'category',
+                axisLabel: {
+                  fontSize:14,
+                  fontFamily: 'PingFang-SC-Regular',
+                  fontWeight: 400,
+                  color: 'rgba(85,85,85,1)',
+                },
                 data : ['黄冈市院','黄冈市黄州区院','团风县院','红安县院','罗田县院','英山县院','浠水县院','蕲春县院','黄梅县院','麻城市院','武穴市院'],
               }
             ],
             series : [
               {
                 type:'bar',
-                barWidth: '60%',
+                barWidth: '16px',
+                itemStyle: {
+                  normal: {
+                    color: new _this.$echarts.graphic.LinearGradient(0, 0, 1, 0, [{
+                      offset: 0,
+                      color: '#4589FD'
+
+                    }, {
+                      offset: 1,
+                      color: '#156AFC'
+                    }]),
+                  }
+                },
                 data:[124, 310, 580, 124, 310, 720, 124, 222, 345, 444,100].sort()
               }
             ]
@@ -545,11 +611,18 @@
         //初始化案件公开排行榜
         initCaseRank() {
           this.caseRank = this.$echarts.init(this.$refs.caseRank);
+          var _this = this;
           var option = {
             color: ['#3398DB'],
             title: {
               text: '案件公开排行榜',
-              x: 'center'
+              x: 'center',
+              textStyle: {
+                fontSize: 16,
+                fontFamily: 'PingFang-SC-Bold',
+                fontWeight: 'bold',
+                color: 'rgba(85,85,85,1)'
+              }
             },
             tooltip : {
               trigger: 'axis',
@@ -566,6 +639,12 @@
             xAxis : [
               {
                 type : 'value',
+                axisLabel: {
+                  fontSize:14,
+                  fontFamily: 'PingFang-SC-Regular',
+                  fontWeight: 400,
+                  color: 'rgba(85,85,85,1)',
+                },
                 axisTick: {
                   alignWithLabel: true
                 }
@@ -574,13 +653,31 @@
             yAxis : [
               {
                 type : 'category',
+                axisLabel: {
+                  fontSize:14,
+                  fontFamily: 'PingFang-SC-Regular',
+                  fontWeight: 400,
+                  color: 'rgba(85,85,85,1)',
+                },
                 data : ['黄冈市院','黄冈市黄州区院','团风县院','红安县院','罗田县院','英山县院','浠水县院','蕲春县院','黄梅县院','麻城市院','武穴市院'],
               }
             ],
             series : [
               {
                 type:'bar',
-                barWidth: '60%',
+                barWidth: '16px',
+                itemStyle: {
+                  normal: {
+                    color: new _this.$echarts.graphic.LinearGradient(0, 0, 1, 0, [{
+                      offset: 0,
+                      color: '#4589FD'
+
+                    }, {
+                      offset: 1,
+                      color: '#156AFC'
+                    }]),
+                  }
+                },
                 data:[124, 310, 580, 124, 310, 720, 124, 222, 345, 444,100].sort()
               }
             ]
@@ -602,16 +699,8 @@
 #count-index {
   width: 100%;
   height: 100%;
-  /*菜单*/
-  #menu {
-    width: 200px;
-    height: 100%;
-    float: left;
-    overflow-y: auto;
-  }
   #main {
     height: 100%;
-    margin-left: 200px;
     overflow-y: auto;
     .count-data {
       display: flex;
@@ -635,7 +724,7 @@
         text-align: center;
         color: #fff;
         border-radius: 10px;
-        background: -webkit-linear-gradient(-32deg,rgba(69,137,253,1) 0%,rgba(48,109,248,1) 100%);
+        background: -webkit-linear-gradient(right,rgba(69,137,253,1) 0%,rgba(48,109,248,1) 100%);
         box-shadow:0 4px 4px 0 rgba(204,204,204,0.34);
         cursor: pointer;
         + .count-item {
@@ -683,7 +772,7 @@
       /*文书*/
       + .count-data {
         .count-item {
-          background:-webkit-linear-gradient(144deg,rgba(231,139,40,1) 0%,rgba(255,164,67,1) 100%);
+          background:-webkit-linear-gradient(left,rgba(231,139,40,1) 0%,rgba(255,164,67,1) 100%);
         }
       }
     }

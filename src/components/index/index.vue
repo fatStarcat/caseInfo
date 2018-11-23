@@ -37,7 +37,7 @@
   #index {
     width: 100%;
     height: 100%;
-    background: url('../../assets/index/bg.jpg') no-repeat;
+    background: url('../../../static/images/index/bg.jpg') no-repeat;
     background-size: cover;
     /*头部*/
     #index-header {
@@ -53,15 +53,18 @@
         float: left;
         width: 150px;
         height: 100%;
+        overflow-y: auto;
+        &::-webkit-scrollbar {
+          display: none;
+        }
       }
       /*功能区*/
       #main-content {
         float: left;
         width: calc(100% - 150px);
-        height: 100%;
-        background: url('../../assets/index/mainBg.png')  no-repeat;
+        height: calc(100%);
+        background: url('../../../static/images/index/mainBg.png') no-repeat;
         background-size: cover;
-        overflow-y: auto;
       }
     }
   }

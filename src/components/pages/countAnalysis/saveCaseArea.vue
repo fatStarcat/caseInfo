@@ -1,23 +1,25 @@
 <template>
-  <div id="docArea">
+  <div id="caseArea" class="clearfix">
+    <div id="menu">
+      <table-menu currName="countCaseArea"></table-menu>
+    </div>
     <div id="main">
       <!--图表-->
       <div id="echarts-wrap" >
-        <!--文书公开排行榜-->
+        <!--案件公开排行榜-->
         <div class="echarts-wrap">
-          <div class='echarts' ref="docRankEchart"></div>
+          <div class='echarts' ref="caseRankEchart"></div>
           <!--表格说明-->
           <span>公开率</span>
         </div>
-        <!--文书公开-->
+        <!--案件公开-->
         <div class="echarts-wrap">
-          <div  class='echarts' ref="docAreaEchart">
+          <div  class='echarts' ref="caseAreaEchart">
 
           </div>
-          <span class='echarts-return' v-show="showReturn" @click="returndocRatio">
-            <img src="../../../assets/countAnalysis/return.png" alt="">
-           <!-- <Icon  type="md-return-left" size="26"/>
-            返回-->
+          <span class='echarts-return' v-show="showReturn" @click="returnCaseRatio">
+            <Icon  type="md-return-left" size="26"/>
+            返回
           </span>
         </div>
 
@@ -27,7 +29,7 @@
         <Table :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
         <!--导出数据-->
         <div id="exportData">
-          <button class="export-all btn-tabDefault-large">导出全部数据</button>
+          <button class="export-all btn-export-large">导出全部数据</button>
         </div>
       </div>
     </div>
@@ -40,23 +42,17 @@
   export default {
     data() {
       return {
-        docAreaEchart: null,//文书公开
-        docRankEchart: null,//文书公开排行榜
+        caseAreaEchart: null,//案件公开
+        caseRankEchart: null,//案件公开排行榜
         tableHeight: '',//表格高度
         showTable: false,//弹出表格显示
         showReturn: false,//显示返回按钮
-        textStyle: {
-          fontSize: 16,
-          fontFamily: 'PingFang-SC-Bold',
-          fontWeight: 'bold',
-          color: 'rgba(85,85,85,1)'
-        },
         columns1: [//表头数据
           {
             title: '序号',
             key: 'order',
             align: 'center',
-            width: 100
+            width: 60
           },
           {
             title: '单位',
@@ -64,7 +60,7 @@
             align: 'center',
           },
           {
-            title: '文书总量',
+            title: '案件总量',
             key: 'count',
             align: 'center',
             render: (h, params) => {
@@ -83,7 +79,7 @@
                     click: () => {
                       this.$bus.$emit('setTable',{
                         title: _this.infoData[params.index].company,
-                        tableName: 'docArea',
+                        tableName: 'caseArea',
                         type: params.column.title
                       });
                       _this.showTable = true;
@@ -113,7 +109,7 @@
                     click: () => {
                       this.$bus.$emit('setTable',{
                         title: _this.infoData[params.index].company,
-                        tableName: 'docArea',
+                        tableName: 'caseArea',
                         type: params.column.title
                       });
                       _this.showTable = true;
@@ -143,7 +139,7 @@
                     click: () => {
                       this.$bus.$emit('setTable',{
                         title: _this.infoData[params.index].company,
-                        tableName: 'docArea',
+                        tableName: 'caseArea',
                         type: params.column.title
                       });
                       _this.showTable = true;
@@ -173,7 +169,7 @@
                     click: () => {
                       this.$bus.$emit('setTable',{
                         title: _this.infoData[params.index].company,
-                        tableName: 'docArea',
+                        tableName: 'caseArea',
                         type: params.column.title
                       });
                       _this.showTable = true;
@@ -198,8 +194,7 @@
             {value:2000, name: '已公开'},
           ],
           legend: [],
-          title: '文书公开比例',
-          color: ['#4589FD','#34ABFE','#8BB3F7']
+          title: '案件公开比例'
         }
       }
     },
@@ -217,8 +212,8 @@
     },
     mounted() {
       this.setTableHeight(this);//设置表格高度
-      this.initdocRankEchart();//文书公开排行榜
-      this.initdocAreaEchart();//文书
+      this.initcaseRankEchart();//案件公开排行榜
+      this.initcaseAreaEchart();//案件
       this.watchEcharts();
     },
     methods: {
@@ -239,20 +234,19 @@
         window.addEventListener('resize',this.repaintEcharts);
       },
       repaintEcharts() {//重绘图表
-        this.docRankEchart.dispose();
-        this.docAreaEchart.dispose();
-        this.initdocRankEchart();
-        this.initdocAreaEchart();
+        this.caseRankEchart.dispose();
+        this.caseAreaEchart.dispose();
+        this.initcaseRankEchart();
+        this.initcaseAreaEchart();
       },
-      //文书类型占比
-      initdocAreaEchart() {
+      //案件类型占比
+      initcaseAreaEchart() {
         var _this = this;
-        this.docAreaEchart = this.$echarts.init(this.$refs.docAreaEchart);
+        this.caseAreaEchart = this.$echarts.init(this.$refs.caseAreaEchart);
         var option = {
           title: {
             text: this.pieData.title,
-            textStyle: _this.textStyle,
-            x:'center'
+            x: 'center'
           },
           tooltip : {
             trigger: 'item',
@@ -260,42 +254,24 @@
           },
           legend: {
             data: this.pieData.legend,
-            bottom: 0,
-            itemWidth: 14,
-            itemHeight: 14
+            bottom: 0
           },
-          color: this.pieData.color,
           series : [
             {
               type: 'pie',
-              /*radius : '55%',
-              center: ['50%', '50%'],*/
-              radius: ['35%', '65%'],
+              radius: ['40%', '65%'],
               selectedMode: 'single',
-              // roseType: 'radius',
-              label: {
-                fontSize:14,
-                fontFamily: 'PingFang-SC-Regular',
-                fontWeight:400,
-                color: '#555555'
-              },
-              labelLine: {
-                lineStyle: {
-                  color: '#555555'
-                }
-              },
               data: _this.pieData.data
             }
           ]
         };
 
-        this.docAreaEchart.setOption(option);
-        (this.pieData.legend.length==0)&&(this.docAreaEchart.on('click',this.selectdocType));
+        this.caseAreaEchart.setOption(option);
+        (this.pieData.legend.length==0)&&(this.caseAreaEchart.on('click',this.selectCaseType));
       },
-      //文书公开排行榜图表
-      initdocRankEchart() {
-        this.docRankEchart = this.$echarts.init(this.$refs.docRankEchart);
-        var _this = this;
+      //案件公开排行榜图表
+      initcaseRankEchart() {
+        this.caseRankEchart = this.$echarts.init(this.$refs.caseRankEchart);
         var option;
         var data = [
           {
@@ -341,9 +317,8 @@
         option = {
           color: ['#3398DB'],
           title: {
-            text: '文书公开排行榜',
-            textStyle: _this.textStyle,
-            x:'center'
+            text: '案件公开排行榜',
+            x: 'center'
           },
           tooltip : {
             formatter: '{b}:{c}%',
@@ -365,10 +340,6 @@
                 alignWithLabel: true
               },
               axisLabel: {
-                fontSize:14,
-                fontFamily: 'PingFang-SC-Regular',
-                fontWeight: 400,
-                color: 'rgba(85,85,85,1)',
                 formatter: '{value}%'
               }
             }
@@ -376,38 +347,20 @@
           yAxis : [
             {
               type : 'category',
-              axisLabel: {
-                fontSize:14,
-                fontFamily: 'PingFang-SC-Regular',
-                fontWeight: 400,
-                color: 'rgba(85,85,85,1)',
-              },
               data: nameData
             }
           ],
           series : [
             {
               type:'bar',
-              barWidth: '16px',
-              data: data,
-              itemStyle: {
-                normal: {
-                  color: new _this.$echarts.graphic.LinearGradient(0, 0, 1, 0, [{
-                    offset: 0,
-                    color: '#4589FD'
-
-                  }, {
-                    offset: 1,
-                    color: '#156AFC'
-                  }]),
-                }
-              },
+              barWidth: '60%',
+              data: data
             }
           ]
         };
-        this.docRankEchart.setOption(option);
+        this.caseRankEchart.setOption(option);
       },
-      returndocRatio() {//返回公开比例图
+      returnCaseRatio() {//返回公开比例图
         this.pieData = {
           data:[
             {value:100, name: '本系统已公开统一系统未公开'},
@@ -415,13 +368,12 @@
             {value:2000, name: '已公开'},
           ],
           legend: [],
-          title: '文书公开比例',
-          color: ['#4589FD','#34ABFE','#8BB3F7']
+          title: '案件公开比例'
         };
-        this.initdocAreaEchart();
+        this.initcaseAreaEchart();
         this.showReturn = false;
       },
-      selectdocType(param) {//选择文书类型
+      selectCaseType(param) {//选择案件类型
         this.pieData = {
           data: [
             {value:200, name: '黄冈市院'},
@@ -437,30 +389,36 @@
             {value:500, name: '武穴市院'},
           ],
           legend: ['黄冈市院','黄冈市黄州区院','团风县院','红安县院','罗田县院','英山县院','浠水县院','蕲春县院','黄梅县院','麻城市院','武穴市院'],
-          title: param.name,
-          color: ['#f6bb42','#8cc152','#f97566','#3bafda','#4a89dc','#f8c35d','#114898','#24adf1','#aab2bd','#656d78','#da4453']
+          title: param.name
         };
-        this.initdocAreaEchart();
-        this.docAreaEchart.off('click');
+        this.initcaseAreaEchart();
+        this.caseAreaEchart.off('click');
         this.showReturn = true;
       },
     },
     destroyed() {
       window.removeEventListener('resize',this.repaintEcharts);
-      this.docRankEchart.dispose();
-      this.docAreaEchart.dispose();
+      this.caseRankEchart.dispose();
+      this.caseAreaEchart.dispose();
     },
   }
 </script>
 
 <style scoped lang="scss">
-  #docArea {
+  #caseArea {
     height: 100%;
+    /*菜单*/
+    #menu {
+      width: 200px;
+      height: 100%;
+      float: left;
+    }
     /*内容区*/
     #main {
       height: 100%;
+      margin-left: 200px;
       #table {
-        height: calc( 100% - 35px - 38px - 20px);
+        height: calc( 100% - 60px);
         margin-right: 620px;
         /*按钮*/
         #exportData { /*导出按钮*/
@@ -471,11 +429,11 @@
       #echarts-wrap {
         float: right;
         width: 600px;
-        height: calc( 100% - 35px - 38px - 20px);
+        height: 100%;
         overflow-y: auto;
         .echarts-wrap {
           text-align: center;
-          margin-bottom: 50px;
+          margin-bottom: 30px;
         }
         .echarts {
           height: 500px;
