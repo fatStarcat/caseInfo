@@ -80,7 +80,8 @@
     </div>
     <!--map-->
     <div id="map">
-      <img src="../../../assets/save/map1.png" alt="">
+      <!--<img src="../../../assets/save/map1.png" alt="">-->
+      <el-amap class="amap-box" :vid="'amap-vue'" :zoom="zoom" :center="center"></el-amap>
     </div>
   </div>
 </template>
@@ -90,12 +91,19 @@
         name: "real-time-reminding",
         data() {
           return {
+            center: [114.87 , 30.45],//
+            zoom: 15
           }
         },
       methods: {
           toPage(path) {//跳转页面
             this.$router.push({path: path});
-          }
+          },
+        initAmap() {//初始化地图
+        }
+      },
+      mounted() {
+        this.initAmap();
       }
     }
 </script>
@@ -184,7 +192,7 @@
           font-size: 14px;
         }
         .info-circle-one .info-content-text {
-          font-family: 'PingFangSC-Semibold';
+          font-family: 'PingFang-SC-Bold';
           font-weight: 500;
           color: rgba(85,85,85,1);
           cursor: auto;
@@ -202,7 +210,7 @@
           }
         }
         .info-circle-two .info-content-text {
-          font-family: 'PingFangSC-Semibold';
+          font-family: 'PingFang-SC-Bold';
           font-weight: 500;
           color: rgba(85,85,85,1);
           cursor: auto;
@@ -221,7 +229,7 @@
         }
         .info-circle-one .info-content-count,
         .info-circle-two .info-content-count {
-          font-family: PingFangSC-Semibold;
+          font-family: 'PingFang-SC-Bold';
           font-weight: 600;
           color: rgba(85,85,85,1);
           font-size: 20px;
@@ -234,8 +242,8 @@
       float: right;
       width: calc( 100% - 369px - 45px);
       height: 742px;
-      background: url('../../../assets/save/map.png') no-repeat;
-      background-size: cover;
+      /*background: url('../../../assets/save/map.png') no-repeat;*/
+      /*background-size: cover;*/
       border-radius:10px;
       img {
         position: relative;

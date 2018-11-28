@@ -343,7 +343,7 @@
       //表格
       #infoTable {
         margin-top: 20px;
-        height: calc(100% - 40px - 40px - 20px - 1px  - 60px - 65px);
+        height: calc(100% - 40px - 40px - 20px - 1px  - 60px - 66px);
       }
       /*表格分页*/
       #tablePage {

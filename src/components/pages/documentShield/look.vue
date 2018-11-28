@@ -32,7 +32,7 @@
 </template>
 
 <script>
-  import * as wangEditor from '../../../script/release/wangEditor'
+  import * as wangEditor from '../../../plugins/wangEditor/release/wangEditor'
   export default {
     name: "look",
     data() {
@@ -71,7 +71,6 @@
     height: 100%;
     padding: 35px;
     #look-content {
-      display: table;
       width: 100%;
       height: 100%;
       /*编辑器*/
@@ -135,7 +134,7 @@
         background:rgba(255,255,255,1);
         box-shadow:0 10px 12px 3px rgba(12,37,95,0.15);
         border-radius:10px;
-        padding: 39px 19px 19px 19px;
+        padding: 48px 24px 24px 24px;
         h3 {//审核批复标题
           font-size:24px;
           font-family:'PingFangSC-Medium';

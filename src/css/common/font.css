@@ -34,3 +34,10 @@
   font-weight: normal;
   font-style: normal;
 }
+
+@font-face {
+  font-family: 'fangzheng_GBK';
+  src: url('../../../static/font/fangzheng_GBK.ttf');
+  font-weight: normal;
+  font-style: normal;
+}

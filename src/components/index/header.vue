@@ -6,7 +6,7 @@
         <img src="../../assets/index/logo.png" alt="">
       </div>
       <div id="logo-text">
-        红蕲案件信息智慧公开系统
+        案件信息智慧公开系统
       </div>
     </div>
     <!--信息-->
@@ -18,15 +18,23 @@
       </div>
       <!--消息-->
       <div class="infoItem">
-        <Icon type="ios-notifications-outline" size="24"/>
+        <img src="../../assets/index/tip.png" alt="">
         <span>消息</span>
       </div>
       <!--退出-->
       <div class="infoItem" @click="exit">
-        <Icon type="ios-exit-outline" size="24" />
-        <span>退出</span>
+        <img src="../../assets/index/toggle.png" alt="">
+        <span>切换用户</span>
       </div>
+
     </div>
+    <!--关闭-->
+    <span class="close forms-btn">
+        <img src="../../assets/index/close.png" alt="">
+      </span>
+    <span class="small forms-btn" @click="close">
+        <img src="../../assets/index/small.png" alt="">
+      </span>
   </div>
 </template>
 
@@ -38,9 +46,22 @@
         }
       },
       methods: {
-        exit(){//退出
-          localStorage.setItem('setAdmin','');
-          this.$router.push({path:'/'});
+        exit(){//切换用户
+          let _this = this;
+          this.axios.get(webApi.Auth.Logout)
+            .then(function(res){
+              console.log(res);
+              localStorage.setItem('setAdmin','');
+              localStorage.setItem('token','');
+              // _this.$router.push({path:'/'});
+            })
+            .catch(function(err) {
+              console.log(err)
+            })
+
+        },
+        close() {//退出
+          invoker.exit();
         }
       }
     }
@@ -58,7 +79,7 @@
        float: left;
        text-align: center;
        color: #FFFFFF;
-       font-size: 36px;
+       font-size: 40px;
        font-weight: 600;
        div {
          display: table-cell;
@@ -73,6 +94,7 @@
        }
        #logo-text {
          height: 100%;
+         font-family: 'fangzheng_GBK';
        }
      }
      /*info*/
@@ -80,14 +102,18 @@
        display: table;
        position: absolute;
        top: 0;
-       right: 84px;
+       right: 85px;
        height: 100%;
        font-size: 18px;
        color: #fff;
        .infoItem {
         display: table-cell;
         vertical-align: middle;
-        padding-left: 70px;
+        padding: 0 20px;
+         &:hover {
+           background: rgba(6,14,128,0.5);
+           cursor: pointer;
+         }
          &:nth-child(3) {
            cursor: pointer;
          }
@@ -100,5 +126,17 @@
          }
        }
      }
+     /*forms-btn*/
+     .forms-btn {
+       position: absolute;
+       top: 7px;
+       right: 20px;
+       cursor: pointer;
+     }
+     .small {
+       right: 64px;
+       top: 2px;
+     }
+
    }
 </style>

@@ -35,13 +35,14 @@
             return {
               admin: '',
               theme: 'light',
-              currNum: '1'
+              currNum: '1',
+              role: '',//角色 1:案管,2:承办人,3:管理员
             }
         },
         methods: {
           //跳转文书屏蔽页面
           toShield() {
-            if(this.admin=='张福珍') {
+            if(this.role=='1'||this.role=='3') {
               this.$router.push({path:'/docShieldAdmin'});
             }else {
               this.$router.push({path:'/documentShield'});
@@ -53,19 +54,18 @@
             if(name==1) {//文书屏蔽
               this.toShield();
             }
-            // else if(name=='infoExport'||name=='messagePush'||name=='countAnalysis') {//承办人角色不能点击
-            //   if(this.admin=='余俊') {
-            //     var path = this.$route.path;
-            //     this.$router.push({path: path});
-            //   }else{
-            //     this.$router.push({path: '/'+name});
-            //   }
-            // }
           }
         },
         created() {
           var admin = localStorage.getItem('setAdmin');
           (admin)&&(this.admin = admin)
+        },
+        beforeMount() {
+          let role = this.$route.query.role;
+          let token = this.$route.query.token;
+          this.role = role;
+          localStorage.setItem('token',token);
+          console.log(this.$route.query)
         },
         mounted() {
           if(this.$route.path == "/index"||this.$route.path == '/caseNotOpen'||this.$route.path == '/caseOpen'||this.$route.path == '/caseUndisclosed'||this.$route.path == "/docNotOpen"||this.$route.path == "/docOpen"||this.$route.path == "/docUndisclosed") {
@@ -81,12 +81,13 @@
           }else if(this.$route.path == "/relevantRegulations") {
             this.currNum = 'relevantRegulations';
           }
-            if(this.admin=='余俊'){
-              document.querySelectorAll('.change-li').forEach(function(item){
-                item.style.cssText = 'opacity: 0.3;cursor:not-allowed !important;';
-                item.setAttribute('disabled',true);
-              })
+            if(this.role=='2'){//承办人角色
+            let changeList = document.querySelectorAll('.change-li');
+            for(let i = 0,len = changeList.length;i < len;i++) {
+              changeList[i].style.cssText = 'opacity: 0.3;cursor:not-allowed !important;';
+              changeList[i].setAttribute('disabled',true);
             }
+          }
 
         }
     }

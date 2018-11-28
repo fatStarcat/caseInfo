@@ -90,10 +90,6 @@
             <!--<button class="save-btn">保存</button>-->
             <router-link  class="save-btn" :class="isEdit?'btn-tabDefault':'btn-tabDefault-not'" tag="button" to="/documentShield">保存</router-link>
           </li>
-          <li class="shield-item">
-            <a>上一篇</a>
-            <a>下一篇</a>
-          </li>
         </ul>
         <!--按钮-->
         <!--<div class="btn">-->
@@ -109,19 +105,29 @@
         <!--标题-->
         <doc-title :docTitle="docTitle"></doc-title>
         <div id="editor">
-
         </div>
+        <!--上一页下一页-->
+        <span v-if="isBatch" @mousemove="showToggle=1" @mouseleave="showToggle=0" class="togglePages pre-page">
+            <img v-show="showToggle!=1" src="../../../assets/documentShield/left.png" alt="">
+            <img v-show="showToggle==1" src="../../../assets/documentShield/left-hover.png" alt="">
+          </span>
+        <span v-if="isBatch" @mousemove="showToggle=2" @mouseleave="showToggle=0" class="togglePages next-page">
+            <img v-show="showToggle!=2" src="../../../assets/documentShield/left.png" alt="">
+            <img v-show="showToggle==2" src="../../../assets/documentShield/left-hover.png" alt="">
+        </span>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-  import * as wangEditor from '../../../script/release/wangEditor'
+  import * as wangEditor from '../../../plugins/wangEditor/release/wangEditor'
   export default {
       name: "drafting",
       data() {
         return {
+          showToggle: 0,//上一页下一页高亮显示
+          isBatch: this.$route.query.isBatch ,//是否批量
           isEdit: false,//是否编辑
           breadData: ['文书屏蔽','拟制'],
           docTitle: this.$route.query.title,//文书名称
@@ -214,6 +220,7 @@
       border-radius:10px;
       overflow-y: auto;
       #editor-wrap {
+        position: relative;
         height: 100%;
         margin-right: 468px;
         padding: 24px;
@@ -221,8 +228,25 @@
       }
       #editor {
         height: calc(100% - 42px - 40px);
+        padding:  0 24px 0 48px;
       }
-
+      .togglePages {/*上一页,下一页*/
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, 0);
+        cursor: pointer;
+        img {
+          width: 23px;
+          height: 41px;
+        }
+      }
+      .pre-page {
+        left: 37px;
+      }
+      .next-page {/*下一页*/
+        right: 0;
+        transform: rotate(180deg);
+      }
       #shield-content {//屏蔽内容
         position: relative;
         float: right;

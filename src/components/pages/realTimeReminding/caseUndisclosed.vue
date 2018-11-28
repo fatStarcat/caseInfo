@@ -5,7 +5,7 @@
       <!--条件选择区-->
       <select-group mar-top="30">
         <select-item>
-          <label>时间: </label>
+          <label>受理时间: </label>
           <DatePicker type="daterange" split-panels placeholder="请选择时间" :value="dateTime" style="width: 200px"></DatePicker>
         </select-item>
         <select-item>

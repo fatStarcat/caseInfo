@@ -26,7 +26,15 @@
           <button class="examine-yes btn-tabDefault-large" @click="examineModal=true">审核通过</button>
           <button class="examine-no btn-reject-large" @click="examineModal=true">审核驳回</button>
         </div>
-
+        <!--上一页下一页-->
+        <span v-if="isBatch" @mousemove="showToggle=1" @mouseleave="showToggle=0" class="togglePages pre-page">
+            <img v-show="showToggle!=1" src="../../../assets/documentShield/left.png" alt="">
+            <img v-show="showToggle==1" src="../../../assets/documentShield/left-hover.png" alt="">
+          </span>
+        <span v-if="isBatch" @mousemove="showToggle=2" @mouseleave="showToggle=0" class="togglePages next-page">
+            <img v-show="showToggle!=2" src="../../../assets/documentShield/left.png" alt="">
+            <img v-show="showToggle==2" src="../../../assets/documentShield/left-hover.png" alt="">
+        </span>
       </div>
 
     </div>
@@ -49,16 +57,18 @@
 </template>
 
 <script>
-  import * as wangEditor from '../../../script/release/wangEditor'
+  import * as wangEditor from '../../../plugins/wangEditor/release/wangEditor'
   export default {
     name: "examine",
     data() {
       return {
+        showToggle: 0,//上一页下一页高亮显示
         examineModal: false,//批复框显示
         text: '',//批复框内容
         breadData: ['文书屏蔽','审核'],
         docTitle: this.$route.query.title,
         editor: null,//富本文编辑器实例
+        isBatch: this.$route.query.isBatch ,//是否批量
         timelineData: [
           '10月3日：审核驳回——嫌疑人住址未屏蔽',
           '9月28日：审核驳回——嫌疑人白展昭姓名未屏蔽',
@@ -84,7 +94,6 @@
     height: 100%;
     padding: 35px;
     #examine-content {
-      display: table;
       width: 100%;
       height: 100%;
       /*编辑器*/
@@ -114,18 +123,41 @@
             outline: none;
           }
         }
+        .togglePages {/*上一页,下一页*/
+          position: absolute;
+          top: 50%;
+          transform: translate(-50%, 0);
+          cursor: pointer;
+          img {
+            width: 23px;
+            height: 41px;
+          }
+        }
+        .pre-page {
+          left: 37px;
+        }
+        .next-page {/*下一页*/
+          right: 24px;
+          transform: rotate(180deg);
+        }
         #editor-content {//富文本编辑器
           /*height: calc(100% - 62px - 33px);*/
           height: calc(100% - 104px - 40px);
+          padding:  0 48px 0 48px;
+
         }
         .examineBtn-wrap {
           padding: 22px 15px 0;
           overflow: hidden;
+          text-align: center;
           button {
-            float: left;
+            /*float: left;*/
+            margin-right: 20px;
           }
           .examine-no {//审核驳回
-            float: right;
+            /*float: right;*/
+            margin-left: 20px;
+            margin-right: 0;
           }
         }
         /*批复框*/
@@ -140,7 +172,7 @@
         background:rgba(255,255,255,1);
         box-shadow:0 10px 12px 3px rgba(12,37,95,0.15);
         border-radius:10px;
-        padding: 39px 19px 19px 19px;
+        padding: 48px 24px 24px 24px;
         overflow-y: auto;
         h3 {//审核批复标题
           font-size:24px;
