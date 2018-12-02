@@ -36,13 +36,49 @@
               admin: '',
               theme: 'light',
               currNum: '1',
-              role: '',//角色 1:案管,2:承办人,3:管理员
+              role: JSON.parse(localStorage.getItem('userInfo')).MC,//角色 1:承办人,2:案管,4:管理员
             }
         },
         methods: {
+          getCaseType() {//获取案件类型
+            this.axios.get(webApi.Host + webApi.SystemInfo.GetAJLXs)
+              .then(function(res){
+                if(res.data.code==0) {
+                  localStorage.setItem('AJLX',JSON.stringify(res.data.data));
+                }
+                console.log(res);
+              })
+              .catch(function(err){
+                console.log(err);
+              })
+          },
+          getUserInfo() {//获取角色身份
+            let _this = this;
+            _this.axios.get(webApi.Host + webApi.Auth.GetCurrentUser)
+              .then(function(res){
+                console.log(res)
+                if(res.data.code==0) {
+                  let userInfo = res.data.data;
+                  if(userInfo.JS=='案管人员'){
+                    userInfo.JS = '案管人员';
+                  }else if(userInfo.JS=='承办人') {
+                    userInfo.JS = '承办人';
+                  }else if(userInfo.JS=='管理员') {
+                    userInfo.JS = '管理员';
+                  }
+                  _this.$bus.$emit('userInfo',{js: userInfo.JS,dwbm: userInfo.DWBM});
+                  localStorage.setItem('getUserInfo',"");
+                  localStorage.setItem('userInfo',JSON.stringify(userInfo));
+                  _this.role = userInfo.JS;//身份  承办人, 案管人员, 管理员
+                }
+              })
+              .catch(function(err){
+                console.log(err)
+              })
+          },
           //跳转文书屏蔽页面
           toShield() {
-            if(this.role=='1'||this.role=='3') {
+            if(this.role=='案管人员'||this.role=='管理员') {
               this.$router.push({path:'/docShieldAdmin'});
             }else {
               this.$router.push({path:'/documentShield'});
@@ -61,10 +97,8 @@
           (admin)&&(this.admin = admin)
         },
         beforeMount() {
-          let role = this.$route.query.role;
-          let token = this.$route.query.token;
-          this.role = role;
-          localStorage.setItem('token',token);
+          // this.getUserInfo();//获取用户信息
+          this.getCaseType();//获取案件信息
           console.log(this.$route.query)
         },
         mounted() {
@@ -81,7 +115,7 @@
           }else if(this.$route.path == "/relevantRegulations") {
             this.currNum = 'relevantRegulations';
           }
-            if(this.role=='2'){//承办人角色
+            if(this.role=='承办人'){//承办人角色
             let changeList = document.querySelectorAll('.change-li');
             for(let i = 0,len = changeList.length;i < len;i++) {
               changeList[i].style.cssText = 'opacity: 0.3;cursor:not-allowed !important;';

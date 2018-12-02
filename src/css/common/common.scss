@@ -93,6 +93,14 @@ hr {
 .echarts-return:hover {
   color: #1e88e5;
 }
+/*清除浮动*/
+.clearfix:after {
+  content: '';
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
 
 /*设置滚动条*/
 ::-webkit-scrollbar-track-piece { //滚动条凹槽的颜色，还可以设置边框属性

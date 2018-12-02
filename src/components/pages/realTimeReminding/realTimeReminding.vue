@@ -3,14 +3,16 @@
   <div id="reminding">
     <!--信息情况-->
     <div id="re-info">
+      <!--<button @click="initMap">重绘</button>-->
       <div id="info-program" class="info-item">
         <h3>程序信息公开信息</h3>
         <div class="info-content info-content-two">
           <div class="info-content-text" >
             已公开
           </div>
-          <div class="info-content-count" @click="toPage('/caseOpen')">
-            2000
+          <div class="info-content-count" @click="toPage({path:'/caseInfo',status: 0,bread:'已公开(程序信息公开信息)'})">
+            {{caseCount[0]}}
+            <loading :width="25" :height="25" :isLoading="isLoading"></loading>
           </div>
         </div>
         <div class="info-content info-content-one">
@@ -18,7 +20,8 @@
             不公开
           </div>
           <div class="info-content-count" @click="toPage('/caseNotOpen')" >
-            100
+            {{caseCount[2]}}
+            <loading :width="25" :height="25" :isLoading="isLoading"></loading>
           </div>
         </div>
         <div class="info-content info-content-three">
@@ -28,7 +31,8 @@
             </span>
           </div>
           <div class="info-content-count" @click="toPage('/caseUndisclosed')">
-            50
+            {{caseCount[1]}}
+            <loading :width="25" :height="25" :isLoading="isLoading"></loading>
           </div>
         </div>
         <div class="info-content info-circle-one">
@@ -44,7 +48,7 @@
         <h3>法律文书公开信息</h3>
         <div class="info-content info-content-two">
           <div class="info-content-text" >
-            已公开
+            应公开
           </div>
           <div class="info-content-count" @click="toPage('/docOpen')">
             2000
@@ -61,7 +65,7 @@
         <div class="info-content info-content-three">
           <div class="info-content-text" >
             <span>
-              本系统已公开统一系统未公开
+              应公开未公开
             </span>
           </div>
           <div class="info-content-count" @click="toPage('/docUndisclosed')">
@@ -80,8 +84,9 @@
     </div>
     <!--map-->
     <div id="map">
-      <!--<img src="../../../assets/save/map1.png" alt="">-->
-      <el-amap class="amap-box" :vid="'amap-vue'" :zoom="zoom" :center="center"></el-amap>
+      <div class="rel-map" ref="mapEchart">
+
+      </div>
     </div>
   </div>
 </template>
@@ -91,19 +96,163 @@
         name: "real-time-reminding",
         data() {
           return {
-            center: [114.87 , 30.45],//
-            zoom: 15
+            isLoading: false,
+            role: JSON.parse(localStorage.getItem('userInfo')).JS,//角色身份,
+            dwbm: JSON.parse(localStorage.getItem('userInfo')).Unit.DWBM,//单位编码
+            mapEchart: null,//地图
+            mapData: [],//地图数据
+            caseCount: [],//案件统计数据
           }
         },
       methods: {
-          toPage(path) {//跳转页面
-            this.$router.push({path: path});
+          setCity() {
+            let _this = this;
+            this.axios({
+              url: '@/../static/map/421100.json'
+            }).then(function(res){
+              console.log(res);
+              let data = [];
+              _this.$echarts.registerMap('HG',res.data);
+              for( var i=0;i<res.data.features.length;i++ ){
+                data.push({
+                  name: res.data.features[i].properties.name
+                })
+              }
+              _this.mapData = data;
+              _this.initMap();
+            })
+              .catch(function(err){
+                console.log(err);
+              })
+
           },
-        initAmap() {//初始化地图
-        }
+          initMap() {
+            var _this = this;
+            this.mapEchart = this.$echarts.init(this.$refs.mapEchart);
+            let option = {
+              backgroundColor: 'transparent',
+              tooltip: {
+                trigger: 'item',
+                formatter: '{b}'
+              },
+              animationDuration:1000,
+              animationEasing:'cubicOut',
+              animationDurationUpdate:1000,
+              series : [
+                {
+                  name: 'HG',
+                  type: 'map',
+                  mapType: 'HG',
+                  roam: false,
+                  nameMap:{
+                    'china':'中国'
+                  },
+                  label: {
+                    normal:{
+                      show:true,
+                      textStyle:{
+                        color:'#999',
+                        fontSize:13
+                      }
+                    },
+                    emphasis: {
+                      show: true,
+                      textStyle:{
+                        color:'#fff',
+                        fontSize:13
+                      }
+                    }
+                  },
+                  itemStyle: {
+                    normal: {
+                      areaColor: '#323c48',
+                      borderColor: 'dodgerblue'
+                    },
+                    emphasis: {
+                      areaColor: 'darkorange'
+                    }
+                  },
+                  data: _this.mapData
+                }
+              ]
+
+            };
+            this.mapEchart.setOption(option);
+          },
+          toPage(config) {//跳转页面
+            this.$router.push({
+              path: config.path,
+              query: {
+                status: config.status,
+                bread: config.bread
+              }
+            });
+          },
+          getCaseCount() {//获取案件公开数量信息
+            this.isLoading = true;
+            let api = '';
+            let _this = this;
+            let date = new Date();
+            let year = date.getFullYear();
+            let startTime = `${year}-01-01 00:00:00`;
+            let endTime = this.getCurrentTime();
+            console.log(startTime,endTime,this.role,this.dwbm)
+            if(this.role=='案管人员') {
+              api = 'AG_CountAJGKXX';
+            }else if(this.role=='承办人'){
+              api = 'CBR_CountAJGKXX';
+            }
+            function getAxios(gkzt) {
+              return _this.axios.get(webApi.SSTX[api].format({
+                startTimeStr: startTime,
+                endTimeStr: endTime,
+                dwbm: _this.dwbm ,
+                gkzt: gkzt,
+                bhxj: false,//包含下级
+                ajlx: '',//案件类型
+              }))
+            }
+            //获取已公开
+            function getOpen() {
+              return getAxios(0)
+            }
+            //获取本系统已公开统一系统未公开
+            function getUndisclosed() {
+              return getAxios(1)
+            }
+            //获取不公开
+            function getNotOpen() {
+              return getAxios(2)
+            }
+            this.axios.all([getOpen(), getUndisclosed(),getNotOpen()])
+              .then(_this.axios.spread(function (open, undisclosed,notOpen) {
+                _this.caseCount = [open.data.data,undisclosed.data.data,notOpen.data.data];
+                _this.isLoading = false;
+                console.log(arguments)
+              }))
+              .catch(_this.axios.spread(function (open, undisclosed,notOpen) {
+                console.log(arguments)
+              }))
+            // this.axios.get(webApi.SSTX[api].format({
+            //   startTimeStr: startTime,
+            //   endTimeStr: endTime,
+            //   dwbm: _this.dwbm ,
+            //   bhxj: false,//包含下级
+            //   ajlx: '',//案件类型
+            // })).then(function(res){
+            //   console.log(res);
+            // }).catch(function(err){
+            //   console.log(err)
+            // })
+          }
+      },
+      create() {
       },
       mounted() {
-        this.initAmap();
+
+        // this.initMap();
+        this.setCity();
+        this.getCaseCount();
       }
     }
 </script>
@@ -116,15 +265,25 @@
     overflow-y: auto;
     /*信息情况*/
     #re-info {
+      position: relative;
       float: left;
+      height: 100%;
       .info-item {
+
         width: 400px;
         height: 360px;
         background: rgba(255,255,255,1);
         box-shadow: 0 10px 12px 3px rgba(12,37,95,0.15);
         border-radius: 10px;
         &:first-child {
-          margin-bottom: 24px;
+          position: absolute;
+          left: 0;
+          top: 0;
+        }
+        &:last-child {
+          position: absolute;
+          left: 0;
+          bottom: 0;
         }
         h3 {
           text-align: center;
@@ -163,6 +322,7 @@
             }
           }
           .info-content-count {
+            position: relative;
             display: inline-block;
             font-size:18px;
             width: 80px;
@@ -241,16 +401,20 @@
       position: relative;
       float: right;
       width: calc( 100% - 369px - 45px);
-      height: 742px;
-      /*background: url('../../../assets/save/map.png') no-repeat;*/
-      /*background-size: cover;*/
+      height: 100%;
+      background: url('../../../assets/realTimeReminding/map.jpg') no-repeat;
+      background-size: cover;
       border-radius:10px;
-      img {
+      .rel-map {
+        width: 100%;
+        height: 100%;
+      }
+     /* img {
         position: relative;
         left: 50%;
         top: 50%;
         transform: translate(-50%,-50%);
-      }
+      }*/
     }
   }
   @media screen and (max-width: 1200px) {
@@ -259,6 +423,7 @@
       right: 0;
       top: 20px;
       width: 100% !important;
+
     }
   }
 </style>

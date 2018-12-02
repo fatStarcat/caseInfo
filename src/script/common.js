@@ -24,4 +24,27 @@ exports.install = function(Vue) {
     obj.editor.create();//生成编辑器
     obj.editor.txt.html(html);
   }
+  Vue.prototype.getCurrentTime = function() {//获取当前时间
+    let date = new Date();
+    let year = date.getFullYear();
+    let month = date.getMonth() + 1;
+    let day = date.getDate();
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let seconds = date.getSeconds();
+    month = timeFormat(month);
+    day = timeFormat(day);
+    hours = timeFormat(hours);
+    minutes = timeFormat(minutes);
+    seconds = timeFormat(seconds);
+    function timeFormat(time) {
+      if(time < 10) {
+        return '0' + time;
+      }else {
+        return time;
+      }
+    }
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+  }
+
 }

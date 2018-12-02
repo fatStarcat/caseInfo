@@ -10,7 +10,7 @@
       </div>
     </div>
     <!--信息-->
-    <div id="header-info">
+    <div id="header-info" >
       <!--用户信息-->
       <div class="infoItem">
         <img src="../../assets/index/user.png" alt="">
@@ -29,12 +29,17 @@
 
     </div>
     <!--关闭-->
-    <span class="close forms-btn">
+    <span class="close forms-btn" @click="close">
         <img src="../../assets/index/close.png" alt="">
       </span>
-    <span class="small forms-btn" @click="close">
+    <span class="small forms-btn" @click="minSize" >
         <img src="../../assets/index/small.png" alt="">
       </span>
+
+    <!--退出提示框-->
+    <my-modal @cancel="closeModal" :title="modTitle" :content="modContent" :show="modShow">
+      <img src="../../assets/index/warning.png" alt="">
+    </my-modal>
   </div>
 </template>
 
@@ -42,18 +47,21 @@
     export default {
       data() {
         return {
+          modTitle: '案件信息智慧公开系统',
+          modContent: '确定退出吗?',
+          modShow: false,
           userName: localStorage.getItem('setAdmin')?localStorage.getItem('setAdmin'):'未知'
         }
       },
       methods: {
         exit(){//切换用户
           let _this = this;
-          this.axios.get(webApi.Auth.Logout)
+          this.axios.get(webApi.Host + webApi.Auth.Logout)
             .then(function(res){
               console.log(res);
-              localStorage.setItem('setAdmin','');
-              localStorage.setItem('token','');
-              // _this.$router.push({path:'/'});
+              if(res.data.code==0) {
+                invoker.reLogin();
+              }
             })
             .catch(function(err) {
               console.log(err)
@@ -61,7 +69,13 @@
 
         },
         close() {//退出
-          invoker.exit();
+          this.modShow = true;
+        },
+        closeModal() {
+          this.modShow = false;
+        },
+        minSize() {//最小化窗口
+          invoker.minimize();
         }
       }
     }

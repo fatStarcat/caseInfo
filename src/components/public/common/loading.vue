@@ -1,21 +1,21 @@
 <template>
-    <div v-show="isLoading" class="loadEffect">
-      <!--<img src="../../../../static/images/common/loading.gif" alt="">-->
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
+    <div :style="{height:height+'px',width:width+'px'}" v-show="isLoading" class="loadEffect">
+      <img  src="../../../assets/public/common/loading.gif" alt="">
+      <!--<span></span>-->
+      <!--<span></span>-->
+      <!--<span></span>-->
+      <!--<span></span>-->
+      <!--<span></span>-->
+      <!--<span></span>-->
+      <!--<span></span>-->
+      <!--<span></span>-->
     </div>
 </template>
 
 <script>
     export default {
         name: "loading",
-        props: ['isLoading']
+        props: ['isLoading','width','height']
     }
 </script>
 
@@ -25,8 +25,9 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%,-50%);
-    width: 100px;
-    height: 100px;
+    img {
+      width: 100%;
+    }
   }
   .loadEffect span{
     display: inline-block;

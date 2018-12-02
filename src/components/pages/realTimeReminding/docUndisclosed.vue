@@ -46,7 +46,7 @@
   export default {
     data() {
       return {
-        breadData: ['实时提醒','本系统已公开统一系统未公开(法律文书公开信息)'],
+        breadData: ['实时提醒','应公开未公开(法律文书公开信息)'],
         tableHeight: '',//表格高度
         dateTime: [new Date((new Date()).getTime() - 86400000),new Date()],//时间
         status: "全部",//当前文书类别

@@ -10,6 +10,7 @@ import Index from '@/components/index/index' //主页
   //实时提醒(主页)
 import realTimeReminding from '@/components/pages/realTimeReminding/realTimeReminding'
   //实时提醒(程序信息公开信息表格)
+import caseInfo from '@/components/pages/realTimeReminding/caseInfo'
   //案件不公开
 import caseNotOpen from '@/components/pages/realTimeReminding/caseNotOpen'
   //案件已公开
@@ -87,6 +88,12 @@ export default new Router({
           path: '/',
           name: 'realTimeReminding',
           component: realTimeReminding,
+        },
+        //实时提醒(案件信息)
+        {
+          path: '/caseInfo',
+          name: 'caseInfo',
+          component: caseInfo,
         },
         //实时提醒(案件不公开)
         {

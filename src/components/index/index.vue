@@ -29,7 +29,13 @@
     export default {
         name: "index",
         // components: {headerBar,footerBar,sideMenu}
-      components: {headerBar,footerBar,sideMenu}
+      components: {headerBar,footerBar,sideMenu},
+      methods: {
+      },
+      mounted() {
+        console.log(invoker)
+      }
+
     }
 </script>
 

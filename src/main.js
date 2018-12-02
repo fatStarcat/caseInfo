@@ -16,7 +16,6 @@ import './plugins/zTree/js/jquery.ztree.core.min' //引入zTree核心js
 import './plugins/zTree/js/jquery.ztree.exhide.min' //引入zTree扩展
 import './script/webApi' //接口
 import './script/format' //字符串格式化
-import VueAMap from  'vue-amap' //引入地图组件
 import axios  from 'axios'
 /**/
 import './../src/script/ajax' //ajax(测试用)
@@ -28,17 +27,10 @@ Vue.prototype.$echarts = echarts;
 Vue.prototype.$bus = Bus;
 Vue.prototype.axios = axios;
 Vue.use(iView);
-Vue.use(VueAMap);
 Vue.use(common);
 Vue.use(tableModal);
 Vue.use(commonComp);
 Vue.use(docShield);
-VueAMap.initAMapApiLoader({
-  key: '3bc7e1e821e9b3b5aa9618b34f86316b',
-  plugin: ['AMap.Autocomplete', 'AMap.PlaceSearch', 'AMap.Scale', 'AMap.OverView', 'AMap.ToolBar', 'AMap.MapType', 'AMap.PolyEditor', 'AMap.CircleEditor'],
-  // 默认高德 sdk 版本为 1.4.4
-  v: '1.4.4'
-});
 
 
 //axios请求拦截器

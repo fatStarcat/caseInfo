@@ -13,16 +13,16 @@
               <div class="enter-item">
                 <img src="../../assets/login/company.png" alt="">
                 <!--<input @click.stop="filterCompany"  @blur="blurSelectCompany" @input="filterCompany" v-model="company" type="text" placeholder="单位" @keyup.enter="login">-->
-                <input @blur="blurSelectCompany"  @input="searchNodes" @click.stop="searchNodes"  v-model="company" type="text" placeholder="请输入单位" @keyup.enter="login">
+                <input class="focusCompany" ref="inputCompany"     @click.stop="searchNodes"  v-model="company.name" type="text" placeholder="请输入单位" @keyup.enter="searchNodes">
+                <!--搜索按钮-->
+                <span   v-show="showCompany"  @click="searchNodes" class="searchBtn focusCompany">
+                  <img src="../../assets/login/search.png" alt="">
+                </span>
                 <div ref="selectCompany" class="select-company" v-show="showCompany">
-                  <!--<ul  v-show="showCompanyList.length==0">-->
-                    <!--<li>无匹配项</li>-->
-                  <!--</ul>-->
-                  <!---->
-                  <!--<ul class="select-data" v-show="showCompanyList.length > 0">-->
-                    <!--<li  @mousedown="selectCompany(item)" v-for="item,index in showCompanyList" :key="index"> {{item}}</li>-->
-                  <!--</ul>-->
-                  <ul id="tree" class="ztree"></ul>
+                  <ul  v-show="!loadComplete">
+                    <li>加载中</li>
+                  </ul>
+                  <ul v-show="loadComplete" id="tree" class="ztree"></ul>
                 </div>
               </div>
               <div class="enter-item">
@@ -38,10 +38,10 @@
             <div class="check-login">
               <div class="checkBtn">
                 <div class="check">
-                  <input type="checkbox" id="agree" class="checkbox" v-model="autoLogin" >
+                  <input type="checkbox" id="agree" class="checkbox" v-model="rememberAccount" >
                   <label for="agree"></label>
                 </div>
-                <span>自动登录</span>
+                <span>记住账号</span>
               </div>
               <button @click="login" class="login-btn">登&nbsp;&nbsp;录</button>
               <button  class="exit-btn" @click="close">退&nbsp;&nbsp;出</button>
@@ -49,7 +49,7 @@
             <!--登录按钮-->
           </div>
           <!--loading-->
-          <loading :isLoading="isLoading"></loading>
+          <loading :width="70" :height="70" :isLoading="isLoading"></loading>
         </div>
       <!--preload-->
       <div id="preloadOne"></div>
@@ -96,39 +96,69 @@
                   ]
               }
             ],
+            loadComplete: false,
             hideNodes: [],//隐藏节点
             keywords: '',//搜索关键字
-            autoLogin: true,//自动登录
+            rememberAccount: true,//记住账号
             user: '',//用户名
             password: '',//密码
-            company: '',//单位
+            company: {//单位
+              name: '',
+              DWBM: '',//单位编码
+            },
             showCompany: false,//显示单位
+            isSeachNodes: false,//是否搜索
           }
       },
       methods: {
+          listenClick(e) {//监听点击
+            if(!(e.target.parentNode.className=="searchBtn focusCompany" ||e.target.className=='focusCompany' ||e.target.outerHTML.indexOf('treenode_switch') > -1)) {
+              this.blurSelectCompany();
+            }
+          },
           initZTree() {//初始化zTree
             let _this = this;
             this.zTreeObj = $.fn.zTree.init($('#tree'), _this.setting, _this.zNodes);
+            this.zTreeObj.expandAll(true);
+            this.loadComplete = true;
           },
-          searchNodes() {//搜索节点
-            let hideNodes =  this.zTreeObj.getNodesByFilter(this.filterHideNodes);
+          searchNodes(type) {//搜索节点
             this.showCompany = true;
-            this.zTreeObj.showNodes(this.hideNodes);
-            this.hideNodes = hideNodes;
-            this.zTreeObj.hideNodes(hideNodes);
-          },
-          filterHideNodes(node) {//过滤不匹配的节点
-            if(node.isParent||PinyinMatch.match(node.name, this.company)) {
-              return false;
+            if(this.loadComplete) {
+              let _this = this;
+              this.zTreeObj.showNodes(this.hideNodes);
+              this.hideNodes = [];
+              if(type!='input') {
+                let showNodes = this.zTreeObj.getNodesByFilter(this.filterHideNodes);
+                console.log(showNodes);
+                for(let i = 0; i < showNodes.length ; i++) {
+                  let pathOfOne = showNodes[i].getPath();
+                  console.log(pathOfOne);
+                  for(let j = 0; j < pathOfOne.length; j++) {
+                    _this.zTreeObj.showNode(pathOfOne[j]); //显示节点
+                    _this.zTreeObj.expandNode(pathOfOne[j],true); //展开节点
+                  }
+                }
+              }
             }
-            return true;//
+          },
+          filterHideNodes(node) {//过滤匹配的节点
+            if(PinyinMatch.match(node.name, this.company.name)) {
+              return true;
+            }
+            this.hideNodes.push(node);
+            this.zTreeObj.hideNode(node);
+            return false;//
           },
           zTreeOnMouseDown(e,treeId,treeNode) {//节点点击
-            this.company = treeNode.name;
-            this.showCompany = false;
-            this.keywords = "";
-            this.$refs.selectCompany.scrollTop = 0;
-            event.preventDefault();
+            if(treeNode.name) {
+              this.company.name = treeNode.name;
+              this.company.DWBM = treeNode.DWBM;
+              this.showCompany = false;
+              this.keywords = "";
+              this.$refs.selectCompany.scrollTop = 0;
+              event.preventDefault();
+            }
           },
           blurSelectCompany() {
             this.showCompany = false;
@@ -137,36 +167,104 @@
           close() {
             invoker.exit();
           },
+        getUnits() {//获取单位信息
+          let _this = this;
+          let host = invoker.getServiceHost();//获取host地址
+          console.log(invoker)
+          host.then(function(hos){
+            webApi.Host = hos;
+            _this.axios.get(webApi.Host + webApi.SystemInfo.GetUnits)
+              .then(function(res){
+                console.log(res);
+                let nodes = [];
+                let root = {};//根节点
+                let units = res.data.data;
+                for(let i = 0 ;i < units.length; i++ ) {
+                  if(!units[i].FDWBM&&units[i].DWBM==100000) {
+                    units[i].name = units[i].DWMC;
+                    // units[i].open = true;
+                    root = units[i];
+                    break
+                  }
+                }
+                nodes.push(root);
+                setUnits(nodes);
+                function setUnits(arr) {
+                  for(let i = 0,len = arr.length;i < len ;i++) {
+                    arr[i].children = [];
+                    for(let j = 0; j < units.length; j++) {
+                      if(arr[i].DWBM == units[j].FDWBM ) {
+                        units[j].name = units[j].DWMC;
+                        // units[j].open = true;
+                        arr[i].children.push(units[j]);
+                      }
+                    }
+                    if(arr[i].children.length > 0) {
+                      setUnits(arr[i].children);
+                    }else {
+                      delete arr[i].children
+                    }
+
+                  }
+                }
+                _this.zNodes = nodes;
+                _this.initZTree();
+              })
+              .catch(function(err){
+                console.log(err);
+              })
+          })
+        },
+        getUserInfo(token,callback) {//获取角色身份
+            let _this = this;
+          _this.axios({
+            method: 'get',
+            url: webApi.Host + webApi.Auth.GetCurrentUser,
+            headers: {token:token}
+          }) .then(function(res){
+            console.log(res)
+            if(res.data.code==0) {
+              let userInfo = res.data.data;
+              if(userInfo.JS=='案管人员'){
+                userInfo.JS = '案管人员';
+              }else if(userInfo.JS=='承办人') {
+                userInfo.JS = '承办人';
+              }else if(userInfo.JS=='管理员') {
+                userInfo.JS = '管理员';
+              }
+              localStorage.setItem('userInfo',JSON.stringify(userInfo));
+              callback();
+            }
+          })
+            .catch(function(err){
+              console.log(err)
+            })
+        },
           login() {//登录
             let _this = this;
             this.isLoading = true;
             this.axios.get(webApi.Auth.Login.format({
-              unit: this.company,
+              unit: this.company.DWBM,
               userName: this.user,
               password: this.password
             })).then(function(res){
-              console.log(res);
               if(res.data.code==0) {
                 let token = res.data.data;
+                let callback = function(){
+                  invoker.login(token)
+                    .then((message) => {
+                      console.log(message);
+                      if(message==-1) {
+                        this.$Message.warning('登录失败!');
+                      }
+                      _this.isLoading = false;
+                    });
+                }
                 localStorage.setItem('token',token);
                 localStorage.setItem('setAdmin',_this.user);
-                _this.axios.get(webApi.Auth.GetCurrentUser)
-                  .then(function(res){
-                    console.log(res)
-                    invoker.login(token)
-                      .then((message) => {
-                        console.log(message);
-                        if(message==-1) {
-                          this.$Message.warning('登录失败!');
-                        }
-                        _this.isLoading = false;
-                      });
-                  })
-                  .catch(function(err){
-                    console.log(err)
-                  })
+                _this. getUserInfo(token,callback);
               }else {
-                _this.$Message.warning('登录失败!');
+                _this.$Message.warning(res.data.errorMessage);
                 _this.isLoading = false;
               }
             }).catch(function(err){
@@ -184,20 +282,32 @@
           },
       },
       created() {
+        if(this.rememberAccount) { //添加账号和单位信息
+          let userInfo = JSON.parse(localStorage.getItem('userInfo'));
+          if(userInfo) {
+            this.user = userInfo.MC;
+            this.company.name = userInfo.Unit.DWMC;
+            this.company.DWBM = userInfo.Unit.DWBM;
+          }
+        }
       },
       mounted() {
-        this.initZTree();
+        window.addEventListener('click',this.listenClick);
+        this.getUnits();
+      },
+      beforeDestroy() {
+        window.removeEventListener('click',this.listenClick);
       }
     }
 </script>
 
 <style scoped lang="scss">
-  #preloadOne {
+  /*#preloadOne {
     background: url("../../../static/images/index/mainBg.png")no-repeat -9999px -9999px;
   }
   #preloadTwo {
     background: url("../../../static/images/index/bg.jpg")no-repeat -9999px -9999px;
-  }
+  }*/
   #login {
     position: relative;
     width: 100%;
@@ -221,7 +331,7 @@
       }
       #login-input {
         position: relative;
-        float: right;
+        float: left;
         width: 340px;
         height: 100%;
         .enter {
@@ -235,10 +345,24 @@
             position: relative;
             width: 100%;
             height: 50px;
+            .searchBtn {//搜索按钮
+              position: absolute;
+              top: 50%;
+              right: 30px;
+              transform: translate(0,-50%);
+              img {
+                width: 20px;
+                height: 20px;
+              }
+              &:hover {
+                cursor: pointer;
+              }
+            }
             input{
               width: 100%;
               height: 100%;
               padding-left: 36px;
+              padding-right: 30px;
               border: none;
               border-bottom: 1px solid rgba(220,220,220,1);
               background: transparent;
@@ -246,6 +370,11 @@
               font-family: 'PingFang-SC-Regular';
               font-weight:400;
               color:rgba(85,85,85,1);
+              &:first-child {
+                &:after {
+                  content: ''
+                }
+              }
               &::-webkit-input-placeholder {
                 color:rgba(85,85,85,.6);
                 font-size: 14px;
@@ -349,7 +478,7 @@
     position: absolute;
     width: 100%;
     max-width: 400px;
-    max-height: 400px;
+    max-height: 250px;
     height: auto;
     background: #fff;
     overflow-y: auto;
