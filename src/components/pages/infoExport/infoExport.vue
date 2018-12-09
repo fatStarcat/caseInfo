@@ -4,23 +4,21 @@
         <!--条件选择区-->
         <select-group>
           <select-item>
-            <label>单位: </label>
-            <Select v-model="company" style="width:228px;height: 35px;">
-              <Option v-for="item in companyList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-            </Select>
+            <label>时间: </label>
+            <DatePicker type="daterange" split-panels placeholder="请选择时间" @on-change="setDate" v-model="dateTime" style="width: 200px"></DatePicker>
           </select-item>
           <select-item>
-            <label>时间: </label>
-            <DatePicker type="daterange" split-panels placeholder="请选择时间" :value="dateTime" style="width: 200px"></DatePicker>
+            <label>单位: </label>
+            <Input   readonly type="text"  v-model="company.name"   style="width:200px" />
           </select-item>
-          <button class="search-btn btn-hover">
+          <button class="search-btn btn-hover" @click="tableType=='case'?getCaseList(true):getDocList(true)">
             查询
           </button>
         </select-group>
         <select-group mar-top="20">
           <select-item>
             <label>当前阶段: </label>
-            <RadioGroup v-model="exportStatus" @on-change="changeStatus">
+            <RadioGroup v-model="exportStatus" @on-change="setNzzt">
               <Radio label="全部"></Radio>
               <Radio label="待导出"></Radio>
               <Radio label="已导出"></Radio>
@@ -52,11 +50,11 @@
         </div>
         <!--表格-->
         <div id="infoTable" ref="table">
-          <Table :height="tableHeight" border stripe :columns="columns1" :data="infoData" ></Table>
+          <Table :loading="isLoading" :height="tableHeight" border stripe :columns="columns1" :data="infoData" ></Table>
         </div>
         <!--表格分页-->
         <div id="tablePage">
-          <Page :total="total" show-sizer show-total show-elevator />
+          <Page :current="pageNum" @on-page-size-change="changePageSize" @on-change="changePageNum"   :total="total" show-sizer show-total show-elevator />
         </div>
       </div>
     </div>
@@ -67,58 +65,20 @@
         name: "info-export",
         data() {
           return {
-            dateTime: [new Date((new Date()).getTime() - 86400000),new Date()],//时间
+            dateValue:[this.getStartTime(),this.getCurrentTime()],
+            dateTime: [this.getStartTime(),this.getCurrentTime()],//时间
             tableHeight: '',//表格高度
             total: 0,//数据总数
-            company: '黄冈市院',//单位
-            tableType: '',//表格类型
-            companyList: [//单位列表
-              {
-                value: "黄冈市院",
-                label: "黄冈市院"
-              },
-              {
-                value: "黄冈市黄州区院",
-                label: "黄冈市黄州区院"
-              },
-              {
-                value: "团风县院",
-                label: "团风县院"
-              },
-              {
-                value: "红安县院",
-                label: "红安县院"
-              },
-              {
-                value: "罗田县院",
-                label: "罗田县院"
-              },
-              {
-                value: "英山县院",
-                label: "英山县院"
-              },
-              {
-                value: "浠水县院",
-                label: "浠水县院"
-              },
-              {
-                value: "蕲春县院",
-                label: "蕲春县院"
-              },
-              {
-                value: "黄梅县院",
-                label: "黄梅县院"
-              },
-              {
-                value: "麻城市院",
-                label: "麻城市院"
-              },
-              {
-                value: "武穴市院",
-                label: "武穴市院"
-              }
-            ],
-            exportStatus: "全部",//导出状态
+            dczt: '',//导出状态
+            exportStatus: "全部",//导出状态(0:待导出 1:已导出)
+            tableType: 'case',//当前类型(案件,文书)
+            pageNum: 1,//页号
+            pageSize: 10,//页大小
+            isLoading: false,//表格加载
+            company: {//单位
+              name: JSON.parse(localStorage.getItem('userInfo')).Unit.DWMC,//单位名称
+              DWBM: JSON.parse(localStorage.getItem('userInfo')).Unit.DWBM,//单位编码
+            },
             exportContent: ['案件信息','法律文书'],//导出内容
             columsData: {
               caseInfo: [//案件信息表头
@@ -129,37 +89,37 @@
                 },
                 {
                   title: '部门受案号',
-                  key: 'caseId',
+                  key: 'BMSAH',
                   align: 'center',
                 },
                 {
                   title: '案件名称',
-                  key: 'caseName',
+                  key: 'AJMC',
                   align: 'center',
                 },
                 {
                   title: '承办单位',
-                  key: 'company',
+                  key: 'CBDW_MC',
                   align: 'center',
                 },
                 {
                   title: '承办部门',
-                  key: 'department',
+                  key: 'CBBM_MC',
                   align: 'center',
                 },
                 {
                   title: '承办人',
-                  key: 'people',
+                  key: 'CBR',
                   align: 'center',
                 },
                 {
                   title: '受理日期',
-                  key: 'dateTime',
+                  key: 'SLRQ',
                   align: 'center',
                 },
                 {
                   title: '当前阶段',
-                  key: 'status',
+                  key: 'AJZT',
                   align: 'center',
                 },
               ],
@@ -171,47 +131,47 @@
                 },
                 {
                   title: '部门受案号',
-                  key: 'caseId',
+                  key: 'BMSAH',
                   align: 'center',
                 },
                 {
                   title: '案件名称',
-                  key: 'caseName',
+                  key: 'AJMC',
                   align: 'center',
                 },
                 {
                   title: '案件类别',
-                  key: 'caseType',
+                  key: 'AJLB_MC',
                   align: 'center',
                 },
                 {
                   title: '承办单位',
-                  key: 'company',
+                  key: 'CBDW_MC',
                   align: 'center',
                 },
                 {
                   title: '承办部门',
-                  key: 'department',
+                  key: 'CBBM_MC',
                   align: 'center',
                 },
                 {
                   title: '承办人',
-                  key: 'people',
+                  key: 'CBR',
                   align: 'center',
                 },
                 {
                   title: '文书名称',
-                  key: 'docName',
+                  key: 'WSMC',
                   align: 'center',
                 },
                 {
                   title: '文书类别',
-                  key: 'docType',
+                  key: 'WSLB',
                   align: 'center',
                 },
                 {
                   title: '当前阶段',
-                  key: 'status',
+                  key: 'NZZT',
                   align: 'center',
                 },
               ]
@@ -221,66 +181,174 @@
             infoDatas: {}
           }
         },
-      created() {
-          this.infoDatas = jsonData.infoExport;
-      },
-      mounted() {
-        this.setTableHeight(this);//设置表格高度
-        this.initTable();//设置初始表格数据
-      },
       methods: {
-        changeStatus(status) {//改变状态
-          let data = [];//改变后的数据
-          if(status=='全部') {
-            let dataName = '';//数据名
-            this.tableType=='doc'?dataName='docInfo':dataName='caseInfo';
-            this.infoData = this.infoDatas[dataName];
-            this.total = this.infoData.length;
-            return;
-          }else {
-            data = this.filterData(status);
+        setNzzt() {//通过当前阶段状态设置nzzt
+          if(this.exportStatus=='全部') {
+            this.dczt = '';
+          }else if(this.exportStatus=='待导出') {
+            this.dczt = 0;
+          }if(this.exportStatus=='已导出') {
+            this.dczt = 1;
           }
-          this.infoData = data;
-          this.total = this.infoData.length;
         },
-        filterData(condition) {//过滤表格数据
+        setDate(fmtDate) {//设置时间
+          fmtDate[0]+=' 00:00:00';
+          fmtDate[1]+=' 00:00:00';
+          this.dateValue = fmtDate;
+        },
+        getStartTime() {//获取初始的开始时间
+          let date = new Date();
+          let year = date.getFullYear();
+          let month = date.getMonth() + 1;
+          (month < 10)&&(month = '0' + month)
+          let startTime = `${year}-${month}-01 00:00:00`;
+          // let startTime = `${year}-01-01 00:00:00`;
+          return startTime;
+        },
+        changePageNum(num) {//改变页码
+          this.pageNum = num;
+          this.tableType=='case'?this.getCaseList():this.getDocList();
+        },
+        changePageSize(size) {//改变每页条数
+          this.pageSize = size;
+          this.tableType=='case'?this.getCaseList():this.getDocList();
+        },
+        getCaseCount() {//获取案件公开信息数量
           let _this = this;
-          let data = [];//数据
-          let num = 0;//计算order
-          let val = null;//一组数据
-          let dataName = '';//数据名
-          this.tableType=='doc'?dataName='docInfo':dataName='caseInfo';
-          for(let i = 0,len = this.infoDatas[dataName].length; i < len;i++) {
-            if(_this.infoDatas[dataName][i].status==condition) {
-              val = Object.assign({},_this.infoDatas[dataName][i]);
-              num+=1;
-              val.order = num;
-              data.push(val);
+          let api = this.setCountApi();
+          this.axios.get(webApi.SJDC[api].format({
+            startTimeStr: _this.dateValue[0],
+            endTimeStr: _this.dateValue[1],
+            dczt: _this.dczt,
+            ajlx: '',//案件类型
+          })).then(function(res){
+            console.log(res);
+            if(res.data.code==0){
+              _this.total = res.data.data;
             }
+          }).catch(function(err){
+            console.log(err)
+          })
+        },
+        getCaseList(getCount){//获取案件列表
+          let _this = this;
+          let api = this.setListApi();
+          this.isLoading = true;
+          if(getCount){//获取总数
+            _this.getCaseCount();//获取总条数
           }
-          return data
+          this.axios.get(webApi.SJDC[api].format({
+            startTimeStr: _this.dateValue[0],
+            endTimeStr: _this.dateValue[1],
+            dczt: _this.dczt,
+            ajlx: '',//案件类型
+            pageNum: _this.pageNum,
+            pageSize: _this.pageSize,
+          })).then(function(res){
+            console.log(res);
+            if(res.data.code==0){
+              let data = res.data.data;//表数据
+              data.forEach(function(item,index){ //添加序号
+                item.order = (_this.pageNum -1) * _this.pageSize +  index + 1;
+              });
+              _this.infoData = data;
+            }
+            _this.isLoading = false;
+          }).catch(function(err){
+            console.log(err)
+            _this.isLoading = false;
+          })
+        },
+        getDocCount() {//获取文书公开信息数量
+          let _this = this;
+          let api = this.setCountApi();
+          this.axios.get(webApi.SJDC[api].format({
+            startTimeStr: _this.dateValue[0],
+            endTimeStr: _this.dateValue[1],
+            dczt: _this.dczt,//导出状态
+            wslb: '',//文书类别
+          })).then(function(res){
+            console.log(res);
+            if(res.data.code==0){
+              _this.total = res.data.data;
+            }
+          }).catch(function(err){
+            console.log(err)
+          })
+        },
+        getDocList(getCount){//获取文书信息列表
+          let _this = this;
+          let api = this.setListApi();
+          this.isLoading = true;
+          if(getCount){//获取总数
+            _this.getDocCount();//获取总条数
+          }
+          this.axios.get(webApi.SJDC[api].format({
+            startTimeStr: _this.dateValue[0],
+            endTimeStr: _this.dateValue[1],
+            dczt: _this.dczt,//导出状态
+            wslb: '',//文书类别
+            pageNum: _this.pageNum,
+            pageSize: _this.pageSize,
+          })).then(function(res){
+            console.log(res);
+            if(res.data.code==0){
+              let data = res.data.data;//表数据
+              data.forEach(function(item,index){ //添加序号
+                item.order = (_this.pageNum -1) * _this.pageSize +  index + 1;
+              });
+              _this.infoData = data;
+            }
+            _this.isLoading = false;
+          }).catch(function(err){
+            console.log(err)
+            _this.isLoading = false;
+          })
+        },
+        setCountApi() {//设置获取信息数量api,根据角色身份
+          let api = '';
+          if(this.tableType=='case') {
+            api = 'AG_CountAJGKXX';
+          }else if(this.tableType=='doc'){
+            api = 'AG_CountWSSL';
+          }
+          return api;
+
+        },
+        setListApi() {//设置获取信息列表api,根据角色身份
+          let api = '';
+          if(this.tableType=='case') {
+            api = 'AG_GetAJGKXXs';
+          }else if(this.tableType=='doc'){
+            api = 'AG_GetWSSLs';
+          }
+          return api;
         },
         toggleTable(e,type){//切换表格
           if(e.target.checked) {
             this.tableType = type;
             this.exportStatus = '全部';
-            if(type == 'doc') {//法律文书
-              this.columns1 = this.columsData.docInfo;
-              this.infoData = this.infoDatas.docInfo;
-              this.total = 2;
-            }else {//案件信息
+            this.pageNum = 1;
+            this.setNzzt();
+            if(type=='case'){
               this.columns1 = this.columsData.caseInfo;
-              this.infoData = this.infoDatas.caseInfo;
-              this.total = 3;
+              this.getCaseList(true);
+            }else if(type=='doc'){
+              this.columns1 = this.columsData.docInfo;
+              this.getDocList(true);
             }
           }
         },
-        initTable() {//初始化表格
-          this.columns1 = this.columsData.caseInfo;
-          this.infoData = this.infoDatas.caseInfo;
-          this.total = this.infoData.length;
-        }
-      }
+      },
+      created() {
+
+      },
+      mounted() {
+        this.setTableHeight(this);//设置表格高度
+        this.columns1 = this.columsData.caseInfo;
+        this.getCaseList(true);
+      },
+
     }
 </script>
 

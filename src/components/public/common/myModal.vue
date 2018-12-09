@@ -1,33 +1,30 @@
 <template>
+  <div id="modal-wrap" v-show="show">
     <!--对话框-->
-  <div id="modal" v-show="show" >
-    <!--对话框名称-->
-    <div class="title">
-      {{title}}
-    </div>
-    <div class="mod-content-wrap">
-      <slot>
-        <!--图片-->
-      </slot>
-      <!--提示文字-->
-      <div class="mod-content">
+    <div id="modal"  >
+      <!--对话框名称-->
+      <div class="title">
         {{content}}
+        <img src="../../../assets/index/gear.png" alt="">
       </div>
-      <div class="mode-btn">
-        <button @click="confirm" class="btn-confirm">确定</button>
-        <button @click="cancel" class="btn-cancel">取消</button>
+      <div class="mod-content-wrap">
+        <div class="mode-btn">
+          <button @click="confirm" class="btn-confirm">确定</button>
+          <button @click="cancel" class="btn-cancel">取消</button>
+        </div>
       </div>
-    </div>
 
+    </div>
   </div>
 </template>
 
 <script>
     export default {
         name: "my-modal",
-      props: ['title','content','show'],
+      props: ['content','show'],
       methods: {
           confirm() {//确定
+              localStorage.setItem('Host','');
               invoker.exit();
           },
         cancel() {//取消
@@ -38,58 +35,78 @@
 </script>
 
 <style scoped lang="scss">
-#modal {
-  width: 527px;
-  position: relative;
-  left: 50%;
-  top: 100px;
-  transform: translate(-50%,0);
-  background:rgba(69,137,253,1);
-  border-radius:10px;
-  padding: 20px 11px  11px  11px;
-  text-align: center;
-  font-size: 20px;
-  color: #333333;
-  z-index: 999999999;
-  clear: both;
-  /*标题*/
-  .title {
-    font-size: 22px;
-    font-family: 'PingFang-SC-Bold';
-    color: #FFFEFE;
-    padding-bottom: 20px;
-  }
-  /*提示文字内容wrap*/
-  .mod-content-wrap {
-    position: relative;
-    height: 191px;
-    background:rgba(255,255,255,1);
-    img {
-      position: absolute;
-      top: 50px;
-      left: 58px;
-    }
-    .mod-content {
-      font-family:'PingFang-SC-Medium';
-      padding-top: 62px;
-      padding-bottom: 55px;
-    }
-    /*按钮*/
-    .mode-btn {
-      font-family:'PingFang-SC-Regular';
-      button {
-        width: 92px;
-        height: 28px;
-        border-radius:10px;
-        border: none;
-        &:hover {
-          background: rgba(69,137,253,1);
-          color: #FFFFFF;
-          cursor: pointer;
+  #modal-wrap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,.4);
+    z-index: 999999999;
+    #modal {
+      width: 400px;
+      height: 233px;
+      position: relative;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%,-50%);
+      border-radius:10px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: 400;
+      color: #333333;
+      line-height: 23px;
+      letter-spacing: 3px;
+      /*标题*/
+      .title {
+        position: relative;
+        font-size:24px;
+        height: 146px;
+        padding-top: 62px;
+        font-family:'PingFang-SC-Bold';
+        font-weight: bold;
+        color: rgba(255,254,254,1);
+        background:url('../../../../static/images/index/bg.jpg') no-repeat;
+        background-size: cover;
+        border-radius: 10px 10px 0 0;
+        img {
+          position: absolute;
+          right: 0;
+          bottom: 0;
         }
       }
+      /*提示文字内容wrap*/
+      .mod-content-wrap {
+        position: relative;
+        height: 87px;
+        background:rgba(255,255,255,1);
+        padding-top: 39px;
+        border-radius: 0 0 10px 10px;
+        /*按钮*/
+        .mode-btn {
+          font-family:'PingFang-SC-Regular';
+          button {
+            width: 92px;
+            height: 28px;
+            border-radius:14px;
+            border:1px solid rgba(69,137,253,1);
+            background: transparent;
+            &:hover {
+              background: rgba(69,137,253,1);
+              color: #FFFFFF;
+              cursor: pointer;
+            }
+            &:first-child {
+              margin-right: 33px;
+            }
+            &:last-child {
+              margin-left: 33px;
+            }
+          }
+        }
+      }
+
     }
   }
 
-}
 </style>

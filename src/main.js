@@ -16,14 +16,22 @@ import './plugins/zTree/js/jquery.ztree.core.min' //引入zTree核心js
 import './plugins/zTree/js/jquery.ztree.exhide.min' //引入zTree扩展
 import './script/webApi' //接口
 import './script/format' //字符串格式化
+import './script/chartData' //图表对象
+import './script/onMaximize'
+
 import axios  from 'axios'
 /**/
 import './../src/script/ajax' //ajax(测试用)
 import '../static/json/jsonData' //数据(测试用)
 const Bus = new Vue();
-
+// const host = invoker.getServiceHost();//获取host地址
+// host.then(function(hos){
+//   webApi.Host = hos;
+// }
+// console.log('main',webApi.Host)
 Vue.config.productionTip = false;
 Vue.prototype.$echarts = echarts;
+window.$echarts = echarts;
 Vue.prototype.$bus = Bus;
 Vue.prototype.axios = axios;
 Vue.use(iView);
@@ -41,12 +49,19 @@ axios.interceptors.request.use(config=>{
       config.headers.token = localStorage.getItem('token');
     }else{
       console.log("请先登录");
-      // router.push({path:'/'});
     }
   }
   return config;
 },err => {
   return Promise.reject(err);
+})
+/*响应拦截*/
+axios.interceptors.response.use(function (response) {
+  return response
+}, function (error) {
+  const status = error.response.status;
+  console.log(error,status);
+  return Promise.reject(error)
 })
 /* eslint-disable no-new */
 new Vue({

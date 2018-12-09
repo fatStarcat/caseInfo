@@ -2,7 +2,7 @@
     <div id="index">
       <!--头部-->
       <div id="index-header">
-        <header-bar></header-bar>
+        <header-bar @modShow="toggleModal"></header-bar>
       </div>
       <!--内容-->
       <div id="index-content">
@@ -19,6 +19,9 @@
       <div id="index-footer">
         <!--<footer-bar></footer-bar>-->
       </div>
+      <!--退出提示框-->
+      <my-modal @cancel="toggleModal" :content="modContent" :show="modShow">
+      </my-modal>
     </div>
 </template>
 
@@ -28,11 +31,25 @@
     import sideMenu from './sideMenu'
     export default {
         name: "index",
-        // components: {headerBar,footerBar,sideMenu}
+      data(){
+          return{
+            modTitle: '案件信息智慧公开系统',
+            modContent: '确定要退出吗?',
+            modShow: false,
+          }
+      },
       components: {headerBar,footerBar,sideMenu},
       methods: {
+        toggleModal() {
+          this.modShow = !this.modShow;
+        },
+      },
+      created(){
+        webApi.Host = localStorage.getItem('Host');
+        console.log(webApi.Host)
       },
       mounted() {
+
         console.log(invoker)
       }
 

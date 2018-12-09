@@ -36,7 +36,7 @@
               admin: '',
               theme: 'light',
               currNum: '1',
-              role: JSON.parse(localStorage.getItem('userInfo')).MC,//角色 1:承办人,2:案管,4:管理员
+              role: JSON.parse(localStorage.getItem('userInfo')).JS,//角色 1:承办人,2:案管,4:管理员
             }
         },
         methods: {
@@ -52,28 +52,16 @@
                 console.log(err);
               })
           },
-          getUserInfo() {//获取角色身份
-            let _this = this;
-            _this.axios.get(webApi.Host + webApi.Auth.GetCurrentUser)
+          getDocType() {//获取案件类型
+            this.axios.get(webApi.Host + webApi.SystemInfo.GetWSLBs)
               .then(function(res){
-                console.log(res)
                 if(res.data.code==0) {
-                  let userInfo = res.data.data;
-                  if(userInfo.JS=='案管人员'){
-                    userInfo.JS = '案管人员';
-                  }else if(userInfo.JS=='承办人') {
-                    userInfo.JS = '承办人';
-                  }else if(userInfo.JS=='管理员') {
-                    userInfo.JS = '管理员';
-                  }
-                  _this.$bus.$emit('userInfo',{js: userInfo.JS,dwbm: userInfo.DWBM});
-                  localStorage.setItem('getUserInfo',"");
-                  localStorage.setItem('userInfo',JSON.stringify(userInfo));
-                  _this.role = userInfo.JS;//身份  承办人, 案管人员, 管理员
+                  localStorage.setItem('WSLX',JSON.stringify(res.data.data));
                 }
+                console.log(res);
               })
               .catch(function(err){
-                console.log(err)
+                console.log(err);
               })
           },
           //跳转文书屏蔽页面
@@ -97,12 +85,11 @@
           (admin)&&(this.admin = admin)
         },
         beforeMount() {
-          // this.getUserInfo();//获取用户信息
           this.getCaseType();//获取案件信息
-          console.log(this.$route.query)
+          this.getDocType();//获取文书类型
         },
         mounted() {
-          if(this.$route.path == "/index"||this.$route.path == '/caseNotOpen'||this.$route.path == '/caseOpen'||this.$route.path == '/caseUndisclosed'||this.$route.path == "/docNotOpen"||this.$route.path == "/docOpen"||this.$route.path == "/docUndisclosed") {
+          if(this.$route.path == "/index"||this.$route.path == '/docInfo'||this.$route.path == '/caseInfo'||this.$route.path == '/caseNotOpen'||this.$route.path == '/caseOpen'||this.$route.path == '/caseUndisclosed'||this.$route.path == "/docNotOpen"||this.$route.path == "/docOpen"||this.$route.path == "/docUndisclosed") {
             this.currNum = 'index';
           }else if(this.$route.path == "/documentShield" || this.$route.path == "/docShieldAdmin" ||this.$route.path == '/revise'|| this.$route.path == '/drafting'|| this.$route.path == '/examine'|| this.$route.path == '/look') {
             this.currNum = '1';

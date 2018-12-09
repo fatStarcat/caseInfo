@@ -7,6 +7,12 @@
 <script>
 export default {
   name: 'App',
+  created(){
+    let loading = document.querySelector('#spinner');
+    if(loading!=null){
+      document.body.removeChild(loading);
+    }
+  }
 }
 </script>
 

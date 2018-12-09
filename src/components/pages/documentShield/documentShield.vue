@@ -5,36 +5,46 @@
       <div class="select-item">
         <select-item>
           <label>时间: </label>
-          <DatePicker type="daterange" split-panels placeholder="请选择时间" :value="dateTime" style="width: 200px"></DatePicker>
-          <button class="search-btn btn-hover">
+          <DatePicker type="daterange" split-panels placeholder="请选择时间" @on-change="setDate" v-model="dateTime" style="width: 200px"></DatePicker>
+
+        </select-item>
+        <select-item>
+          <label>单位: </label>
+          <Input   readonly type="text"  v-model="company.name"   style="width:200px" />
+        </select-item>
+        <select-item>
+          <label>文书类型: </label>
+          <Select v-model="wslb" style="width:200px">
+            <Option v-for="item in docType" :value="item" :key="item">{{ item}}</Option>
+          </Select>
+          <button class="search-btn btn-hover" @click="getDocList(true)">
             查询
           </button>
         </select-item>
-
       </div>
       <div class="select-item">
         <select-item>
           <label>当前阶段: </label>
-          <RadioGroup v-model="status" @on-change="changeStatus">
+          <RadioGroup v-model="status" @on-change="setNzzt">
             <Radio label="全部"></Radio>
-            <Radio label="未拟制文书(公开版)"></Radio>
-            <Radio label="审核退回"></Radio>
-            <Radio label="审核通过待导出"></Radio>
-            <Radio label="审核通过已导出"></Radio>
+            <Radio label="待拟制"></Radio>
+            <Radio label="已拟制待审核"></Radio>
+            <Radio label="案管审核退回"></Radio>
+            <Radio label="审核通过"></Radio>
           </RadioGroup>
         </select-item>
       </div>
       <hr/>
       <!--表格-->
       <div id="infoTable" ref="table">
-        <Table :loading="loading" :height="tableHeight"   border stripe :columns="columns1" :data="infoData" ></Table>
+        <Table ref="iTable" :loading="isLoading" :height="tableHeight"   border stripe :columns="columns1" :data="infoData" ></Table>
       </div>
       <!--表格分页-->
       <div id="tablePage">
-        <Page :total="total" show-sizer show-total show-elevator />
+        <Page :current="pageNum" @on-page-size-change="changePageSize" @on-change="changePageNum"   :total="total" show-sizer show-total show-elevator />
         <!--导出数据-->
         <div class="exportData" v-show="showBtnNum===0">
-          <button class="export-page btn-tabDefault-large">导出本页数据</button>
+          <button class="export-page btn-tabDefault-large" @click="handleDownload">导出本页数据</button>
           <button class="export-all btn-export-large">导出全部数据</button>
         </div>
         <div class="exportData" v-show="showBtnNum===1">
@@ -53,11 +63,21 @@
     data() {
       return {
         tableHeight: '',//表格高度
-        dateTime: [new Date((new Date()).getTime() - 86400000),new Date()],//时间
-        status: "全部",//当前时间段文书状态
+        dateValue:[this.getStartTime(),this.getCurrentTime()],
+        dateTime: [this.getStartTime(),this.getCurrentTime()],//时间
+        pageNum: 1,//页号
+        pageSize: 10,//页大小
+        nzzt: '',//拟制状态
+        status: "全部",//当前阶段
+        wslb: '全部',//文书类别
         total: 0,//总条数
-        loading: true,//表格加载
+        isLoading: false,//表格加载
+        docType: JSON.parse(localStorage.getItem('WSLX')),//文书类型
         showBtnNum: 0,//显示按钮 {0:全部(导出本页,导出全部),1:未拟制(批量拟制),2:审核通过待导出(批量导出)}
+        company: {//单位
+          name: JSON.parse(localStorage.getItem('userInfo')).Unit.DWMC,//单位名称
+          DWBM: JSON.parse(localStorage.getItem('userInfo')).Unit.DWBM,//单位编码
+        },
         columns1: [//表头数据
           {
             title: '序号',
@@ -66,42 +86,42 @@
           },
           {
             title: '部门受案号',
-            key: 'caseId',
+            key: 'BMSAH',
             align: 'center',
           },
           {
             title: '案件名称',
-            key: 'caseName',
+            key: 'AJMC',
             align: 'center',
           },
           {
             title: '承办单位',
-            key: 'company',
+            key: 'CBDW_MC',
             align: 'center',
           },
           {
             title: '承办部门',
-            key: 'department',
+            key: 'CBBM_MC',
             align: 'center',
           },
           {
             title: '承办人',
-            key: 'people',
+            key: 'CBR',
             align: 'center',
           },
           {
             title: '文书名称',
-            key: 'docName',
+            key: 'WSMC',
             align: 'center',
           },
           {
             title: '文书类别',
-            key: 'docType',
+            key: 'WSLB',
             align: 'center',
           },
           {
             title: '当前阶段',
-            key: 'status',
+            key: 'NZZT',
             align: 'center',
           },
           {
@@ -114,7 +134,7 @@
             key: 'operation',
             align: 'center',
             render: (h, params) => {
-              if(params.row.status=='审核退回'){
+              if(params.row.NZZT=='案管审核退回'){
                 return h('div', [
                   h('span', {
                     props: {
@@ -132,7 +152,7 @@
                     }
                   }, '修订')
                 ]);
-              }else if(params.row.status=='未拟制'){
+              }else if(params.row.NZZT=='待拟制'){
                 return h('div', [
                   h('span', {
                     props: {
@@ -151,7 +171,7 @@
                     }
                   }, '拟制'),
                 ]);
-              }else if(params.row.status=='审核通过待导出') {
+              }else if(params.row.NZZT=='审核通过') {
                 return h('div', [
                   h('span', {
                     props: {
@@ -184,7 +204,7 @@
                   //   }
                   // }, '导出')
                 ]);
-              }else if(params.row.status=='待审核'||params.row.status=='审核通过已导出') {
+              }else if(params.row.NZZT=='已拟制待审核') {
                 return h('div', [
                   h('span', {
                     props: {
@@ -215,80 +235,151 @@
       }
     },
     methods: {
-      changeStatus(status) {//改变状态
-        let data = [];//数据
-        this.loading = true;
-        if(this.columns1[0].type=='selection') {
-          this.columns1.shift();
-        }
-        if(status=='全部') {
-          this.infoData = this.allData;
-          this.total = this.infoData.length;
-          this.loading = false;
-          this.showBtnNum = 0;
-          return
-        }else if(status=='未拟制文书(公开版)') {
-          data = this.filterData('未拟制');
-          this.columns1.unshift({
-            type: 'selection',
-            width: 60,
-            align: 'center'
-          });
-          this.showBtnNum = 1;
-        }else if(status=='审核退回') { //退回数据
-          data = this.filterData('审核退回');
-          this.showBtnNum = '';
-        }else if(status=='审核通过待导出') {//审核通过待导出
-          data = this.filterData('审核通过待导出');
-          this.showBtnNum = 2;
-          this.columns1.unshift({
-            type: 'selection',
-            width: 60,
-            align: 'center'
-          });
-        }else if(status=='审核通过已导出') {//审核通过已导出
-          data = this.filterData('审核通过已导出');
-          this.showBtnNum = '';
-        }
-        this.infoData = data;
-        this.total = this.infoData.length;
-        this.loading = false;
+      handleDownload() {
+        // this.downloadLoading = true
+        require.ensure([], () => {
+          const {export_json_to_excel} = require('@/vendor/Export2Excel');
+          const tHeader = this.utilsCutValue(this.columns1, 'title');
+          const filterVal = this.utilsCutValue(this.columns1, 'key');
+          const list = this.infoData;
+          const data = this.formatJson(filterVal, list);
+          export_json_to_excel(tHeader, data, '列表excel')
+          // this.downloadLoading = false
+        })
       },
-      filterData(condition) {//过滤表格数据
-        let _this = this;
-        let data = [];//数据
-        let num = 0;//计算order
-        let val = null;//一组数据
-        for(let i = 0,len = this.allData.length; i < len;i++) {
-          if(_this.allData[i].status==condition) {
-            val = Object.assign({},_this.allData[i]);
-            num+=1;
-            val.order = num;
-            data.push(val);
-          }
+      formatJson(filterVal, jsonData) {
+        return jsonData.map(v => filterVal.map(j => v[j]))
+      },
+      utilsCutValue(target, name){//将tHeader 和filterVal 的值转成数组从而生成表格
+        let arr = []
+        for (let i = 0; i < target.length; i++) {
+          arr.push(target[i][name])
         }
-        return data
+        return arr
+      },
+      exportData() {//导出本页数据
+        this.$refs.iTable.exportCsv({
+          filename: '文书屏蔽'
+        });
+      },
+      setNzzt() {//通过当前阶段状态设置nzzt
+        if(this.status=='全部') {
+          this.nzzt = '';
+        }else if(this.status=='待拟制') {
+          this.nzzt = 1;
+          this.showBtnNum = 1;
+        }if(this.status=='已拟制待审核') {
+          this.nzzt = 2;
+        }if(this.status=='案管审核退回') {
+          this.nzzt = 4;
+        }if(this.status=='审核通过') {
+          this.nzzt = 8;
+        }
+        this.showBtnNum = 0;
+      },
+      setDate(fmtDate) {//设置时间
+        fmtDate[0]+=' 00:00:00';
+        fmtDate[1]+=' 00:00:00';
+        this.dateValue = fmtDate;
+      },
+      getStartTime() {//获取初始的开始时间
+        let date = new Date();
+        let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        (month < 10)&&(month = '0' + month)
+        let startTime = `${year}-${month}-01 00:00:00`;
+        // let startTime = `${year}-01-01 00:00:00`;
+        return startTime;
+      },
+      changePageNum(num) {//改变页码
+        this.pageNum = num;
+        this.getDocList();
+      },
+      changePageSize(size) {//改变每页条数
+        this.pageSize = size;
+        this.getDocList();
+      },
+      getDocList(getCount){//获取文书列表
+        let _this = this;
+        this.isLoading = true;
+        if(getCount){//获取总数
+          _this.getCount();//获取总条数
+        }
+        this.axios.get(webApi.WSPB.CBR_GetWSSLs.format({
+          startTimeStr: _this.dateValue[0],
+          endTimeStr: _this.dateValue[1],
+          nzzt: _this.nzzt,//拟制状态(拟制状态 1:待拟制 2:已拟制待审核 4:案管审核退回 8:审核通过;支持位域)
+          wslb: _this.wslb=='全部'?'':_this.wslb,//文书类型
+          pageNum: _this.pageNum,
+          pageSize: _this.pageSize,
+        })).then(async function(res){
+          console.log(res);
+          if(res.data.code==0){
+            let data = res.data.data;//表数据
+            data.forEach(function(item,index){ //添加序号
+              item.order = (_this.pageNum -1) * _this.pageSize +  index + 1;
+            });
+            if(data.length>0) {
+              _this.getExamineList(data);//获取审核内容
+            }else {
+              _this.infoData = data;
+            }
+          }
+          _this.isLoading = false;
+        }).catch(function(err){
+          console.log(err)
+          _this.isLoading = false;
+        })
+      },
+      getCount() {//获取文书数量
+        let _this = this;
+        this.setNzzt();
+        this.axios.get(webApi.WSPB.CBR_CountWSSL.format({
+          startTimeStr: _this.dateValue[0],
+          endTimeStr: _this.dateValue[1],
+          nzzt: _this.nzzt,//拟制状态(拟制状态 1:待拟制 2:已拟制待审核 4:案管审核退回 8:审核通过;支持位域)
+          wslb: _this.wslb=='全部'?'':_this.wslb,//文书类型
+        })).then(function(res){
+          console.log(res)
+          if(res.data.code==0){
+            _this.total = res.data.data;
+          }
+        }).catch(function(err){
+          console.log(err)
+        })
+      },
+      getExamineList(data) {//获取审核批复列表
+        let _this = this;
+        let count = 0;
+        _this.isLoading = true;
+        data.forEach(function(item,i){
+          _this.isLoading = true;
+          _this.axios.get(webApi.WSPB.GetWSSHJGs.format({
+            bmsah: item.BMSAH,
+            dwbm: item.DWBM,
+            wsbh: item.WSBH
+          })).then(function(res){
+            if(res.data.code==0){
+              item.examine = res.data.data[0];
+              count++;
+            }
+            if(count==data.length) {
+              _this.infoData = data;
+              _this.isLoading = false;
+            }
+          }).catch(function(err){
+            console.log(err)
+            _this.isLoading = false;
+          })
+        })
       }
     },
     created() {
-      this.allData =  this.infoData = jsonData.docShield.infoData;
-      this.total = this.infoData.length;
-      this.loading = false;
-      // let option = {
-      //   type: 'get',
-      //   // href: '../../../../static/json/docShield/table.json',
-      //   href: './static/json/docShield/table.json',
-      //   async: true,
-      //   callback: function(val){
-      //     _this.allData =  _this.infoData = val.infoData;
-      //     _this.total = _this.infoData.length;
-      //     _this.loading = false;
-      //   }
-      // };
-      // myAjax(option);
+      this.docType.unshift("全部");//文书类型添加全部选项
     },
     mounted() {
       this.setTableHeight(this);//设置表格高度
+      this.getDocList(true);
     }
   }
 </script>

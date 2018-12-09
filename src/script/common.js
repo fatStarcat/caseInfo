@@ -46,5 +46,4 @@ exports.install = function(Vue) {
     }
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
   }
-
 }

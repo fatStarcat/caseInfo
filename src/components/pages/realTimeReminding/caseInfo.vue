@@ -6,15 +6,18 @@
       <select-group mar-top="30">
         <select-item>
           <label>受理时间: </label>
-          <DatePicker v-model="dateTime" type="daterange" split-panels placeholder="请选择时间"  style="width: 200px"></DatePicker>
+          <DatePicker  @on-change="setDate" v-model="dateTime" type="daterange" split-panels placeholder="请选择时间"  style="width: 200px"></DatePicker>
         </select-item>
         <select-item>
           <label>单位: </label>
-          <!--<Select v-model="company" style="width:228px;height: 35px;">-->
-            <!--<Option v-for="item in companyList" :value="item.value" :key="item.value">{{ item.label }}</Option>-->
-          <!--</Select>-->
-          <Input style="width:200px" v-model="unit" />
-          <Checkbox  v-model="checkSub" v-show="showCheck">包含下级院</Checkbox>
+          <div class="input-wrap">
+            <Input   readonly type="text"  v-model="company.name"   style="width:200px" />
+          </div>
+          <!--<div   v-if="showCheck" class="input-wrap">-->
+            <!--<input    @blur="blurSelectCompany" type="text" ref="inputCompany" v-model="company.name"  @focus="searchNodes" @keyup.enter="searchNodes"  class="focusCompany" style="width:200px" />-->
+            <!--<my-tree :api="'sub'" @selectUnits="selectUnits" v-show="showCompany"></my-tree>-->
+            <!--<Checkbox  v-model="checkSub" >包含下级院</Checkbox>-->
+          <!--</div>-->
         </select-item>
         <select-item>
           <label>案件类型: </label>
@@ -22,21 +25,21 @@
             <Option v-for="item in caseType" :value="item.MC" :key="item.MC">{{ item.MC }}</Option>
           </Select>
         </select-item>
-        <button class="search-btn btn-hover" @click="getCaseList">
+        <button class="search-btn btn-hover" @click="getCaseList(true)">
           查询
         </button>
       </select-group>
       <hr/>
       <!--表格-->
       <div id="infoTable" ref="table">
-        <Table :loading="isLoading"  :height="tableHeight"   border stripe :columns="columns1" :data="infoData" ></Table>
+        <Table  ref="iTable" :loading="isLoading"  :height="tableHeight"   border stripe :columns="columns1" :data="infoData" ></Table>
       </div>
       <!--表格分页-->
       <div id="tablePage">
-        <Page :total="total" show-sizer show-total show-elevator />
+        <Page :current="pageNum" @on-page-size-change="changePageSize" @on-change="changePageNum"   :total="total" show-sizer show-total show-elevator />
         <!--导出数据-->
         <div id="exportData">
-          <button class="export-page btn-tabDefault-large">导出本页数据</button>
+          <button class="export-page btn-tabDefault-large" @click="handleDownload">导出本页数据</button>
           <button class="export-all btn-export-large">导出全部数据</button>
         </div>
       </div>
@@ -45,6 +48,11 @@
 </template>
 
 <script>
+  // require('script-loader!file-saver');
+  // // 转二进制用
+  // require('script-loader!@/vendor/Blob');
+  // // xlsx核心
+  // require('script-loader!xlsx/dist/xlsx.core.min');
   export default {
     data() {
       return {
@@ -52,88 +60,22 @@
         isLoading: false,
         checkSub: false,//是否选择包含下级院
         breadData: ['实时提醒',this.$route.query.bread],
-        gkzt: this.$route.query.status,
+        gkzt: this.$route.query.status.gkzt,
         role: JSON.parse(localStorage.getItem('userInfo')).JS,
-        dwbm: JSON.parse(localStorage.getItem('userInfo')).Unit.DWBM,//单位编码
-        unit: JSON.parse(localStorage.getItem('userInfo')).Unit.DWMC,//单位名称
         tableHeight: '',//表格高度
         // dateTime: [new Date((new Date()).getTime() - 86400000),new Date()],//时间
+        dateValue:[this.getStartTime(),this.getCurrentTime()],
         dateTime: [this.getStartTime(),this.getCurrentTime()],//时间
         status: "全部",//当前案件类型
         total: '',//总条数
         pageNum: 1,//页号
         pageSize: 10,//页大小
         caseType: JSON.parse(localStorage.getItem('AJLX')),//案件类型
-        // caseType: [
-        //   '全部',
-        //   '审查逮捕案件',
-        //   '一审公诉案件',
-        //   '二审上诉案件',
-        //   '二审抗诉案件',
-        //   '对民事、行政生效判决、裁定、调解书的监督案件',
-        //   '刑事申诉审查案件',
-        //   '刑事赔偿案件',
-        //   '生效刑事赔偿决定执行案件',
-        //   '刑事赔偿复议案件',
-        //   '刑事赔偿及民事行政诉讼赔偿监督案件',
-        //   '行政赔偿监督案件',
-        //   '国家司法救助案件',
-        //   '行政公益诉讼一审案件',
-        //   '民事公益诉讼一审案件',
-        //   '行政公益诉讼二审上案件',
-        //   '民事公益诉讼二审上案件',
-        //   '行政公益诉讼二审支上案件',
-        //   '民事公益诉讼二审支上案件',
-        //   '民事公益诉讼重（再）审案件',
-        //   '行政公益诉讼重（再）审案件'
-        // ],//案件类型
-        company: '黄冈市院',//单位
-        companyList: [//单位列表
-          {
-            value: "黄冈市院",
-            label: "黄冈市院"
-          },
-          {
-            value: "黄冈市黄州区院",
-            label: "黄冈市黄州区院"
-          },
-          {
-            value: "团风县院",
-            label: "团风县院"
-          },
-          {
-            value: "红安县院",
-            label: "红安县院"
-          },
-          {
-            value: "罗田县院",
-            label: "罗田县院"
-          },
-          {
-            value: "英山县院",
-            label: "英山县院"
-          },
-          {
-            value: "浠水县院",
-            label: "浠水县院"
-          },
-          {
-            value: "蕲春县院",
-            label: "蕲春县院"
-          },
-          {
-            value: "黄梅县院",
-            label: "黄梅县院"
-          },
-          {
-            value: "麻城市院",
-            label: "麻城市院"
-          },
-          {
-            value: "武穴市院",
-            label: "武穴市院"
-          }
-        ],
+        company: {//单位
+          name: JSON.parse(localStorage.getItem('userInfo')).Unit.DWMC,//单位名称
+          DWBM: JSON.parse(localStorage.getItem('userInfo')).Unit.DWBM,//单位编码
+        },
+        showCompany: false,//显示单位
         columns1: [//表头数据
           {
             title: '序号',
@@ -152,7 +94,7 @@
           },
           {
             title: '案件类别',
-            key: 'AJMC',
+            key: 'AJLB_MC',
             align: 'center',
           },
           {
@@ -190,31 +132,113 @@
       }
     },
     methods: {
+      handleDownload() {
+        // this.downloadLoading = true
+        require.ensure([], () => {
+          const {export_json_to_excel} = require('@/vendor/Export2Excel');
+          const tHeader = this.utilsCutValue(this.columns1, 'title');
+          const filterVal = this.utilsCutValue(this.columns1, 'key');
+          const list = this.infoData;
+          const data = this.formatJson(filterVal, list);
+          export_json_to_excel(tHeader, data, '列表excel')
+          // this.downloadLoading = false
+        })
+      },
+      formatJson(filterVal, jsonData) {
+        return jsonData.map(v => filterVal.map(j => v[j]))
+      },
+      utilsCutValue(target, name){//将tHeader 和filterVal 的值转成数组从而生成表格
+        let arr = []
+        for (let i = 0; i < target.length; i++) {
+          arr.push(target[i][name])
+        }
+        return arr
+      },
+      exportData() {//导出本页数据
+        let _this = this;
+        this.$refs.iTable.exportCsv({
+          filename: _this.breadData[1]
+        });
+      },
+      getCount() {//获取案件公开数量信息
+        let api = '';
+        let _this = this;
+        if(this.role=='案管人员') {
+          api = 'AG_CountAJGKXX';
+        }else if(this.role=='承办人'){
+          api = 'CBR_CountAJGKXX';
+        }
+        _this.axios.get(webApi.SSTX[api].format({
+          startTimeStr: _this.dateValue[0],
+          endTimeStr: _this.dateValue[1],
+          dwbm: _this.company.DWBM,
+          gkzt: _this.gkzt,
+          bhxj: _this.checkSub,//包含下级
+          ajlx: _this.getCaseCode(),//案件类型
+        })).then(function(res){
+          _this.total = res.data.data;
+        }).catch(function(err){
+          console.log(err)
+        })
+      },
+      selectUnits(val) {
+        console.log(val)
+        this.company = val.company;
+        this.showCompany = false;
+        this.$refs.inputCompany.blur();
+      },
+      listenClick(e) {//监听点击
+        console.log('点击',e)
+        if(!(e.target.parentNode.className=="searchBtn focusCompany" ||e.target.className=='focusCompany' ||e.target.outerHTML.indexOf('treenode_switch') > -1)) {
+          this.blurSelectCompany();
+        }
+      },
+      searchNodes(){
+        this.showCompany = true;
+        this.$bus.$emit('searchUnits',{keywords: this.company.name});
+      },
+      blurSelectCompany() {
+        this.showCompany = false;
+      },
+      setDate(fmtDate) {//设置时间
+        fmtDate[0]+=' 00:00:00';
+        fmtDate[1]+=' 00:00:00';
+        this.dateValue = fmtDate;
+      },
       getStartTime() {//获取初始的开始时间
         let date = new Date();
         let year = date.getFullYear();
-        // let month = date.getMonth() + 1;
-        // (month < 10)&&(month = '0' + month)
-        // let startTime = `${year}-${month}-01 00:00:00`;
-        let startTime = `${year}-01-01 00:00:00`;
+        let month = date.getMonth() + 1;
+        (month < 10)&&(month = '0' + month)
+        let startTime = `${year}-${month}-01 00:00:00`;
+        // let startTime = `${year}-01-01 00:00:00`;
         return startTime;
       },
-      getCaseList() {//获取案件信息列表
+      changePageNum(num) {//改变页码
+        this.pageNum = num;
+        this.getCaseList();
+      },
+      changePageSize(size) {//改变每页条数
+        this.pageSize = size;
+        this.getCaseList();
+      },
+      getCaseList(getCount) {//获取案件信息列表
         this.isLoading = true;
         let api = '';
         let _this = this;
+        if(getCount){//获取总数
+          _this.getCount();//获取总条数
+        }
         // let endTime = this.getCurrentTime();
-        console.log(this.dateTime);
-        console.log(this.startTime,this.endTime,this.role,this.dwbm)
         if(this.role=='案管人员') {
           api = 'AG_GetAJGKXXs';
         }else if(this.role=='承办人'){
           api = 'CBR_GetAJGKXXs';
         }
         _this.axios.get(webApi.SSTX[api].format({
-          startTimeStr: _this.dateTime[0],
-          endTimeStr: _this.dateTime[1],
-          dwbm: _this.dwbm ,
+          startTimeStr: _this.dateValue[0],
+          endTimeStr: _this.dateValue[1],
+          dwbm: _this.company.DWBM,
           gkzt: _this.gkzt,
           bhxj: _this.checkSub,//包含下级
           ajlx: _this.getCaseCode(),//案件类型
@@ -228,12 +252,11 @@
               item.order = (_this.pageNum -1) * _this.pageSize +  index + 1;
             });
             _this.infoData = data;
-            // _this.total = _this.infoData.length;
           }
           _this.isLoading = false;
         }).catch(function(err){
           console.log(err);
-          this.isLoading = false;
+          _this.isLoading = false;
         })
       },
       getCaseCode() {//根据案件名称获取编码
@@ -248,19 +271,55 @@
         return ajlx;
       },
       setColumns1() {//设置表头
-        if(this.gkzt==1) {//本系统已公开统一系统未公开
+        if(this.gkzt==2) {//本系统已公开统一系统未公开
           this.columns1.push({
             title: '未公开原因',
-            key: 'reason',
+            key: 'BZ',
             align: 'center',
           })
-        }else if(this.gkzt==2) {//不公开
+        }else if(this.gkzt==4) {//不公开
           this.columns1.push({
             title: '不公开原因',
-            key: 'reason',
+            key: 'BZ',
             align: 'center',
           })
         }
+        // this.columns1.push({
+        //   title: '案情摘要',
+        //   key: 'operation',
+        //   align: 'center',
+        //   render: (h, params) => {
+        //     let texts = params.row.AQZY;
+        //     let _this = this;
+        //     if(texts) {
+        //       if(texts.length > 20) {
+        //         texts = texts.substring(0,15) + '...';
+        //       }
+        //     }else {
+        //       texts = '暂无';
+        //     }
+        //     return h('div', [
+        //       h('Tooltip', {
+        //         props: {
+        //           placement: 'left',
+        //           transfer: true,
+        //           theme: 'light',
+        //         },
+        //
+        //       },[texts,h('div',{
+        //         slot: 'content',
+        //         style: {
+        //           whiteSpace: 'normal',
+        //           maxWidth: '400px',
+        //           maxHeight: '320px',
+        //           paddingRight: '10px',
+        //           fontSize: '14px',
+        //           overflowY: 'auto'
+        //         }
+        //       },params.row.AQZY)])
+        //     ]);
+        //   }
+        // })
       },
       initConfig() {//初始化配置
         this.caseType.unshift({MC:"全部",BM: ' '});//案件类型添加全部选项
@@ -269,12 +328,16 @@
     },
     created() {
       this.initConfig();//初始化配置
-      // this.infoData = jsonData.caseInfo;
-      // this.total = this.infoData.length;
+      console.log(this.$route)
+
     },
     mounted() {
+      // window.addEventListener('click',this.listenClick);
       this.setTableHeight(this);//设置表格高度
-      this.getCaseList();
+      this.getCaseList(true);
+    },
+    beforeDestroy() {
+      // window.removeEventListener('click',this.listenClick);
     }
   }
 </script>
@@ -314,6 +377,26 @@
           }
         }
       }
+    }
+  }
+  .input-wrap {
+    position: relative;
+    display: inline-block;
+    input {
+      display: inline-block;
+      width: 100%;
+      height: 32px;
+      line-height: 1.5;
+      padding: 4px 7px;
+      font-size: 12px;
+      border: 1px solid #dcdee2;
+      border-radius: 4px;
+      color: #515a6e;
+      background-color: #fff;
+      background-image: none;
+      position: relative;
+      cursor: text;
+      transition: border .2s ease-in-out,background .2s ease-in-out,box-shadow .2s ease-in-out;
     }
   }
 </style>

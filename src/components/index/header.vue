@@ -17,10 +17,10 @@
         <span>欢迎您，{{userName}}</span>
       </div>
       <!--消息-->
-      <div class="infoItem">
-        <img src="../../assets/index/tip.png" alt="">
-        <span>消息</span>
-      </div>
+      <!--<div class="infoItem">-->
+        <!--<img src="../../assets/index/tip.png" alt="">-->
+        <!--<span>消息</span>-->
+      <!--</div>-->
       <!--退出-->
       <div class="infoItem" @click="exit">
         <img src="../../assets/index/toggle.png" alt="">
@@ -36,10 +36,6 @@
         <img src="../../assets/index/small.png" alt="">
       </span>
 
-    <!--退出提示框-->
-    <my-modal @cancel="closeModal" :title="modTitle" :content="modContent" :show="modShow">
-      <img src="../../assets/index/warning.png" alt="">
-    </my-modal>
   </div>
 </template>
 
@@ -47,9 +43,6 @@
     export default {
       data() {
         return {
-          modTitle: '案件信息智慧公开系统',
-          modContent: '确定退出吗?',
-          modShow: false,
           userName: localStorage.getItem('setAdmin')?localStorage.getItem('setAdmin'):'未知'
         }
       },
@@ -69,10 +62,7 @@
 
         },
         close() {//退出
-          this.modShow = true;
-        },
-        closeModal() {
-          this.modShow = false;
+          this.$emit('modShow')
         },
         minSize() {//最小化窗口
           invoker.minimize();

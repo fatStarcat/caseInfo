@@ -46,13 +46,34 @@
       </div>
       <!--文书-->
       <div class="count-data">
-        <div class="count-item" @click="showTable('doc','文书总量')">
+        <div class="count-item" @click="showTable('doc','统计文书')">
           <span class="count-img">
             <img src="../../../assets/countAnalysis/count.png" alt="">
           </span>
           <p>
             <span>2100</span><br/>
-            <span>文书总量</span>
+            <span>统计文书总量</span>
+
+          </p>
+        </div>
+
+        <div class="count-item" @click="showTable('doc','不公开')">
+          <span class="count-img">
+            <img src="../../../assets/countAnalysis/noOpen.png" alt="">
+          </span>
+          <p>
+            <span>100</span><br/>
+            <span>不公开总量</span>
+
+          </p>
+        </div>
+        <div class="count-item" @click="showTable('doc','应公开')">
+          <span class="count-img">
+            <img src="../../../assets/countAnalysis/open.png" alt="">
+          </span>
+          <p>
+            <span>100</span><br/>
+            <span>应公开总量</span>
 
           </p>
         </div>
@@ -62,27 +83,18 @@
           </span>
           <p>
             <span>2000</span><br/>
-            <span>已公开</span>
+            <span>已公开总量</span>
 
           </p>
         </div>
-        <div class="count-item" @click="showTable('doc','不公开')">
-          <span class="count-img">
-            <img src="../../../assets/countAnalysis/noOpen.png" alt="">
-          </span>
-          <p>
-            <span>100</span><br/>
-            <span>不公开</span>
 
-          </p>
-        </div>
-        <div class="count-item" @click="showTable('doc','本系统已公开统一系统未公开')">
+        <div class="count-item" @click="showTable('doc','应公开未公开')">
           <span class="count-img">
             <img src="../../../assets/countAnalysis/undisclosedDoc.png" alt="">
           </span>
           <p>
             <span>50</span><br/>
-            <span>本系统已公开统一系统未公开</span>
+            <span>应公开未公开总量</span>
 
           </p>
         </div>
@@ -704,9 +716,11 @@
     overflow-y: auto;
     .count-data {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       width: 100%;
       overflow: hidden;
+      padding-left: 20px;
+      padding-right: 20px;
       margin-bottom: 20px;
       &:first-child {
         padding-top: 14px;
@@ -717,9 +731,7 @@
       }
       .count-item {
         position: relative;
-        /*float: left;*/
-        /*width: calc(25% - 15px);*/
-        width: 289px;
+        width: 25%;
         height: 100px;
         text-align: center;
         color: #fff;

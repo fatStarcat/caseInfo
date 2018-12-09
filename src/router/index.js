@@ -18,6 +18,7 @@ import caseOpen from '@/components/pages/realTimeReminding/caseOpen'
   //案件未公开
 import caseUndisclosed from '@/components/pages/realTimeReminding/caseUndisclosed'
   //实时提醒(法律文书公开信息表格)
+import docInfo from '@/components/pages/realTimeReminding/docInfo'
   //文书不公开
 import docNotOpen from '@/components/pages/realTimeReminding/docNotOpen'
   //文书已公开
@@ -112,6 +113,12 @@ export default new Router({
           path: '/caseUndisclosed',
           name: 'caseUndisclosed',
           component: caseUndisclosed,
+        },
+        //实时提醒(文书信息)
+        {
+          path: '/docInfo',
+          name: 'docInfo',
+          component: docInfo,
         },
         //实时提醒(文书不公开)
         {
