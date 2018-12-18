@@ -19,6 +19,7 @@
     left: 50%;
     transform: translate(-50%,-50%);
     img {
+      display: block;
       width: 100%;
     }
   }

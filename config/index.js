@@ -37,7 +37,7 @@ module.exports = {
   },
 
   build: {
-    // Template for index.html
+    // Template for index.error
     index: path.resolve(__dirname, '../dist/index.html'),
 
     // Paths

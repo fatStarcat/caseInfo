@@ -19,11 +19,11 @@
           <hr/>
           <!--表格-->
           <div id="infoTable" ref="table">
-            <Table ref="iTable" :height="tableHeight" border stripe :columns="columnsData" :data="infoData" ></Table>
+            <Table :loading="isLoading" ref="iTable" :height="tableHeight" border stripe :columns="columnsData" :data="infoData" ></Table>
           </div>
           <!--表格分页-->
           <div id="tablePage">
-            <Page :total="infoData.length" show-sizer show-total show-elevator />
+            <Page :current="pageNum" @on-page-size-change="changePageSize" @on-change="changePageNum"   :total="total" show-sizer show-total show-elevator />
             <!--导出数据-->
             <div id="exportData">
               <button class="export-all btn-hover-large" @click="exportAll">导出全部数据</button>
@@ -40,885 +40,156 @@
             return {
               tableHeight: '',//表格高度
               status: "",//当前状态
-              title: '',//标题
               statusData: [],
               columnsData: [],
-              tableName: '',//表名
               infoData: [],
+              isLoading: false,//显示加载
+              total: '',//总条数
+              pageNum: 1,//页号
+              pageSize: 10,//页大小
+              /*--传值start--*/
+              title: '',//标题
+              tableName: '',//表名
+              dateValue: '',//时间
+              dwbm: '',//单位编码
+              gkzt: '',//公开状态,
+              nzzt: '',//拟制状态
+              bhxj: '',//包含下级
+              /*--传值end--*/
               tableData: {
-                caseArea: {//区域分析(程序性公开)
-                  statusData: ['案件总量','已公开','本系统已公开统一系统未公开','不公开'],
-                  columns: [
+                caseInfo: {//区域分析(程序性公开)
+                  statusData: ['全部','已公开','本系统已公开统一系统未公开','不公开'],
+                  columns: [//表头数据
                     {
                       title: '序号',
                       key: 'order',
                       align: 'center',
+                      maxWidth: 80
                     },
                     {
                       title: '部门受案号',
-                      key: 'caseId',
+                      key: 'BMSAH',
                       align: 'center',
                     },
                     {
                       title: '案件名称',
-                      key: 'caseName',
-                      align: 'center',
-                    },
-                    {
-                      title: '承办部门',
-                      key: 'department',
-                      align: 'center',
-                    },
-                    {
-                      title: '承办人',
-                      key: 'people',
+                      key: 'AJMC',
                       align: 'center',
                     },
                     {
                       title: '案件类别',
-                      key: 'caseType',
+                      key: 'AJLB_MC',
                       align: 'center',
                     },
                     {
-                      title: '当前阶段',
-                      key: 'status',
-                      align: 'center',
-                    },
-                    {
-                      title: '受理日期',
-                      key: 'receiveTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '办结日期',
-                      key: 'overTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '完成日期',
-                      key: 'completeTime',
-                      align: 'center',
-                    },
-                  ],
-                  infoData: [
-                    {
-                      order: '1',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01'
-                    },
-                    {
-                      order: '2',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01'
-                    },
-                    {
-                      order: '3',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01'
-                    },
-                    {
-                      order: '4',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01'
-                    },
-                    {
-                      order: '5',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01'
-                    },
-                    {
-                      order: '6',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01'
-                    }
-                  ],
-                  columnsShouldOpen: [
-                    {
-                      title: '序号',
-                      key: 'order',
-                      align: 'center',
-                    },
-                    {
-                      title: '部门受案号',
-                      key: 'caseId',
-                      align: 'center',
-                    },
-                    {
-                      title: '案件名称',
-                      key: 'caseName',
+                      title: '承办单位',
+                      key: 'CBDW_MC',
                       align: 'center',
                     },
                     {
                       title: '承办部门',
-                      key: 'department',
+                      key: 'CBBM_MC',
                       align: 'center',
                     },
                     {
                       title: '承办人',
-                      key: 'people',
+                      key: 'CBR',
                       align: 'center',
+                      maxWidth: 100
                     },
                     {
-                      title: '案件类别',
-                      key: 'caseType',
+                      title: '受理时间',
+                      key: 'SLRQ',
                       align: 'center',
+                      maxWidth: 160
                     },
                     {
                       title: '当前阶段',
-                      key: 'status',
+                      key: 'AJZT',
                       align: 'center',
+                      maxWidth: 100
                     },
                     {
-                      title: '受理日期',
-                      key: 'receiveTime',
+                      title: '完成时间',
+                      key: 'WCRQ',
                       align: 'center',
-                    },
-                    {
-                      title: '办结日期',
-                      key: 'overTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '完成日期',
-                      key: 'completeTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '未公开原因',
-                      key: 'result',
-                      align: 'center',
-                    },
-                  ],
-                  infoDataShouldOpen: [
-                    {
-                      order: '1',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      result: '审结情况案卡里收到执行回执日期未填'
-                    },
-                    {
-                      order: '2',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      result: '审结情况案卡里收到执行回执日期未填'
-                    },
-                    {
-                      order: '3',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      result: '审结情况案卡里收到执行回执日期未填'
-                    },
-                    {
-                      order: '4',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      result: '审结情况案卡里收到执行回执日期未填'
-                    },
-                    {
-                      order: '5',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      result: '审结情况案卡里收到执行回执日期未填'
-                    },
-                    {
-                      order: '6',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      result: '审结情况案卡里收到执行回执日期未填'
-                    }
-                  ],
-                  //不公开
-                  columnsNotOpen: [
-                    {
-                      title: '序号',
-                      key: 'order',
-                      align: 'center',
-                    },
-                    {
-                      title: '部门受案号',
-                      key: 'caseId',
-                      align: 'center',
-                    },
-                    {
-                      title: '案件名称',
-                      key: 'caseName',
-                      align: 'center',
-                    },
-                    {
-                      title: '承办部门',
-                      key: 'department',
-                      align: 'center',
-                    },
-                    {
-                      title: '承办人',
-                      key: 'people',
-                      align: 'center',
-                    },
-                    {
-                      title: '案件类别',
-                      key: 'caseType',
-                      align: 'center',
-                    },
-                    {
-                      title: '当前阶段',
-                      key: 'status',
-                      align: 'center',
-                    },
-                    {
-                      title: '受理日期',
-                      key: 'receiveTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '办结日期',
-                      key: 'overTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '完成日期',
-                      key: 'completeTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '文书数量',
-                      key: 'docCount',
-                      align: 'center',
-                    },
-                    {
-                      title: '不公开原因',
-                      key: 'result',
-                      align: 'center',
-                    },
-                  ],
-                  infoDataNotOpen: [
-                    {
-                      order: '1',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '1',
-                      result: '案由涉及刑法第120条或120条之一的罪名'
-                    },
-                    {
-                      order: '2',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '5',
-                      result: '案由涉及刑法第120条或120条之一的罪名'
-                    },
-                    {
-                      order: '3',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '3',
-                      result: '案由涉及刑法第120条或120条之一的罪名'
-                    },
-                    {
-                      order: '4',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '1',
-                      result: '案由涉及刑法第120条或120条之一的罪名'
-                    },
-                    {
-                      order: '5',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '2',
-                      result: '案由涉及刑法第120条或120条之一的罪名'
-                    },
-                    {
-                      order: '6',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '1',
-                      result: '案由涉及刑法第120条或120条之一的罪名'
+                      maxWidth: 160
                     }
                   ],
                 },
-                docArea: {//区域分析(文书公开信息)
-                  statusData: ['文书总量','已公开','本系统已公开统一系统未公开','不公开'],
-                  columns: [
+                docInfo: {//区域分析(文书公开信息)
+                  statusData: ['全部','已公开','应公开','应公开未公开','不公开'],
+                  columns: [//表头数据
                     {
                       title: '序号',
                       key: 'order',
                       align: 'center',
+                      maxWidth: 80
                     },
                     {
                       title: '部门受案号',
-                      key: 'caseId',
+                      key: 'BMSAH',
                       align: 'center',
                     },
                     {
                       title: '案件名称',
-                      key: 'caseName',
-                      align: 'center',
-                    },
-                    {
-                      title: '承办部门',
-                      key: 'department',
-                      align: 'center',
-                    },
-                    {
-                      title: '承办人',
-                      key: 'people',
+                      key: 'AJMC',
                       align: 'center',
                     },
                     {
                       title: '案件类别',
-                      key: 'caseType',
+                      key: 'AJLB_MC',
                       align: 'center',
                     },
                     {
-                      title: '当前阶段',
-                      key: 'status',
+                      title: '承办单位',
+                      key: 'CBDW_MC',
                       align: 'center',
-                    },
-                    {
-                      title: '受理日期',
-                      key: 'receiveTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '办结日期',
-                      key: 'overTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '完成日期',
-                      key: 'completeTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '文书数量',
-                      key: 'docCount',
-                      align: 'center',
-                    },
-                  ],
-                  infoData: [
-                    {
-                      order: '1',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '1'
-                    },
-                    {
-                      order: '2',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '5'
-                    },
-                    {
-                      order: '3',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '3'
-                    },
-                    {
-                      order: '4',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '1'
-                    },
-                    {
-                      order: '5',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '2'
-                    },
-                    {
-                      order: '6',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '1'
-                    }
-                  ],
-                  columnsShouldOpen: [
-                    {
-                      title: '序号',
-                      key: 'order',
-                      align: 'center',
-                    },
-                    {
-                      title: '部门受案号',
-                      key: 'caseId',
-                      align: 'center',
-                    },
-                    {
-                      title: '案件名称',
-                      key: 'caseName',
-                      align: 'center',
+                      minWidth: 100,
+                      maxWidth: 220
                     },
                     {
                       title: '承办部门',
-                      key: 'department',
+                      key: 'CBBM_MC',
                       align: 'center',
                     },
                     {
                       title: '承办人',
-                      key: 'people',
+                      key: 'CBR',
+                      align: 'center',
+                      maxWidth: 100
+                    },
+                    {
+                      title: '文书名称',
+                      key: 'WSMC',
                       align: 'center',
                     },
                     {
-                      title: '案件类别',
-                      key: 'caseType',
+                      title: '文书类别',
+                      key: 'WSLB',
                       align: 'center',
                     },
                     {
-                      title: '当前阶段',
-                      key: 'status',
+                      title: '移送法院日期/办结日期',
+                      key: 'SJRQ_BJRQ',
                       align: 'center',
+                      maxWidth: 160
                     },
-                    {
-                      title: '受理日期',
-                      key: 'receiveTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '办结日期',
-                      key: 'overTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '完成日期',
-                      key: 'completeTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '文书数量',
-                      key: 'docCount',
-                      align: 'center',
-                    },
-                    {
-                      title: '未公开原因',
-                      key: 'result',
-                      align: 'center',
-                    },
-                  ],
-                  infoDataShouldOpen: [
-                    {
-                      order: '1',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '1',
-                      result: '审结情况案卡里收到执行回执日期未填'
-                    },
-                    {
-                      order: '2',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '5',
-                      result: '审结情况案卡里收到执行回执日期未填'
-                    },
-                    {
-                      order: '3',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '3',
-                      result: '审结情况案卡里收到执行回执日期未填'
-                    },
-                    {
-                      order: '4',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '1',
-                      result: '审结情况案卡里收到执行回执日期未填'
-                    },
-                    {
-                      order: '5',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '2',
-                      result: '审结情况案卡里收到执行回执日期未填'
-                    },
-                    {
-                      order: '6',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '1',
-                      result: '审结情况案卡里收到执行回执日期未填'
-                    }
-                  ],
-                  //不公开
-                  columnsNotOpen: [
-                    {
-                      title: '序号',
-                      key: 'order',
-                      align: 'center',
-                    },
-                    {
-                      title: '部门受案号',
-                      key: 'caseId',
-                      align: 'center',
-                    },
-                    {
-                      title: '案件名称',
-                      key: 'caseName',
-                      align: 'center',
-                    },
-                    {
-                      title: '承办部门',
-                      key: 'department',
-                      align: 'center',
-                    },
-                    {
-                      title: '承办人',
-                      key: 'people',
-                      align: 'center',
-                    },
-                    {
-                      title: '案件类别',
-                      key: 'caseType',
-                      align: 'center',
-                    },
-                    {
-                      title: '当前阶段',
-                      key: 'status',
-                      align: 'center',
-                    },
-                    {
-                      title: '受理日期',
-                      key: 'receiveTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '办结日期',
-                      key: 'overTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '完成日期',
-                      key: 'completeTime',
-                      align: 'center',
-                    },
-                    {
-                      title: '文书数量',
-                      key: 'docCount',
-                      align: 'center',
-                    },
-                    {
-                      title: '不公开原因',
-                      key: 'result',
-                      align: 'center',
-                    },
-                  ],
-                  infoDataNotOpen: [
-                    {
-                      order: '1',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '1',
-                      result: '案由涉及刑法第120条或120条之一的罪名'
-                    },
-                    {
-                      order: '2',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '5',
-                      result: '案由涉及刑法第120条或120条之一的罪名'
-                    },
-                    {
-                      order: '3',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '3',
-                      result: '案由涉及刑法第120条或120条之一的罪名'
-                    },
-                    {
-                      order: '4',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '1',
-                      result: '案由涉及刑法第120条或120条之一的罪名'
-                    },
-                    {
-                      order: '5',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '2',
-                      result: '案由涉及刑法第120条或120条之一的罪名'
-                    },
-                    {
-                      order: '6',
-                      caseId: '蕲检刑申受[2018]42112600001号',
-                      caseName: '王晓能刑事申诉案',
-                      department: '控告申诉',
-                      people: '华菱',
-                      caseType: '刑事申诉审查案件',
-                      status: '流程结束',
-                      receiveTime: '2018-01-01',
-                      overTime: '2018-01-01',
-                      completeTime: '2018-01-01',
-                      docCount: '1',
-                      result: '案由涉及刑法第120条或120条之一的罪名'
-                    }
                   ],
                 },
               }
             }
         },
       created() {
-          var _this = this;
-          this.$bus.$on('setTable',function(set) {
-            _this.tableName = set.tableName;
-            _this.title = set.title?set.title:'总计';
-            _this.statusData = _this.tableData[set.tableName].statusData;
-            _this.status = set.type;
-            if(set.type=='本系统已公开统一系统未公开'){
-              _this.infoData = _this.tableData[set.tableName].infoDataShouldOpen;
-              _this.columnsData = _this.tableData[set.tableName].columnsShouldOpen;
-            }else if(set.type=='不公开'){
-              _this.infoData = _this.tableData[set.tableName].infoDataNotOpen;
-              _this.columnsData = _this.tableData[set.tableName].columnsNotOpen;
-            }else{
-              _this.infoData = _this.tableData[set.tableName].infoData;
-              _this.columnsData = _this.tableData[set.tableName].columns;
-            }
-          })
+
+      },
+      mounted() {
+        this.initBus();
+        this.setTableHeight(this);//设置表格高度
+      },
+      beforeDestroy(){
+          console.log('销毁了')
+          this.$bus.$off('setTable');
       },
       methods: {
         exportAll() {//导出数据
@@ -927,24 +198,265 @@
             filename: 'testData'
           });
         },
+        initBus() {
+          var _this = this;
+          this.$bus.$on('setTable',function(set) {
+            // console.log('设置表格',set);
+            _this.tableName = set.tableName;
+            //标题
+            _this.title = set.title;
+            //当前状态
+            _this.status = set.type;
+            //状态数据
+            _this.statusData = _this.tableData[set.tableName].statusData;
+            //表头数据
+            _this.columnsData = [].concat(_this.tableData[set.tableName].columns);
+            //请求参数
+            _this.dateValue = set.dateValue;
+            _this.dwbm = set.dwbm;
+            _this.gkzt = set.gkzt;
+            _this.nzzt = set.nzzt;
+            _this.bhxj = set.bhxj;
+            //设置表头
+            _this.setColumns1();
+            //获取表格数据
+            if(_this.tableName==='caseInfo') {//案件
+              _this.getCaseList(true);
+            }else {//文书
+              _this.getDocList(true);
+            }
+          })
+        },
+        changePageNum(num) {//改变页码
+          this.pageNum = num;
+          if(this.tableName==='docInfo') {
+            this.getDocList();
+          }else {
+            this.getCaseList();
+          }
+
+        },
+        changePageSize(size) {//改变每页条数
+          this.pageSize = size;
+          if(this.tableName==='docInfo') {
+            this.getDocList();
+          }else {
+            this.getCaseList();
+          }
+        },
+        getDocCount() {//获取文书公开数量信息
+          let _this = this;
+          _this.axios.get(webApi.SSTX.AG_CountWSSL.format({
+            startTimeStr: _this.dateValue[0],
+            endTimeStr: _this.dateValue[1],
+            dwbm: _this.dwbm,
+            gkzt: _this.gkzt,
+            nzzt: _this.nzzt,
+            bhxj: _this.bhxj,//包含下级
+            wslb: '',//文书类型
+          })).then(function(res){
+            _this.total = res.data.data;
+          }).catch(function(err){
+            console.log(err)
+          })
+        },
+        getCaseCount() {//获取案件公开数量信息
+          let _this = this;
+          _this.axios.get(webApi.SSTX.AG_CountAJGKXX.format({
+            startTimeStr: _this.dateValue[0],
+            endTimeStr: _this.dateValue[1],
+            dwbm: _this.dwbm,
+            gkzt: _this.gkzt,
+            bhxj: _this.bhxj,//包含下级
+            ajlx: '',//案件类型
+          })).then(function(res){
+            _this.total = res.data.data;
+          }).catch(function(err){
+            console.log(err)
+          })
+        },
+        /*
+    * getCount: 是否获取当前选择条件下的公开信息数量
+    * getAll: 是否获取当前选择条件下的全部数据
+    * */
+        getDocList(getCount,getAll) {//获取文书信息列表
+          this.isLoading = true;
+          let _this = this;
+          if(getCount){//获取总数
+            _this.getDocCount();//获取总条数
+          }
+          if(getAll){//下载全部数据
+            this.$Message.info('获取数据中');
+          }
+          _this.axios.get(webApi.SSTX.AG_GetWSSLs.format({
+            startTimeStr: _this.dateValue[0],
+            endTimeStr: _this.dateValue[1],
+            dwbm: _this.dwbm,
+            gkzt: _this.gkzt,
+            nzzt: _this.nzzt,
+            bhxj: _this.bhxj,//包含下级
+            wslb: '',//文书类型
+            pageNum: _this.pageNum,
+            pageSize: getAll?_this.total:_this.pageSize,
+          })).then(function(res){
+            ;
+            if(res.data.code==0){
+              let data = res.data.data;//表数据
+              data.forEach(function(item,index){ //添加序号
+                item.order = (_this.pageNum -1) * _this.pageSize +  index + 1;
+                // 如果bz为空,使用nzzt的值
+                if(!item.BZ) {
+                  item.BZ = item.NZZT;
+                }
+              });
+              if(getAll){
+                _this.exportData(data);//下载全部数据
+              }else{
+                _this.infoData = data;
+              }
+            }else if(res.data.code==-1){
+              _this.$Message.warning(res.data.errorMessage);
+            }
+            _this.isLoading = false;
+          }).catch(function(err){
+            console.log(err);
+            _this.isLoading = false;
+          })
+        },
+        /*
+    * getCount: 是否获取当前选择条件下的公开信息数量
+    * getAll: 是否获取当前选择条件下的全部数据
+    * */
+        getCaseList(getCount,getAll) {//获取案件信息列表
+          this.isLoading = true;
+          let _this = this;
+          if(getCount){//获取总数
+            _this.getCaseCount();//获取总条数
+          }
+          if(getAll){//下载全部数据
+            this.$Message.info('获取数据中');
+          }
+          _this.axios.get(webApi.SSTX.AG_GetAJGKXXs.format({
+            startTimeStr: _this.dateValue[0],
+            endTimeStr: _this.dateValue[1],
+            dwbm: _this.dwbm,
+            gkzt: _this.gkzt,
+            bhxj: _this.bhxj,//包含下级
+            ajlx: '',//案件类型
+            pageNum: _this.pageNum,
+            pageSize: getAll?_this.total:_this.pageSize,
+          })).then(function(res){
+            ;
+            if(res.data.code==0){
+              let data = res.data.data;//表数据
+              data.forEach(function(item,index){ //添加序号
+                item.order = (_this.pageNum -1) * _this.pageSize +  index + 1;
+              });
+              if(getAll){
+                _this.exportData(data);//下载全部数据
+              }else{
+                _this.infoData = data;
+              }
+            }else if(res.data.code==-1){
+              _this.$Message.warning(res.data.errorMessage);
+            }
+            _this.isLoading = false;
+          }).catch(function(err){
+            console.log(err);
+            _this.isLoading = false;
+          })
+        },
+        setColumns1() {//设置表头
+          if(this.tableName === 'caseInfo') {//案件信息列表
+            if(this.gkzt==2) {//本系统已公开统一系统未公开
+              this.columnsData.push({
+                title: '未公开原因',
+                key: 'BZ',
+                align: 'center',
+              })
+            }else if(this.gkzt==4) {//不公开
+              this.columnsData.push({
+                title: '不公开原因',
+                key: 'BZ',
+                align: 'center',
+              })
+            }
+          }else {//文书信息列表
+            if(this.gkzt==0&&this.nzzt==7) {//应公开未公开
+              this.columnsData.push({
+                title: '未公开原因',
+                key: 'BZ',
+                align: 'center',
+              })
+            }else if(this.gkzt==1) {//不公开
+              this.columnsData.push({
+                title: '不公开原因',
+                key: 'BZ',
+                align: 'center',
+              })
+            }
+          }
+
+        },
         changeStatus(status) {//改变状态
           var _this = this;
-          if(status=='本系统已公开统一系统未公开'){
-            _this.infoData = _this.tableData[_this.tableName].infoDataShouldOpen;
-            _this.columnsData = _this.tableData[_this.tableName].columnsShouldOpen;
-          }else{
-            _this.infoData = _this.tableData[_this.tableName].infoData;
-            _this.columnsData = _this.tableData[_this.tableName].columns;
-          }
+          let initChangeType = function(){
+            let tableName = _this.tableName;
+            if(tableName === "caseInfo") {
+              caseChangeStatus();
+            }else if(tableName === 'docInfo') {
+              docChangeStatus();
+            }
+          };
+          let caseChangeStatus = function() {
+            switch(status) {
+              case '全部':
+                _this.gkzt = '';
+                break;
+              case '已公开':
+                _this.gkzt = 3;
+                break;
+              case '本系统已公开统一系统未公开':
+                _this.gkzt = 2;
+                break;
+              case '不公开':
+                _this.gkzt = 4;
+                break;
+            }
+            _this.getCaseList(true);
+          };
+          let docChangeStatus = function() {
+            switch(status) {
+              case '全部':
+                _this.gkzt = '';
+                _this.nzzt = '';
+                break;
+              case '不公开':
+                _this.gkzt = 1;
+                _this.nzzt = '';
+                break;
+              case '应公开':
+                _this.gkzt = 0;
+                _this.nzzt = '';
+                break;
+              case '已公开':
+                _this.gkzt = 0;
+                _this.nzzt = 8;
+                break;
+              case '应公开未公开':
+                _this.gkzt = 0;
+                _this.nzzt = 7;
+                break;
+            }
+            _this.getDocList(true);
+          };
+          initChangeType();
         },
         closeTable() {//关闭表格
           this.$emit('closeTable');
         }
       },
-        mounted() {
-          let _this = this;
-          this.setTableHeight(this);//设置表格高度
-        },
+
       watch: {
           title() {
             this.setTableHeight(this);//设置表格高度
@@ -999,6 +511,6 @@
         }
       }
     }
-    z-index: 3000;
+    z-index: 999;
   }
 </style>

@@ -29,7 +29,7 @@
         <Page :total="total" show-sizer show-total show-elevator />
         <!--导出数据-->
         <div id="exportData">
-          <button class="export-page btn-tabDefault-large">导出本页数据</button>
+          <button class="export-page btn-tabDefault-large" @click="exportData">导出本页数据</button>
           <button class="export-all btn-export-large">导出全部数据</button>
         </div>
       </div>
@@ -38,6 +38,7 @@
 </template>
 
 <script>
+  import ExportJsonExcel from 'js-export-excel' //导出excel
   export default {
     data() {
       return {
@@ -51,26 +52,31 @@
             title: '序号',
             key: 'order',
             align: 'center',
+            minWidth: 80
           },
           {
             title: '部门受案号',
             key: 'caseId',
             align: 'center',
+            minWidth: 200
           },
           {
             title: '案件名称',
             key: 'caseName',
             align: 'center',
+            minWidth: 200
           },
           {
             title: '日期',
             key: 'dateTime',
             align: 'center',
+            minWidth: 100
           },
           {
             title: '接收人',
             key: 'people',
             align: 'center',
+            minWidth: 100
           },
           {
             title: '信息内容',
@@ -82,10 +88,16 @@
         infoData: []//表格数据
       }
     },
+    methods: {
+      exportData() {//导出本页数据
+
+      },
+    },
     created() {
       this.infoData = jsonData.messagePush;
       this.total = this.infoData.length;
     },
+
     mounted() {
       this.setTableHeight(this);//设置表格高度
     }

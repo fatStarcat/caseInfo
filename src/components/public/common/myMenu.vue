@@ -64,6 +64,7 @@
       props: ['resetMenu'],
       data() {
           return {
+            unit: JSON.parse(localStorage.getItem('userInfo')).Unit.DWMC,//单位名称
             selected: 0,
             showActiveImg: 0,//移入显示 1:count,2:program,3:doc
             isDocActive: true,
@@ -100,7 +101,16 @@
             ],
           }
       },
+      created() {
+          this.setMenu();
+      },
       methods: {
+          setMenu() {//设置显示区域分析模块
+            if(this.unit!=='黄冈市院'){
+              this.caseData.shift();
+              this.docData.shift();
+            }
+          },
           openMenu(type) {
             if(type=='doc') {
               this.isDocActive = !this.isDocActive;

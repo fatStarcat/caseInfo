@@ -50,7 +50,7 @@
             webApi.Host = hos;
             _this.axios.get(webApi.Host + webApi.SystemInfo[api])
               .then(function(res){
-                console.log(res);
+                ;
                 let nodes = [];
                 let root = {};//根节点
                 let units = res.data.data;

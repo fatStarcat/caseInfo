@@ -19,16 +19,13 @@ import './script/format' //字符串格式化
 import './script/chartData' //图表对象
 import './script/onMaximize'
 
+
 import axios  from 'axios'
 /**/
 import './../src/script/ajax' //ajax(测试用)
 import '../static/json/jsonData' //数据(测试用)
 const Bus = new Vue();
-// const host = invoker.getServiceHost();//获取host地址
-// host.then(function(hos){
-//   webApi.Host = hos;
-// }
-// console.log('main',webApi.Host)
+let timer = null;
 Vue.config.productionTip = false;
 Vue.prototype.$echarts = echarts;
 window.$echarts = echarts;
@@ -57,9 +54,70 @@ axios.interceptors.request.use(config=>{
 })
 /*响应拦截*/
 axios.interceptors.response.use(function (response) {
+  if(response.data.code===-1) {
+    if(timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(function(){
+      Bus.$Message.warning(response.data.errorMessage);
+    },200)
+  }
   return response
-}, function (error) {
-  const status = error.response.status;
+}, function (err) {
+  if (err && err.response) {
+    const status = err.response.status;
+    switch (status) {
+      case 400: err.message = '请求错误(400)' ;
+                Bus.$Message.warning(err.message);
+                break;
+      case 401: err.message = '未授权，请重新登录(401)';
+                Bus.$Message.warning(err.message);
+                break;
+      case 403: err.message = '拒绝访问(403)';
+                  Bus.$emit('relModal',{
+                    relShow: true
+                  });
+                break;
+      case 404: err.message = '请求出错(404)';
+                Bus.$Message.warning(err.message);
+                break;
+      case 408: err.message = '请求超时(408)';
+                Bus.$Message.warning(err.message);
+                break;
+      case 500: err.message = '服务器错误(500)';
+                Bus.$Message.warning(err.message);
+                break;
+      case 501: err.message = '服务未实现(501)';
+                Bus.$Message.warning(err.message);
+                break;
+      case 502: err.message = '网络错误(502)';
+                Bus.$Message.warning(err.message);
+                break;
+      case 503: err.message = '服务不可用(503)';
+                Bus.$Message.warning(err.message);
+                break;
+      case 504: err.message = '网络超时(504)';
+                Bus.$Message.warning(err.message);
+                break;
+      case 505: err.message = 'HTTP版本不受支持(505)';
+                Bus.$Message.warning(err.message);
+                break;
+      default: err.message = `连接出错!`;
+                const config = err.config;
+                Bus.$emit('failModal',{
+                  failShow: true,
+                  config: config
+                })
+              ;
+    }
+  }else{
+    const config = err.config;
+    console.dir(err)
+    Bus.$emit('failModal',{
+      failShow: true,
+      config: config
+    })
+  }
   console.log(error,status);
   return Promise.reject(error)
 })

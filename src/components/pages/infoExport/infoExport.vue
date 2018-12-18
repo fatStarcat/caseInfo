@@ -7,10 +7,10 @@
             <label>时间: </label>
             <DatePicker type="daterange" split-panels placeholder="请选择时间" @on-change="setDate" v-model="dateTime" style="width: 200px"></DatePicker>
           </select-item>
-          <select-item>
-            <label>单位: </label>
-            <Input   readonly type="text"  v-model="company.name"   style="width:200px" />
-          </select-item>
+          <!--<select-item>-->
+            <!--<label>单位: </label>-->
+            <!--<Input   readonly type="text"  v-model="company.name"   style="width:200px" />-->
+          <!--</select-item>-->
           <button class="search-btn btn-hover" @click="tableType=='case'?getCaseList(true):getDocList(true)">
             查询
           </button>
@@ -31,7 +31,7 @@
               <Checkbox label="法律文书"></Checkbox>
             </CheckboxGroup>
           </select-item>
-          <button class="export-btn btn-hover-export" >
+          <button class="export-btn btn-hover-export" @click="createPackage">
             导出
           </button>
         </select-group>
@@ -61,6 +61,7 @@
 </template>
 
 <script>
+  import ExportJsonExcel from 'js-export-excel' //导出excel
     export default {
         name: "info-export",
         data() {
@@ -80,12 +81,14 @@
               DWBM: JSON.parse(localStorage.getItem('userInfo')).Unit.DWBM,//单位编码
             },
             exportContent: ['案件信息','法律文书'],//导出内容
+            flag: 0,//0:导出全部，1:导出案件;2:导出文书
             columsData: {
               caseInfo: [//案件信息表头
                 {
                   title: '序号',
                   key: 'order',
                   align: 'center',
+                  maxWidth: 80
                 },
                 {
                   title: '部门受案号',
@@ -111,16 +114,19 @@
                   title: '承办人',
                   key: 'CBR',
                   align: 'center',
+                  maxWidth: 100
                 },
                 {
                   title: '受理日期',
                   key: 'SLRQ',
                   align: 'center',
+                  maxWidth: 160
                 },
                 {
                   title: '当前阶段',
                   key: 'AJZT',
                   align: 'center',
+                  maxWidth: 100
                 },
               ],
               docInfo: [//法律文书表头
@@ -128,6 +134,7 @@
                   title: '序号',
                   key: 'order',
                   align: 'center',
+                  maxWidth: 80
                 },
                 {
                   title: '部门受案号',
@@ -158,6 +165,7 @@
                   title: '承办人',
                   key: 'CBR',
                   align: 'center',
+                  maxWidth: 100
                 },
                 {
                   title: '文书名称',
@@ -173,15 +181,87 @@
                   title: '当前阶段',
                   key: 'NZZT',
                   align: 'center',
+                  maxWidth: 100
                 },
               ]
             },
             columns1: [],//表头信息
             infoData: [],//数据信息
-            infoDatas: {}
           }
         },
       methods: {
+        createPackage() {//生成导出数据包
+          let _this = this;
+          let exportContent = this.exportContent;
+          let msg = this.$Message.loading({
+            content: '获取数据中',
+            duration: 0
+          });
+          if(exportContent.length===2) {
+            this.flag = 0;
+          }else if(exportContent.indexOf('案件信息') > -1) {
+            this.flag = 1;
+          }else if(exportContent.indexOf('法律文书') > -1) {
+            this.flag = 2;
+          }
+          this.axios.get(webApi.SJDC.CreatePackage.format({
+            startTimeStr: _this.dateValue[0],
+            endTimeStr: _this.dateValue[1],
+            flag: _this.flag//0:导出全部，1:导出案件;2:导出文书
+          })).then(function(res){
+
+            _this.$Message.destroy()
+            if(res.data.code===0){
+              let fileName = '数据导出: ' +  exportContent.join('、') +'-'+  _this.getExportTime() + '.zip';
+              _this.exportFlie(res.data.data,fileName);
+            }
+          }).catch(function(err){
+            console.log(err)
+            _this.$Message.destroy()
+            _this.$Message.warning('生成导出数据包失败!');
+          })
+        },
+        exportFlie(b64Data, fileName) {
+          //创建下载链接
+          //best64 转化为 blob对象
+          function b64toBlob(b64Data) {
+            var sliceSize = 512;
+            var byteCharacters = atob(b64Data);
+            var byteArrays = [];
+            for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+              var slice = byteCharacters.slice(offset, offset + sliceSize);
+              var byteNumbers = new Array(slice.length);
+
+              for (var i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+              }
+
+              var byteArray = new Uint8Array(byteNumbers);
+
+              byteArrays.push(byteArray);
+            }
+            var blob = new Blob(byteArrays, {
+              type: 'appliction/octet-stream'
+            });
+            return blob;
+          }
+
+          var blob = b64toBlob(b64Data);
+          var saveData = (function () {
+            var a = document.createElement('a');
+            document.body.appendChild(a);
+            a.style = 'display:none';
+            return function (blob, fileName) {
+              let url = window.URL.createObjectURL(blob);
+              a.href = url;
+              a.download = fileName;
+              a.click();
+              window.URL.revokeObjectURL(url);
+              a.remove()
+            };
+          }());
+          saveData(blob,fileName)
+        },
         setNzzt() {//通过当前阶段状态设置nzzt
           if(this.exportStatus=='全部') {
             this.dczt = '';
@@ -192,9 +272,11 @@
           }
         },
         setDate(fmtDate) {//设置时间
-          fmtDate[0]+=' 00:00:00';
-          fmtDate[1]+=' 00:00:00';
-          this.dateValue = fmtDate;
+          if(fmtDate){
+            fmtDate[0]+=' 00:00:00';
+            fmtDate[1]+=' 00:00:00';
+            this.dateValue = fmtDate;
+          }
         },
         getStartTime() {//获取初始的开始时间
           let date = new Date();
@@ -222,7 +304,7 @@
             dczt: _this.dczt,
             ajlx: '',//案件类型
           })).then(function(res){
-            console.log(res);
+            ;
             if(res.data.code==0){
               _this.total = res.data.data;
             }
@@ -245,7 +327,7 @@
             pageNum: _this.pageNum,
             pageSize: _this.pageSize,
           })).then(function(res){
-            console.log(res);
+            ;
             if(res.data.code==0){
               let data = res.data.data;//表数据
               data.forEach(function(item,index){ //添加序号
@@ -268,7 +350,7 @@
             dczt: _this.dczt,//导出状态
             wslb: '',//文书类别
           })).then(function(res){
-            console.log(res);
+            ;
             if(res.data.code==0){
               _this.total = res.data.data;
             }
@@ -291,7 +373,7 @@
             pageNum: _this.pageNum,
             pageSize: _this.pageSize,
           })).then(function(res){
-            console.log(res);
+            ;
             if(res.data.code==0){
               let data = res.data.data;//表数据
               data.forEach(function(item,index){ //添加序号
@@ -327,9 +409,7 @@
         toggleTable(e,type){//切换表格
           if(e.target.checked) {
             this.tableType = type;
-            this.exportStatus = '全部';
             this.pageNum = 1;
-            this.setNzzt();
             if(type=='case'){
               this.columns1 = this.columsData.caseInfo;
               this.getCaseList(true);
@@ -339,6 +419,25 @@
             }
           }
         },
+        //获取当前导出时间
+        getExportTime: function () {
+          var date = new Date();
+          var year,
+            month,
+            day,
+            hours,
+            minutes,
+            seconds;
+
+          year = date.getFullYear();
+          month = (date.getMonth() + 1) >= 10 ? date.getMonth() + 1 : '0' + (date.getMonth() + 1);
+          day = date.getDate() >= 10 ? date.getDate() : '0' + date.getDate();
+          hours = date.getHours() >= 10 ? date.getHours() : '0' + date.getHours();
+          minutes = date.getMinutes() >= 10 ? date.getMinutes() : '0' + date.getMinutes();
+          seconds = date.getSeconds() >= 10 ? date.getSeconds() : '0' + date.getSeconds();
+          return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds
+
+        }
       },
       created() {
 

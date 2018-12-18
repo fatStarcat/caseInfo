@@ -1,16 +1,6 @@
 <template>
   <!--实时提醒-->
   <div id="reminding">
-    <!--<button @click="initMap('红安县')">红安县</button>-->
-    <!--<button @click="initMap('黄梅县')"></button>-->
-    <!--<button @click="initMap('黄梅县')">黄州区</button>-->
-    <!--<button @click="initMap('黄州区')">罗田县</button>-->
-    <!--<button @click="initMap('罗田县')">麻城市</button>-->
-    <!--<button @click="initMap('麻城市')">团风县</button>-->
-    <!--<button @click="initMap('团风县')">武穴市</button>-->
-    <!--<button @click="initMap('武穴市')">英山县</button>-->
-    <!--<button @click="initMap('英山县')">蕲春县</button>-->
-    <!--<button @click="initMap('蕲春县')">浠水县</button>-->
     <!--信息情况-->
     <div id="re-info">
       <div id="info-program" class="info-item">
@@ -107,6 +97,9 @@
     </div>
     <!--map-->
     <div id="map" class="echarts-wrap">
+      <!--<div class="mapBg">-->
+        <!--<img src="../../../assets/realTimeReminding/mapT.jpg" alt="">-->
+      <!--</div>-->
       <div class="rel-map" ref="mapEchart" id="mapEcharts">
 
       </div>
@@ -155,29 +148,46 @@
       methods: {
           setCity() {//注册地图数据
             let _this = this;
-            if((this.dwmc.indexOf('黄冈市') > -1)||this.dwmc === '湖北省院') {
-              $echarts.registerMap('HG',_this.mapJsonData);//全局注册黄冈地图
-              _this.mapType = 'HG';
-            }else {//注册区县地图
-              for(let i = 0, len = _this.mapJsonData.features.length; i < len; i++){
-                let oriData = _this.mapJsonData.features[i];
-                if(this.dwmc.indexOf(oriData.properties.name) > -1) {
-                  let selfData = { //各个区县地图数据
-                    "type": "FeatureCollection",
-                    "features": [oriData]
-                  };
-                  $echarts.registerMap(oriData.properties.name,selfData);//注册地图
-                  _this.mapType = oriData.properties.name;
-                  break
-                }
-              }
-            }
+            $echarts.registerMap('HG',_this.mapJsonData);//全局注册黄冈地图
+            _this.mapType = 'HG';
+            //注册黄冈地图和各区县地图
+            // if((this.dwmc.indexOf('黄冈市') > -1)||this.dwmc === '湖北省院') {
+            //   $echarts.registerMap('HG',_this.mapJsonData);//全局注册黄冈地图
+            //   _this.mapType = 'HG';
+            // }else {//注册区县地图
+            //   for(let i = 0, len = _this.mapJsonData.features.length; i < len; i++){
+            //     let oriData = _this.mapJsonData.features[i];
+            //     if(this.dwmc.indexOf(oriData.properties.name) > -1) {
+            //       let selfData = { //各个区县地图数据
+            //         "type": "FeatureCollection",
+            //         "features": [oriData]
+            //       };
+            //       $echarts.registerMap(oriData.properties.name,selfData);//注册地图
+            //       _this.mapType = oriData.properties.name;
+            //       break
+            //     }
+            //   }
+            // }
             this.setMapData();
           },
           setMapData() {//设置地图数据
             let mapData = [];
+            let showAllMap = false;//是否所有地图移入都显示信息
+            let _this = this;
+            if(((_this.dwmc.indexOf('黄冈市') > -1)||_this.dwmc === '湖北省院')&&(_this.dwmc.indexOf('黄州区') == -1)&&(_this.role=='案管人员')) {
+              showAllMap = true;
+            }
             for( let i = 0;i < this.mapJsonData.features.length;i++ ){
               let color = '#4589fd';
+              if(!showAllMap) {
+                let name = _this.dwmc;
+                if(name.indexOf('黄冈市')>-1) {
+                  name = '黄州区';
+                }
+                if(!(name.indexOf(this.mapJsonData.features[i].properties.name) > -1)) {//地图名称与当前单位不符
+                  color = '#ccc'
+                }
+              }
               mapData.push({
                 name: this.mapJsonData.features[i].properties.name,
                 itemStyle: {
@@ -197,7 +207,7 @@
           this.axios({
             url: '@/../static/map/421100.json'
           }).then(function(res){
-            console.log(res);
+            ;
             _this.mapJsonData = res.data;
             _this.setCity();
           })
@@ -264,11 +274,14 @@
                       marker3 +" " + '应公开未公开：' + _this.cityCount[param.name].docCount[3] + '<br/>' +
                       marker1 +" " + '法律文书公开率：' + _this.cityCount[param.name].docCount[4] + '<br/>'
                   }else {//显示本区县数据
-                    let name = param.name;
-                    if(_this.dwmc.indexOf('黄冈市')>-1) {
+                    let name = _this.dwmc;
+                    if(name.indexOf('黄冈市')>-1) {
                       name = '黄州区';
                     }
-                    return name + '<br/>' +
+                    if(!(name.indexOf(param.name) > -1)) {//移入地图与当前单位不符
+                      return
+                    }
+                    return param.name + '<br/>' +
                       '程序信息公开信息' + '<br/>' +
                       marker1 +" " + '已公开：' + _this.caseCount[0] + '<br/>' +
                       marker2 +" " + '不公开：' + _this.caseCount[2] + '<br/>' +
@@ -333,7 +346,7 @@
             this.$router.push({
               path: config.path,
               query: {
-                status: config.status,
+                status: JSON.stringify(config.status),
                 bread: config.bread
               }
             });
@@ -394,6 +407,7 @@
               let shouldOpenVal = shouldOpen.data.data;
               let notOpenVal = notOpen.data.data;
               let ratio = '0%';
+              _this.docLoading = false;
               if((shouldOpenVal + notOpenVal)!=0){//判断值是否为0
                 ratio = Number((openVal/(shouldOpenVal + notOpenVal))*100).toFixed(1) + '%';
               }
@@ -403,7 +417,6 @@
               }else {//当前地图统计信息
                 _this.docCount = [openVal,notOpenVal,shouldOpenVal,undisclosedVal,ratio];
               }
-              _this.docLoading = false;
               console.log(arguments)
             }))
             .catch(_this.axios.spread(function (open,notOpen ,shouldOpen,undisclosed) {
@@ -457,21 +470,21 @@
                 let openVal = open.data.data;
                 let undisclosedVal = undisclosed.data.data;
                 let notOpenVal = notOpen.data.data;
-                let ratio = '0%';
-                if((openVal + notOpenVal)!=0){
-                  ratio = Number((openVal/(openVal + notOpenVal))*100).toFixed(1) + '%';
-                }
+                let ratio = '100.0%';
+                _this.isLoading = false;
+                // if((openVal + notOpenVal)!=0){//程序性公开率
+                //   ratio = Number((openVal/(openVal + notOpenVal))*100).toFixed(1) + '%';
+                // }
                 if(cityName) {//指定地图统计信息
                   _this.cityCount[cityName].caseCount = [openVal,undisclosedVal,notOpenVal,ratio];
                 }else {//当前地图统计信息
                   _this.caseCount = [openVal,undisclosedVal,notOpenVal,ratio];
                 }
 
-                _this.isLoading = false;
                 console.log(arguments)
               }))
               .catch(_this.axios.spread(function (open, undisclosed,notOpen) {
-                console.log(arguments)
+                console.log(arguments);
               }))
           }
       },
@@ -642,22 +655,41 @@
       float: right;
       width: calc( 100% - 369px - 45px);
       height: 100%;
-      background: url('../../../assets/realTimeReminding/map.jpg') no-repeat;
+      background: url('../../../assets/realTimeReminding/mapT.jpg') no-repeat 50% 50% ;
       background-size: cover;
       border-radius:10px;
+      overflow: hidden;
+      /*<!--.mapBg {-->
+        <!--position: absolute;-->
+        <!--top: 55%;-->
+        <!--left: 55%;-->
+        <!--transform: translate(-55%,-55%);-->
+        <!--height: 100%;-->
+        <!--img {-->
+          <!--display: block;-->
+          <!--height: 100%;-->
+        <!--}-->
+
+      <!--}-->*/
       .rel-map {
         width: 100%;
         height: 100%;
       }
     }
   }
-  @media screen and (max-width: 1200px) {
-    #map {
-      position: absolute;
-      right: 0;
-      top: 20px;
-      width: 100% !important;
+  /*@media screen and (max-width: 1200px) {*/
+    /*#map {*/
+      /*position: absolute;*/
+      /*right: 0;*/
+      /*top: 20px;*/
+      /*width: 100% !important;*/
 
+    /*}*/
+  /*}*/
+  @media screen and (max-width: 1680px) {
+    /*信息内容*/
+    .info-content{
+      height: 55px !important;
     }
   }
 </style>

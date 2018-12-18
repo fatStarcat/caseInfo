@@ -12,7 +12,7 @@
         <div class="enter">
           <div class="enter-item">
             <img src="../../assets/login/company.png" alt="">
-            <input id="keyword" @blur='blurSelectCompany' class="focusCompany" ref="inputCompany" @focus="searchNodes"   v-model="keywords" type="text" placeholder="请输入单位" @keyup.enter="searchNodes"/>
+            <input id="keyword" @blur='blurSelectCompany' class="focusCompany" ref="inputCompany" @focus="searchNodes" @input="inputKeywords"  v-model="keywords" type="text" placeholder="请输入单位" />
             <my-tree :isSaveUnits="true" @selectUnits="selectUnits" v-show="showCompany"></my-tree>
           </div>
           <div class="enter-item">
@@ -48,7 +48,6 @@
   import PinyinMatch from 'pinyin-match' //引入拼音检索
   import md5 from 'js-md5'
   export default {
-    name: "login-old",
     data() {
       return {
         isLoading: false,//
@@ -61,6 +60,7 @@
           DWBM: '',//单位编码
         },
         showCompany: false,//显示单位
+        timer: null,
       }
     },
     methods: {
@@ -74,6 +74,20 @@
         if(!(e.target.parentNode.className=="searchBtn focusCompany" ||e.target.className=='focusCompany' ||e.target.outerHTML.indexOf('treenode_switch') > -1)) {
           this.blurSelectCompany();
         }
+      },
+      inputKeywords(e){
+        let val = (e.target.value).replace(/\s+/g,"");
+        let _this = this;
+        if(this.timer) {
+          clearTimeout(this.timer);
+        }
+        if(!val) {//空字符串
+          return
+        }
+        this.timer = setTimeout(function(){
+          _this.showCompany = true;
+          _this.$bus.$emit('searchUnits',{keywords: _this.keywords});
+        },200)
       },
       searchNodes(){
         this.showCompany = true;
@@ -93,7 +107,7 @@
           url: webApi.Host + webApi.Auth.GetCurrentUser,
           headers: {token:token}
         }) .then(function(res){
-          console.log(res)
+
           if(res.data.code==0) {
             let userInfo = res.data.data;
             if(userInfo.JS=='案管人员'){
@@ -132,7 +146,6 @@
       login() {//登录
         let _this = this;
         let password = md5(this.password);
-        // console.log(md5(this.password));
         this.isLoading = true;
         this.getUnitsCode();
         this.axios.get(webApi.Auth.Login.format({
@@ -153,10 +166,8 @@
                 });
             }
             localStorage.setItem('token',token);
-            localStorage.setItem('setAdmin',_this.user);
             _this. getUserInfo(token,callback);
           }else {
-            _this.$Message.warning(res.data.errorMessage);
             _this.isLoading = false;
           }
         }).catch(function(err){

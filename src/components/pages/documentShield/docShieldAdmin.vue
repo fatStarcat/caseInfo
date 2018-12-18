@@ -7,16 +7,16 @@
           <label>时间: </label>
           <DatePicker type="daterange" split-panels placeholder="请选择时间" @on-change="setDate" v-model="dateTime" style="width: 200px"></DatePicker>
         </select-item>
-        <select-item>
-          <label>单位: </label>
-          <Input   readonly type="text"  v-model="company.name"   style="width:200px" />
-        </select-item>
+        <!--<select-item>-->
+          <!--<label>单位: </label>-->
+          <!--<Input   readonly type="text"  v-model="company.name"   style="width:200px" />-->
+        <!--</select-item>-->
         <select-item>
           <label>文书类型: </label>
           <Select v-model="wslb" style="width:200px">
             <Option v-for="item in docType" :value="item" :key="item">{{ item}}</Option>
           </Select>
-          <button class="search-btn btn-hover" @click="getDocList(true)">
+          <button class="search-btn btn-hover" @click="searchData">
             查询
           </button>
         </select-item>
@@ -43,8 +43,8 @@
         <Page ref="iTable" :current="pageNum" @on-page-size-change="changePageSize" @on-change="changePageNum"   :total="total" show-sizer show-total show-elevator />
         <!--导出数据-->
         <div class="exportData" v-show="showBtnNum===0">
-          <button class="export-page btn-tabDefault-large">导出本页数据</button>
-          <button class="export-all btn-export-large">导出全部数据</button>
+          <button class="export-page btn-tabDefault-large" @click="exportData(infoData)">导出本页数据</button>
+          <button class="export-all btn-export-large" @click="getDocList(false,true)">导出全部数据</button>
         </div>
         <div class="exportData" v-show="showBtnNum===1">
           <button class="export-all btn-export-large">批量审核</button>
@@ -58,6 +58,7 @@
 </template>
 
 <script>
+  import ExportJsonExcel from 'js-export-excel' //导出excel
   export default {
     data() {
       return {
@@ -83,6 +84,7 @@
             title: '序号',
             key: 'order',
             align: 'center',
+            maxWidth: 80
           },
           {
             title: '部门受案号',
@@ -108,6 +110,7 @@
             title: '承办人',
             key: 'CBR',
             align: 'center',
+            maxWidth: 100
           },
           {
             title: '文书名称',
@@ -123,6 +126,7 @@
             title: '当前阶段',
             key: 'NZZT',
             align: 'center',
+            maxWidth: 100
           },
           {
             title: '审核批复',
@@ -188,10 +192,28 @@
       }
     },
     methods: {
-      exportData() {//导出本页数据
-        this.$refs.iTable.exportCsv({
-          filename: '文书屏蔽'
+      exportData(data) {//导出本页数据
+        let header = [];//表头
+        let filter = [];//过滤
+        var option = {};//配置
+        var toExcel;
+        this.columns1.forEach(function(item){
+          if(item.title!='序号'&&item.title!='操作') {
+            header.push(item.title);
+          }
+          if(item.key!='order'&&item.key!='operation') {
+            filter.push(item.key);
+          }
         });
+        option.datas = [{
+          sheetData: data,
+          sheetName: 'sheet',
+          sheetFilter: filter,
+          sheetHeader: header,
+          columnWidths: []
+        }];
+        toExcel = new ExportJsonExcel(option);
+        toExcel.saveExcel();
       },
       setNzzt() {//通过当前阶段状态设置nzzt
         if(this.status=='全部') {
@@ -209,9 +231,15 @@
         this.showBtnNum = 0;
       },
       setDate(fmtDate) {//设置时间
-        fmtDate[0]+=' 00:00:00';
-        fmtDate[1]+=' 00:00:00';
-        this.dateValue = fmtDate;
+        if(fmtDate){
+          fmtDate[0]+=' 00:00:00';
+          fmtDate[1]+=' 00:00:00';
+          this.dateValue = fmtDate;
+        }
+      },
+      searchData(){
+        this.pageNum = 1;
+        this.getDocList(true);
       },
       getStartTime() {//获取初始的开始时间
         let date = new Date();
@@ -230,11 +258,18 @@
         this.pageSize = size;
         this.getDocList();
       },
-      getDocList(getCount){//获取文书列表
+      /*
+     * getCount: 是否获取当前选择条件下的公开信息数量
+     * getAll: 是否获取当前选择条件下的全部数据
+     * */
+      getDocList(getCount,getAll){//获取文书列表
         let _this = this;
         this.isLoading = true;
         if(getCount){//获取总数
           _this.getCount();//获取总条数
+        }
+        if(getAll){//下载全部数据
+          this.$Message.info('获取数据中');
         }
         this.axios.get(webApi.WSPB.AG_GetWSSLs.format({
           startTimeStr: _this.dateValue[0],
@@ -242,22 +277,21 @@
           nzzt: _this.nzzt,//拟制状态(拟制状态 1:待拟制 2:已拟制待审核 4:案管审核退回 8:审核通过;支持位域)
           wslb: _this.wslb=='全部'?'':_this.wslb,//文书类型
           pageNum: _this.pageNum,
-          pageSize: _this.pageSize,
+          pageSize: getAll?_this.total:_this.pageSize,
         })).then(function(res){
-          console.log(res);
+          ;
           if(res.data.code==0){
             let data = res.data.data;//表数据
             data.forEach(function(item,index){ //添加序号
               item.order = (_this.pageNum -1) * _this.pageSize +  index + 1;
             });
             if(data.length>0) {
-              _this.getExamineList(data);//获取审核内容
+              _this.getExamineList(data,getAll);//获取审核内容
             }else {
               _this.infoData = data;
+              _this.isLoading = false;
             }
-
           }
-          _this.isLoading = false;
         }).catch(function(err){
           console.log(err)
         })
@@ -273,7 +307,7 @@
           nzzt: _this.nzzt,//拟制状态(拟制状态 1:待拟制 2:已拟制待审核 4:案管审核退回 8:审核通过;支持位域)
           wslb: _this.wslb=='全部'?'':_this.wslb,//文书类型
         })).then(function(res){
-          console.log(res)
+
           if(res.data.code==0){
             _this.total = res.data.data;
           }
@@ -281,7 +315,11 @@
           console.log(err)
         })
       },
-      getExamineList(data) {//获取审核批复列表
+      /*
+     * data: 获取的列表信息数据
+     * getAll: 是否获取当前选择条件下的全部信息
+     * */
+      getExamineList(data,getAll) {//获取审核批复列表
         let _this = this;
         let count = 0;
         _this.isLoading = true;
@@ -297,7 +335,11 @@
               count++;
             }
             if(count==data.length) {
-              _this.infoData = data;
+              if(getAll){
+                _this.exportData(data);//下载全部数据
+              }else{
+                _this.infoData = data;
+              }
               _this.isLoading = false;
             }
           }).catch(function(err){

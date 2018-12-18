@@ -12,12 +12,7 @@ var webApi = {
     GetWSSHJGs: '/api/WSPB/GetWSSHJGs?bmsah={bmsah}&dwbm={dwbm}&wsbh={wsbh}', //获取文书审核结果列表; HttpMethod:GET; NeedToken:True(承办人, 案管人员)
     GetOriginalWord: '/api/WSPB/GetOriginalWord?bmsah={bmsah}&dwbm={dwbm}&wsbh={wsbh}&wjlj={wjlj}', //获取原始文书文件; HttpMethod:GET; NeedToken:True(承办人)
     GetPublishWord: '/api/WSPB/GetPublishWord?bmsah={bmsah}&dwbm={dwbm}&wsbh={wsbh}&gkbwjlj={gkbwjlj}', //获取公开版文书文件; HttpMethod:GET; NeedToken:True(承办人)
-  },
-//授权控制器
-  Auth : {
-    Login: '/api/Auth/Login?unit={unit}&userName={userName}&password={password}', //登录; HttpMethod:GET; NeedToken:False
-    GetCurrentUser: '/api/Auth/GetCurrentUser', //获取当前用户信息; HttpMethod:GET; NeedToken:True(承办人, 案管人员, 管理员)
-    Logout: '/api/Auth/Logout', //登出; HttpMethod:GET; NeedToken:True(承办人, 案管人员, 管理员)
+    MaskWord: '/api/WSPB/MaskWord', //屏蔽文本; HttpMethod:POST; NeedToken:False
   },
 //系统信息控制器
   SystemInfo : {
@@ -25,6 +20,21 @@ var webApi = {
     GetAJLXs: '/api/SystemInfo/GetAJLXs', //获取所有案件类型列表; HttpMethod:GET; NeedToken:True(承办人, 案管人员, 管理员)
     GetWSLBs: '/api/SystemInfo/GetWSLBs', //获取所有文书类型列表; HttpMethod:GET; NeedToken:True(承办人, 案管人员, 管理员)
     GetSubUnits: '/api/SystemInfo/GetSubUnits', //获取下级单位列表; HttpMethod:GET; NeedToken:True(案管人员)
+  },
+//授权控制器
+  Auth : {
+    Login: '/api/Auth/Login?unit={unit}&userName={userName}&password={password}', //登录; HttpMethod:GET; NeedToken:False
+    AdminLogin: '/api/Auth/AdminLogin?userName={userName}&password={password}', //管理员登录; HttpMethod:GET; NeedToken:False
+    GetCurrentUser: '/api/Auth/GetCurrentUser', //获取当前用户信息; HttpMethod:GET; NeedToken:True(承办人, 案管人员, 管理员)
+    Logout: '/api/Auth/Logout', //登出; HttpMethod:GET; NeedToken:True(承办人, 案管人员, 管理员)
+  },
+//数据导出控制器
+  SJDC : {
+    AG_GetAJGKXXs: '/api/SJDC/AG_GetAJGKXXs?startTimeStr={startTimeStr}&endTimeStr={endTimeStr}&ajlx={ajlx}&dczt={dczt}&pageNum={pageNum}&pageSize={pageSize}', //获取案件公开信息列表; HttpMethod:GET; NeedToken:True(案管人员)
+    AG_CountAJGKXX: '/api/SJDC/AG_CountAJGKXX?startTimeStr={startTimeStr}&endTimeStr={endTimeStr}&ajlx={ajlx}&dczt={dczt}', //计算案件公开信息数量; HttpMethod:GET; NeedToken:True(案管人员)
+    AG_GetWSSLs: '/api/SJDC/AG_GetWSSLs?startTimeStr={startTimeStr}&endTimeStr={endTimeStr}&wslb={wslb}&dczt={dczt}&pageNum={pageNum}&pageSize={pageSize}', //获取文书公开信息列表; HttpMethod:GET; NeedToken:True(案管人员)
+    AG_CountWSSL: '/api/SJDC/AG_CountWSSL?startTimeStr={startTimeStr}&endTimeStr={endTimeStr}&wslb={wslb}&dczt={dczt}', //计算文书公开信息数量; HttpMethod:GET; NeedToken:True(案管人员)
+    CreatePackage: '/api/SJDC/CreatePackage?flag={flag}&startTimeStr={startTimeStr}&endTimeStr={endTimeStr}', //生成导出数据包; HttpMethod:GET; NeedToken:True(案管人员)
   },
 //实时提醒
   SSTX : {
@@ -37,14 +47,22 @@ var webApi = {
     AG_CountWSSL: '/api/SSTX/AG_CountWSSL?startTimeStr={startTimeStr}&endTimeStr={endTimeStr}&dwbm={dwbm}&bhxj={bhxj}&gkzt={gkzt}&nzzt={nzzt}&wslb={wslb}', //计算文书公开信息数量(案管); HttpMethod:GET; NeedToken:True(案管人员)
     CBR_CountWSSL: '/api/SSTX/CBR_CountWSSL?startTimeStr={startTimeStr}&endTimeStr={endTimeStr}&gkzt={gkzt}&nzzt={nzzt}&wslb={wslb}', //计算文书公开信息数量(承办人); HttpMethod:GET; NeedToken:True(承办人)
   },
-//数据导出控制器
-  SJDC : {
-    AG_GetAJGKXXs: '/api/SJDC/AG_GetAJGKXXs?startTimeStr={startTimeStr}&endTimeStr={endTimeStr}&ajlx={ajlx}&dczt={dczt}&pageNum={pageNum}&pageSize={pageSize}', //获取案件公开信息列表; HttpMethod:GET; NeedToken:True(案管人员)
-    AG_CountAJGKXX: '/api/SJDC/AG_CountAJGKXX?startTimeStr={startTimeStr}&endTimeStr={endTimeStr}&ajlx={ajlx}&dczt={dczt}', //计算案件公开信息数量; HttpMethod:GET; NeedToken:True(案管人员)
-    AG_GetWSSLs: '/api/SJDC/AG_GetWSSLs?startTimeStr={startTimeStr}&endTimeStr={endTimeStr}&wslb={wslb}&dczt={dczt}&pageNum={pageNum}&pageSize={pageSize}', //获取文书公开信息列表; HttpMethod:GET; NeedToken:True(案管人员)
-    AG_CountWSSL: '/api/SJDC/AG_CountWSSL?startTimeStr={startTimeStr}&endTimeStr={endTimeStr}&dczt={dczt}&wslb={wslb}', //计算文书公开信息数量; HttpMethod:GET; NeedToken:True(案管人员)
-    CreatePackage: '/api/SJDC/CreatePackage?flag={flag}&startDate={startDate}&endDate={endDate}', //生成导出数据包; HttpMethod:POST; NeedToken:False
-    DownloadPackage: '/api/SJDC/DownloadPackage?packageName={packageName}', //下载包; HttpMethod:POST; NeedToken:False
+//信息发送控制器
+  XXFS : {
+    GetAJSLTZs: '/api/XXFS/GetAJSLTZs?startTimeStr={startTimeStr}&endTimeStr={endTimeStr}&fszt={fszt}&keywords={keywords}', //获取案件受理通知列表; HttpMethod:GET; NeedToken:True(管理员)
+  },
+//
+  Stat : {
+    GetOpenCaseOverview: '/api/Stat/GetOpenCaseOverview?dwbm={dwbm}&bhxj={bhxj}&startTimeStr={startTimeStr}&endTimeStr={endTimeStr}', //获取案件公开总览信息; HttpMethod:GET; NeedToken:True(案管人员)
+    GetOpenDocOverview: '/api/Stat/GetOpenDocOverview?dwbm={dwbm}&bhxj={bhxj}&startTimeStr={startTimeStr}&endTimeStr={endTimeStr}', //获取文书公开总览信息; HttpMethod:GET; NeedToken:True(案管人员)
+    GetOpenCaseTableByDw: '/api/Stat/GetOpenCaseTableByDw?dwbm={dwbm}&bhxj={bhxj}&startTimeStr={startTimeStr}&endTimeStr={endTimeStr}', //获取按案件类别统计的案件公开趋势情况; HttpMethod:GET; NeedToken:True(案管人员)
+    GetOpenCaseTrendByAjlb: '/api/Stat/GetOpenCaseTrendByAjlb?dwbm={dwbm}&bhxj={bhxj}&startTimeStr={startTimeStr}&endTimeStr={endTimeStr}', //获取案件类别公开趋势; HttpMethod:GET; NeedToken:True(案管人员)
+    GetOpenCasePropByDw: '/api/Stat/GetOpenCasePropByDw?dwbm={dwbm}&bhxj={bhxj}&startTimeStr={startTimeStr}&endTimeStr={endTimeStr}', //获取案件公开占比情况; HttpMethod:GET; NeedToken:True(案管人员)
+    GetOpenCaseByAjlb: '/api/Stat/GetOpenCaseByAjlb?dwbm={dwbm}&bhxj={bhxj}&startTimeStr={startTimeStr}&endTimeStr={endTimeStr}', //获取按案件类别统计的公开情况列表; HttpMethod:GET; NeedToken:True(案管人员)
+    GetOpenCaseTableByPerson: '/api/Stat/GetOpenCaseTableByPerson?dwbm={dwbm}&bhxj={bhxj}&startTimeStr={startTimeStr}&endTimeStr={endTimeStr}&cbr={cbr}', //获取检察官公开情况列表; HttpMethod:GET; NeedToken:True(案管人员)
+    GetOpenDocTableByDw: '/api/Stat/GetOpenDocTableByDw?dwbm={dwbm}&bhxj={bhxj}&startTimeStr={startTimeStr}&endTimeStr={endTimeStr}', //获取指定单位文书公开情况列表; HttpMethod:GET; NeedToken:True(案管人员)
+    GetOpenDocTableByWslb: '/api/Stat/GetOpenDocTableByWslb?dwbm={dwbm}&bhxj={bhxj}&startTimeStr={startTimeStr}&endTimeStr={endTimeStr}', //获取按类别统计的文书公开情况列表; HttpMethod:GET; NeedToken:True(案管人员)
+    GetOpenDocTableByPerson: '/api/Stat/GetOpenDocTableByPerson?dwbm={dwbm}&bhxj={bhxj}&startTimeStr={startTimeStr}&endTimeStr={endTimeStr}&cbr={cbr}', //获取按检察官统计的文书公开情况列表; HttpMethod:GET; NeedToken:True(案管人员)
   },
 }
 

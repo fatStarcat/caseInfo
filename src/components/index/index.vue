@@ -2,7 +2,7 @@
     <div id="index">
       <!--头部-->
       <div id="index-header">
-        <header-bar @modShow="toggleModal"></header-bar>
+        <header-bar @modShow="modShow=true"></header-bar>
       </div>
       <!--内容-->
       <div id="index-content">
@@ -12,7 +12,7 @@
         </div>
         <!--功能区-->
         <div id="main-content">
-          <router-view/>
+          <router-view></router-view>
         </div>
       </div>
       <!--底部-->
@@ -20,8 +20,12 @@
         <!--<footer-bar></footer-bar>-->
       </div>
       <!--退出提示框-->
-      <my-modal @cancel="toggleModal" :content="modContent" :show="modShow">
+      <my-modal @confirm="exit" @cancel="closeModal" :content="modContent" v-show="modShow">
       </my-modal>
+      <!--重新登录-->
+      <re-login @cancel="closeModal" v-show="relShow"></re-login>
+      <!--请求失败提示-->
+      <re-fail @reAgain="reAgain" v-show="failShow"></re-fail>
     </div>
 </template>
 
@@ -29,27 +33,48 @@
     import headerBar from './header'
     import footerBar from './footer'
     import sideMenu from './sideMenu'
+    import reLogin from './modalReLogin'
+    import reFail from './modalFail'
     export default {
         name: "index",
       data(){
           return{
-            modTitle: '案件信息智慧公开系统',
             modContent: '确定要退出吗?',
             modShow: false,
+            failShow: false,
+            relShow: false,//重新登录提示框显示
+            config: null,//请求配置
           }
       },
-      components: {headerBar,footerBar,sideMenu},
+      components: {headerBar,footerBar,sideMenu,reLogin,reFail},
       methods: {
-        toggleModal() {
-          this.modShow = !this.modShow;
+        reAgain(){//重新请求
+          // console.log(this.config);
+          // this.axios(this.config);
+          location.reload();
+        },
+        closeModal() {//关闭提示框
+          this.modShow = false;
+          this.relShow = false;
+        },
+        exit(){
+          localStorage.setItem('Host','');
+          invoker.exit();
         },
       },
       created(){
+        let _this = this;
         webApi.Host = localStorage.getItem('Host');
+        this.$bus.$on('relModal',function(config){
+          _this.relShow = config.relShow;
+        });
+        this.$bus.$on('failModal',function(config){
+          _this.failShow = config.failShow;
+          _this.config = config.config;
+        });
         console.log(webApi.Host)
       },
       mounted() {
-
         console.log(invoker)
       }
 

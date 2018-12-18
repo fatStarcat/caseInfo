@@ -56,7 +56,7 @@
         }
         _this.axios.get(webApi.Host + webApi.SystemInfo[api])
           .then(function(res){
-            console.log(res);
+            ;
             let nodes = [];
             let root = {};//根节点
             let units = res.data.data;
@@ -159,11 +159,23 @@
             if(showNodes.length>0){
               _this.zTreeObj.hideNodes(_this.hideNodes);
               for(let i = 0; i < showNodes.length ; i++) {
-                let pathOfOne = showNodes[i].getPath();
-                for(let j = 0; j < pathOfOne.length; j++) {
+                let currentNodes = showNodes[i];
+                let pathOfOne = currentNodes.getPath();
+                for(let j = 0; j < pathOfOne.length; j++) {//获取父级节点
                   nodes.push(pathOfOne[j]);
                 }
+                getChildNodes(currentNodes);//获取子节点
               }
+              function getChildNodes(node){
+                let children = node.children;
+                if(children) {
+                  for(let i = 0; i < children.length; i++){
+                    nodes.push(children[i]);
+                    getChildNodes(children[i]);
+                  }
+                }
+              }
+
               _this.zTreeObj.showNodes(nodes);
             }
           }

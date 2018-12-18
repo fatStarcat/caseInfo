@@ -989,7 +989,7 @@
           var childHtml = [];
           var children = data.nodeChildren(setting, node);
           if (children && children.length > 0) {
-            //make child html first, because checkType
+            //make child error first, because checkType
             childHtml = view.appendNodes(setting, level + 1, children, node, -1, initFlag, openFlag && node.open);
           }
           if (openFlag) {

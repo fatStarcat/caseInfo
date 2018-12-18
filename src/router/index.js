@@ -11,20 +11,9 @@ import Index from '@/components/index/index' //主页
 import realTimeReminding from '@/components/pages/realTimeReminding/realTimeReminding'
   //实时提醒(程序信息公开信息表格)
 import caseInfo from '@/components/pages/realTimeReminding/caseInfo'
-  //案件不公开
-import caseNotOpen from '@/components/pages/realTimeReminding/caseNotOpen'
-  //案件已公开
-import caseOpen from '@/components/pages/realTimeReminding/caseOpen'
-  //案件未公开
-import caseUndisclosed from '@/components/pages/realTimeReminding/caseUndisclosed'
   //实时提醒(法律文书公开信息表格)
 import docInfo from '@/components/pages/realTimeReminding/docInfo'
-  //文书不公开
-import docNotOpen from '@/components/pages/realTimeReminding/docNotOpen'
-  //文书已公开
-import docOpen from '@/components/pages/realTimeReminding/docOpen'
-  //文书未公开
-import docUndisclosed from '@/components/pages/realTimeReminding/docUndisclosed'
+
 
 //文书屏蔽(表格)主页/承办人
 import documentShield from '@/components/pages/documentShield/documentShield'
@@ -96,47 +85,11 @@ export default new Router({
           name: 'caseInfo',
           component: caseInfo,
         },
-        //实时提醒(案件不公开)
-        {
-          path: '/caseNotOpen',
-          name: 'caseNotOpen',
-          component: caseNotOpen,
-        },
-        //实时提醒(案件已公开)
-        {
-          path: '/caseOpen',
-          name: 'caseOpen',
-          component: caseOpen,
-        },
-        //实时提醒(未公开)
-        {
-          path: '/caseUndisclosed',
-          name: 'caseUndisclosed',
-          component: caseUndisclosed,
-        },
         //实时提醒(文书信息)
         {
           path: '/docInfo',
           name: 'docInfo',
           component: docInfo,
-        },
-        //实时提醒(文书不公开)
-        {
-          path: '/docNotOpen',
-          name: 'docNotOpen',
-          component: docNotOpen,
-        },
-        //实时提醒(文书公开)
-        {
-          path: '/docOpen',
-          name: 'docOpen',
-          component: docOpen,
-        },
-        //实时提醒(文书应公开未公开)
-        {
-          path: '/docUndisclosed',
-          name: 'docUndisclosed',
-          component: docUndisclosed,
         },
         //文书屏蔽(表格)/承办人
         {

@@ -53,7 +53,7 @@ var polyfill = function () {
     DOM 操作 API
 */
 
-// 根据 html 代码片段创建 dom 对象
+// 根据 error 代码片段创建 dom 对象
 function createElemByHTML(html) {
     var div = void 0;
     div = document.createElement('div');
@@ -424,7 +424,7 @@ DomElement.prototype = {
         }
     },
 
-    // 获取 html
+    // 获取 error
     html: function html(value) {
         var elem = this[0];
         if (value == null) {
@@ -634,14 +634,14 @@ var config = {
     // 对粘贴的文字进行自定义处理，返回处理后的结果。编辑器会将处理后的结果粘贴到编辑区域中。
     // IE 暂时不支持
     pasteTextHandle: function pasteTextHandle(content) {
-        // content 即粘贴过来的内容（html 或 纯文本），可进行自定义处理然后返回
+        // content 即粘贴过来的内容（error 或 纯文本），可进行自定义处理然后返回
         return content;
     },
 
     // onchange 事件
-    // onchange: function (html) {
-    //     // html 即变化之后的内容
-    //     console.log(html)
+    // onchange: function (error) {
+    //     // error 即变化之后的内容
+    //     console.log(error)
     // },
 
     // 是否显示添加网络图片的 tab
@@ -775,7 +775,7 @@ function getRandom(prefix) {
     return prefix + Math.random().toString().slice(2);
 }
 
-// 替换 html 特殊字符
+// 替换 error 特殊字符
 function replaceHtmlSymbol(html) {
     if (html == null) {
         return '';
@@ -2142,7 +2142,7 @@ Emoticon.prototype = {
             var emotType = emotData.type;
             var content = emotData.content || [];
 
-            // 这一组表情最终拼接出来的 html
+            // 这一组表情最终拼接出来的 error
             var faceHtml = '';
 
             // emoji 表情
@@ -3042,7 +3042,7 @@ function getPasteHtml(e, filterStyle, ignoreImg) {
         pasteText = window.clipboardData && window.clipboardData.getData('text');
     } else {
         pasteText = clipboardData.getData('text/plain');
-        pasteHtml = clipboardData.getData('text/html');
+        pasteHtml = clipboardData.getData('text/error');
     }
     if (!pasteHtml && pasteText) {
         pasteHtml = '<p>' + replaceHtmlSymbol(pasteText) + '</p>';
@@ -3052,7 +3052,7 @@ function getPasteHtml(e, filterStyle, ignoreImg) {
     }
 
     // 过滤word中状态过来的无用字符
-    var docSplitHtml = pasteHtml.split('</html>');
+    var docSplitHtml = pasteHtml.split('</error>');
     if (docSplitHtml.length === 2) {
         pasteHtml = docSplitHtml[0];
     }
@@ -3170,7 +3170,7 @@ Text.prototype = {
         this.html('<p><br></p>');
     },
 
-    // 获取 设置 html
+    // 获取 设置 error
     html: function html(val) {
         var editor = this.editor;
         var $textElem = editor.$textElem;

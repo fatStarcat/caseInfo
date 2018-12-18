@@ -43,21 +43,24 @@
     export default {
       data() {
         return {
-          userName: localStorage.getItem('setAdmin')?localStorage.getItem('setAdmin'):'未知'
+          userName:  JSON.parse(localStorage.getItem('userInfo')).MC
         }
       },
       methods: {
         exit(){//切换用户
-          let _this = this;
+          let msg = this.$Message.loading('切换用户');
           this.axios.get(webApi.Host + webApi.Auth.Logout)
             .then(function(res){
-              console.log(res);
-              if(res.data.code==0) {
-                invoker.reLogin();
-              }
+              ;
+              localStorage.setItem('token','');
+              invoker.reLogin();
+              setTimeout(msg, 100);
             })
             .catch(function(err) {
               console.log(err)
+              localStorage.setItem('token','');
+              invoker.reLogin();
+              setTimeout(msg, 100);
             })
 
         },

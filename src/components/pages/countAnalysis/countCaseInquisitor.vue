@@ -2,16 +2,17 @@
   <div id="caseInquisitor">
     <div id="main">
       <!--图表-->
-      <div id="echarts-wrap">
-        <div id="echarts" ref="inquisitorEchart">
+      <div id="echarts-wrap" >
+        <div id="echarts" ref="echartsWrap">
+          <rank-chart :config="config" :text="chartText" :chartData="chartData">
 
+          </rank-chart>
         </div>
-        <!--表格说明-->
-        <span>公开率</span>
+
       </div>
       <!--表格-->
       <div id="table" ref="table">
-        <Table :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
+        <Table :loading="isLoading" :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
         <!--导出数据-->
         <div id="exportData">
           <button class="export-all btn-tabDefault-large">导出全部数据</button>
@@ -27,35 +28,46 @@
   export default {
     data() {
       return {
-        inquisitorEchart: null,//检察官图表
+        chartText: '检察官公开案件排行榜',//图表名称
         tableHeight: '',//表格高度
         showTable: false,//显示表格
-        textStyle: {
-          fontSize: 16,
-          fontFamily: 'PingFang-SC-Bold',
-          fontWeight: 'bold',
-          color: 'rgba(85,85,85,1)'
-        },
+        isLoading: false,//加载
+         config: {//图表配置项
+           xAxis:{
+              type : 'value',
+                axisTick: {
+                alignWithLabel: true
+              },
+              axisLabel: {
+                fontSize:14,
+                  fontFamily: 'PingFang-SC-Regular',
+                  fontWeight: 400,
+                  color: 'rgba(85,85,85,1)',
+                  formatter: '{value}%'
+              }
+            }
+         },
         columns1: [//表头数据
           {
             title: '序号',
             key: 'order',
             align: 'center',
-            width: 100
+            maxWidth: 80
           },
           {
             title: '检察官',
-            key: 'inquisitor',
+            key: 'CBR',
             align: 'center',
+            maxWidth: 100
           },
           {
             title: '单位名称',
-            key: 'company',
+            key: 'CBDW_MC',
             align: 'center',
           },
           {
             title: '案件总量',
-            key: 'count',
+            key: 'ZL',
             align: 'center',
             render: (h, params) => {
               var _this = this;
@@ -79,13 +91,13 @@
                       _this.showTable = true;
                     }
                   }
-                }, _this.infoData[params.index].count)
+                }, _this.infoData[params.index].ZL)
               ]);
             }
           },
           {
             title: '已公开',
-            key: 'open',
+            key: 'GKSL',
             align: 'center',
             render: (h, params) => {
               var _this = this;
@@ -109,13 +121,13 @@
                       _this.showTable = true;
                     }
                   }
-                }, _this.infoData[params.index].open)
+                }, _this.infoData[params.index].GKSL)
               ]);
             }
           },
           {
             title: '本系统已公开统一系统未公开',
-            key: 'shouldOpen',
+            key: 'TYWGKBXTYGKSL',
             align: 'center',
             render: (h, params) => {
               var _this = this;
@@ -139,13 +151,13 @@
                       _this.showTable = true;
                     }
                   }
-                }, _this.infoData[params.index].shouldOpen)
+                }, _this.infoData[params.index].TYWGKBXTYGKSL)
               ]);
             }
           },
           {
             title: '不公开',
-            key: 'notOpen',
+            key: 'BGKSL',
             align: 'center',
             render: (h, params) => {
               var _this = this;
@@ -169,51 +181,109 @@
                       _this.showTable = true;
                     }
                   }
-                }, _this.infoData[params.index].notOpen)
+                }, _this.infoData[params.index].BGKSL)
               ]);
             }
           },
           {
             title: '公开率',
-            key: 'ratio',
+            key: 'GKL',
             align: 'center',
+            maxWidth: 100
           },
         ],
         infoData: [//表格数据
-        ]
+        ],
+        chartData: [],//图表数据
+        dateValue: '',//时间
+        dwbm: '',//单位编码
+        bhxj: '',//包含下级
+        cbr: '',//承办人
       }
     },
     created() {
-      let data = jsonData.caseInquisitor;
-      this.$bus.$emit('setInquisitor',true);
-      data = data.sort(this.compareData('ratio'));
-      data.forEach(function(item,i) {
-        item.order = i + 1;
-      });
-      this.infoData = data;
+
     },
     mounted() {
+      this.initBus();
       this.setTableHeight(this);//设置表格高度
-      this.initInquisitorEchart();
-      this.watchEcharts();
+    },
+    beforeDestroy() {
+      this.$bus.$off('countSearch');
     },
     methods: {
-      compareData(property,noSplit) {//比较公开率
+      initBus() {
+        let _this = this;
+        this.$bus.$emit('setInquisitor',true);
+        this.$bus.$on('countSearch',function(val){
+          _this.dwbm = val.dwbm;
+          _this.dateValue = val.dateValue;
+          _this.bhxj = val.bhxj;
+          _this.cbr = val.cbr;
+          _this.$bus.$emit('myChartLoading',true);
+          _this.getOpenCaseTableByPerson();
+        });
+        this.$bus.$emit('loadComplete',true);
+      },
+      //获取检察官公开案件列表
+      getOpenCaseTableByPerson() {
+        let _this = this;
+        let config = {
+          dwbm: this.dwbm,
+          bhxj: this.bhxj,
+          startTimeStr: this.dateValue[0],
+          endTimeStr: this.dateValue[1],
+          cbr: this.cbr
+        };
+        this.isLoading = true;
+        this.axios.get(webApi.Stat.GetOpenCaseTableByPerson.format(config))
+          .then(function(res){
+            ;
+            _this.isLoading = false;
+            if(res.data.code === 0){
+              let data = res.data.data.Table;
+              let cData = [];
+              if(data.length > 0) {
+                data.sort(_this.compareData('GKL')).reverse();
+              }
+              //检察官案件公开排行榜数据
+              data.forEach(function(item,index){
+                item.order = index + 1;
+                //图表数据
+                cData.push({
+                  name: item.CBR,
+                  value: item.GKL
+                })
+              });
+              _this.setChartHeight(data);
+              _this.chartData = cData;
+              _this.infoData = data;
+              // _this.$bus.$emit('resetMyChart',true);
+            }
+          })
+          .catch(function(err){
+            console.log(err)
+            _this.isLoading = false;
+          })
+      },
+      //设置图表高度
+      setChartHeight(data) {
+        let chartWrap = this.$refs.echartsWrap;
+        let height = data.length * 35;
+        if(height < 500) {
+          height = 500;
+        }
+        chartWrap.style.height = height + 'px';
+      },
+      compareData(property) {//比较公开率
         return function(pre,next) {
-          let valPre = noSplit?pre[property]:pre[property].split('%')[0];
-          let valNext = noSplit?next[property]:next[property].split('%')[0];
+          let valPre = pre[property].split('%')[0];
+          let valNext = next[property].split('%')[0];
           return valNext - valPre;
         }
       },
       closeTable() {
         this.showTable = false;
-      },
-      watchEcharts() {//监听浏览器宽度改变
-        window.addEventListener('resize',this.repaintEcharts);
-      },
-      repaintEcharts() {//重绘图表
-        this.inquisitorEchart.dispose();
-        this.initInquisitorEchart();
       },
       //检察官公开文书排行榜
       initInquisitorEchart() {
@@ -331,9 +401,6 @@
       }
     },
     destroyed() {
-
-      window.removeEventListener('resize',this.repaintEcharts);
-      this.inquisitorEchart.dispose();
     },
   }
 </script>
@@ -357,8 +424,10 @@
         position: relative;
         float: right;
         text-align: center;
+        width: 500px;
+        height: calc( 100% - 35px - 38px - 20px);
+        overflow-y: auto;
         #echarts {
-          width: 500px;
           height: 500px;
         }
       }

@@ -5,9 +5,12 @@
       <div id="echarts-wrap" >
         <!--案件公开排行榜-->
        <div class="echarts-wrap">
-         <div class='echarts' ref="caseRankEchart"></div>
-         <!--表格说明-->
-         <span>公开率</span>
+         <!--<div class='echarts' ref="caseRankEchart"></div>-->
+         <!--&lt;!&ndash;表格说明&ndash;&gt;-->
+         <!--<span>公开率</span>-->
+         <rank-chart :config="config" :text="chartText" :chartData="chartData">
+
+         </rank-chart>
        </div>
         <!--案件公开-->
         <div class="echarts-wrap">
@@ -23,7 +26,7 @@
       </div>
       <!--表格-->
       <div id="table" ref="table">
-        <Table :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
+        <Table :loading='isLoading' :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
         <!--导出数据-->
         <div id="exportData">
           <button class="export-all btn-tabDefault-large">导出全部数据</button>
@@ -44,11 +47,22 @@
         tableHeight: '',//表格高度
         showTable: false,//弹出表格显示
         showReturn: false,//显示返回按钮
-        textStyle: {
-          fontSize: 16,
-          fontFamily: 'PingFang-SC-Bold',
-          fontWeight: 'bold',
-          color: 'rgba(85,85,85,1)'
+        isLoading: false,//显示加载
+        chartText: '案件公开排行榜',//
+        config: {//图表配置项
+          xAxis:{
+            type : 'value',
+            axisTick: {
+              alignWithLabel: true
+            },
+            axisLabel: {
+              fontSize:14,
+              fontFamily: 'PingFang-SC-Regular',
+              fontWeight: 400,
+              color: 'rgba(85,85,85,1)',
+              formatter: '{value}%'
+            }
+          }
         },
         columns1: [//表头数据
           {
@@ -59,12 +73,12 @@
           },
           {
             title: '单位',
-            key: 'company',
+            key: 'CBDW_MC',
             align: 'center',
           },
           {
             title: '案件总量',
-            key: 'count',
+            key: 'ZL',
             align: 'center',
             render: (h, params) => {
               var _this = this;
@@ -88,13 +102,13 @@
                       _this.showTable = true;
                     }
                   }
-                }, _this.infoData[params.index].count)
+                }, _this.infoData[params.index].ZL)
               ]);
             }
           },
           {
             title: '已公开',
-            key: 'open',
+            key: 'GKSL',
             align: 'center',
             render: (h, params) => {
               var _this = this;
@@ -118,13 +132,13 @@
                       _this.showTable = true;
                     }
                   }
-                }, _this.infoData[params.index].open)
+                }, _this.infoData[params.index].GKSL)
               ]);
             }
           },
           {
             title: '本系统已公开统一系统未公开',
-            key: 'shouldOpen',
+            key: 'TYWGKBXTYGK',
             align: 'center',
             render: (h, params) => {
               var _this = this;
@@ -148,13 +162,13 @@
                       _this.showTable = true;
                     }
                   }
-                }, _this.infoData[params.index].shouldOpen)
+                }, _this.infoData[params.index].TYWGKBXTYGK)
               ]);
             }
           },
           {
             title: '不公开',
-            key: 'notOpen',
+            key: 'BGKSL',
             align: 'center',
             render: (h, params) => {
               var _this = this;
@@ -178,13 +192,13 @@
                       _this.showTable = true;
                     }
                   }
-                }, _this.infoData[params.index].notOpen)
+                }, _this.infoData[params.index].BGKSL)
               ]);
             }
           },
           {
             title: '公开率',
-            key: 'ratio',
+            key: 'GKL',
             align: 'center',
           },
         ],
@@ -199,28 +213,161 @@
           legend: [],
           title: '案件公开比例',
           color: ['#4589FD','#34ABFE','#8BB3F7']
-        }
+        },
+        chartData: [],//图表数据
+        //父组件传递数据
+        dateValue: '',//时间
+        dwbm: '',//单位编码
+        bhxj: '',//包含下级
+        openCaseProp: [],//案件公开占比数据
       }
     },
     created() {
-      let data = jsonData.caseArea;
-      this.$bus.$emit('setInquisitor',false);
-      data = data.sort(this.compareData('ratio'));
-      data.forEach(function(item,i) {
-        item.order = i + 1;
-        if(i==data.length-1) {
-          item.order = '总计';
-        }
-      });
-      this.infoData = data;
+      // let data = jsonData.caseArea;
+      // this.$bus.$emit('setInquisitor',false);
+      // data = data.sort(this.compareData('ratio'));
+      // data.forEach(function(item,i) {
+      //   item.order = i + 1;
+      //   if(i==data.length-1) {
+      //     item.order = '总计';
+      //   }
+      // });
+      // this.infoData = data;
     },
     mounted() {
       this.setTableHeight(this);//设置表格高度
-      this.initcaseRankEchart();//案件公开排行榜
-      this.initcaseAreaEchart();//案件
+      this.initBus();
       this.watchEcharts();
     },
     methods: {
+      initBus() {
+        let _this = this;
+        this.$bus.$emit('setInquisitor',false);
+        this.$bus.$on('countSearch',function(val){
+          _this.dwbm = val.dwbm;
+          _this.dateValue = val.dateValue;
+          _this.bhxj = val.bhxj;
+          _this.$bus.$emit('myChartLoading',true);
+          _this.initChartAndShowLoad();//显示加载
+          _this.getOpenCasePropByDw();//获取案件公开占比情况
+          _this.getOpenCaseInfo();//获取各单位案件公开数据列表
+        });
+        this.$bus.$emit('loadComplete',true);
+      },
+      getOpenCaseInfo(){//获取案件公开列表信息
+        let _this = this;
+        let config = {
+          dwbm: this.dwbm,
+          bhxj: this.bhxj,
+          startTimeStr: this.dateValue[0],
+          endTimeStr: this.dateValue[1],
+        };
+        this.isLoading = true;
+        this.axios.get(webApi.Stat.GetOpenCaseTableByDw.format(config))
+          .then(function(res){
+            ;
+            if(res.data.code === 0) {
+              let data = res.data.data;
+              let cData = [];
+              if(data.length > 0) {
+                data = _this.handleDocListData(data);
+                data.forEach(function(item) {
+                  //图表数据
+                  cData.push({
+                    name: item.CBDW_MC,
+                    value: item.GKL
+                  })
+                })
+              }
+              _this.chartData = cData.reverse();
+              _this.infoData = data;
+              _this.initcaseAreaEchart();
+              // _this.$bus.$emit('resetMyChart',true);
+            }
+            _this.isLoading = false;
+          })
+          .catch(function(err){
+            console.log(err);
+            _this.isLoading = false;
+          })
+      },
+      //获取案件公开占比情况
+      getOpenCasePropByDw() {
+        let _this = this;
+        let config = {
+          dwbm: this.dwbm,
+          bhxj: this.bhxj,
+          startTimeStr: this.dateValue[0],
+          endTimeStr: this.dateValue[1],
+        };
+        this.axios.get(webApi.Stat.GetOpenCasePropByDw.format(config))
+          .then(function(res){
+            ;
+            if(res.data.code===0) {
+              let data = res.data.data;
+              _this.openCaseprop = data;
+              data = _this.handleOpenCasePropData(data);
+              _this.pieData.title = '案件公开比例';
+              _this.pieData.data = data.relData;
+              _this.pieData.legend = [];
+              _this.initcaseAreaEchart();//案件公开占比
+            }
+          })
+          .catch(function(err){
+            console.log(err);
+          })
+      },
+      handleDocListData(data) {//处理表格数据
+        data.sort(compare('GKL'));
+        function compare(property) {
+          return function(pre,next) {
+            let preVal = pre[property].split('%')[0];
+            let nextVal = next[property].split('%')[0];
+            return  nextVal -  preVal;
+          }
+        }
+        data.forEach(function(item,index){
+          item.order = index + 1;
+        });
+        return data;
+      },
+      handleOpenCasePropData(data) {//处理公开占比数据
+        let type = '';
+        let relData = [];
+        // let legendData = [];
+        for(let i in data) {
+          if(i === 'zl') {//总量
+            continue;
+          }
+          if(i==='bgksl') {
+            type = '不公开';
+          }else if(i==="tyywgksl") {
+            type = '统一业务系统未公开';
+          }else if(i==="tywgkbxtygk") {
+             type = '统一业务系统未公开本系统已公开';
+          }
+          relData.push({
+            name: type,
+            value: data[i]
+          });
+          // legendData.push(type);
+        }
+        return {
+          relData: relData,
+          // legendData: legendData
+        }
+
+      },
+      initChartAndShowLoad() {
+        if(!this.caseAreaEchart) {
+          this.caseAreaEchart = this.$echarts.init(this.$refs.caseAreaEchart);
+        }
+        this.caseAreaEchart.showLoading({//加载中
+          animation:false,
+          text : 'loading',
+          textStyle : {fontSize : 20}
+        });
+      },
       compareData(property,noSplit) {//比较公开率
         return function(pre,next) {
           if(!pre[property]||!next[property]) {
@@ -245,12 +392,17 @@
       },
       //案件类型占比
       initcaseAreaEchart() {
+        console.log('pie',this.pieData)
         var _this = this;
-        this.caseAreaEchart = this.$echarts.init(this.$refs.caseAreaEchart);
         var option = {
           title: {
             text: this.pieData.title,
-            textStyle: _this.textStyle,
+            textStyle: {
+              fontSize: 16,
+              fontFamily: 'PingFang-SC-Bold',
+              fontWeight: 'bold',
+              color: 'rgba(85,85,85,1)'
+            },
             x: 'center'
           },
           tooltip : {
@@ -289,6 +441,7 @@
         };
 
         this.caseAreaEchart.setOption(option);
+        this.caseAreaEchart.hideLoading();
         (this.pieData.legend.length==0)&&(this.caseAreaEchart.on('click',this.selectCaseType));
       },
       //案件公开排行榜图表
@@ -446,7 +599,7 @@
     },
     destroyed() {
       window.removeEventListener('resize',this.repaintEcharts);
-      this.caseRankEchart.dispose();
+      // this.caseRankEchart.dispose();
       this.caseAreaEchart.dispose();
     },
   }
@@ -473,12 +626,14 @@
         height: calc( 100% - 35px - 38px - 20px);
         overflow-y: auto;
         .echarts-wrap {
+          height: 500px;
           text-align: center;
           margin-bottom: 50px;
         }
         .echarts {
-          height: 500px;
+          height:  100%;
         }
+
       }
     }
   }

@@ -46,7 +46,7 @@
                 if(res.data.code==0) {
                   localStorage.setItem('AJLX',JSON.stringify(res.data.data));
                 }
-                console.log(res);
+                ;
               })
               .catch(function(err){
                 console.log(err);
@@ -58,7 +58,7 @@
                 if(res.data.code==0) {
                   localStorage.setItem('WSLX',JSON.stringify(res.data.data));
                 }
-                console.log(res);
+                ;
               })
               .catch(function(err){
                 console.log(err);
@@ -89,7 +89,7 @@
           this.getDocType();//获取文书类型
         },
         mounted() {
-          if(this.$route.path == "/index"||this.$route.path == '/docInfo'||this.$route.path == '/caseInfo'||this.$route.path == '/caseNotOpen'||this.$route.path == '/caseOpen'||this.$route.path == '/caseUndisclosed'||this.$route.path == "/docNotOpen"||this.$route.path == "/docOpen"||this.$route.path == "/docUndisclosed") {
+          if(this.$route.path == "/index"||this.$route.path == '/docInfo'||this.$route.path == '/caseInfo') {
             this.currNum = 'index';
           }else if(this.$route.path == "/documentShield" || this.$route.path == "/docShieldAdmin" ||this.$route.path == '/revise'|| this.$route.path == '/drafting'|| this.$route.path == '/examine'|| this.$route.path == '/look') {
             this.currNum = '1';

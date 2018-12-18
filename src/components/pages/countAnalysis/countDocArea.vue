@@ -5,9 +5,13 @@
       <div id="echarts-wrap" >
         <!--文书公开排行榜-->
         <div class="echarts-wrap">
-          <div class='echarts' ref="docRankEchart"></div>
-          <!--表格说明-->
-          <span>公开率</span>
+          <!--<div class='echarts' ref="docRankEchart"></div>-->
+          <!--<span>公开率</span>-->
+          <!--&lt;!&ndash;表格说明&ndash;&gt;-->
+          <rank-chart :config="config" :text="chartText" :chartData="chartData">
+
+          </rank-chart>
+
         </div>
         <!--文书公开-->
         <div class="echarts-wrap">
@@ -24,7 +28,7 @@
       </div>
       <!--表格-->
       <div id="table" ref="table">
-        <Table :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
+        <Table :loading="isLoading" :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
         <!--导出数据-->
         <div id="exportData">
           <button class="export-all btn-tabDefault-large">导出全部数据</button>
@@ -45,11 +49,22 @@
         tableHeight: '',//表格高度
         showTable: false,//弹出表格显示
         showReturn: false,//显示返回按钮
-        textStyle: {
-          fontSize: 16,
-          fontFamily: 'PingFang-SC-Bold',
-          fontWeight: 'bold',
-          color: 'rgba(85,85,85,1)'
+        isLoading: false,//显示加载
+        chartText: '文书公开排行榜',//柱状图名称
+        config: {//图表配置项
+          xAxis:{
+            type : 'value',
+            axisTick: {
+              alignWithLabel: true
+            },
+            axisLabel: {
+              fontSize:14,
+              fontFamily: 'PingFang-SC-Regular',
+              fontWeight: 400,
+              color: 'rgba(85,85,85,1)',
+              formatter: '{value}%'
+            }
+          }
         },
         columns1: [//表头数据
           {
@@ -60,12 +75,12 @@
           },
           {
             title: '单位',
-            key: 'company',
+            key: 'CBDW_MC',
             align: 'center',
           },
           {
             title: '文书总量',
-            key: 'count',
+            key: 'ZL',
             align: 'center',
             render: (h, params) => {
               var _this = this;
@@ -89,13 +104,13 @@
                       _this.showTable = true;
                     }
                   }
-                }, _this.infoData[params.index].count)
+                }, _this.infoData[params.index].ZL)
               ]);
             }
           },
           {
             title: '已公开',
-            key: 'open',
+            key: 'YIGKSL',
             align: 'center',
             render: (h, params) => {
               var _this = this;
@@ -119,13 +134,13 @@
                       _this.showTable = true;
                     }
                   }
-                }, _this.infoData[params.index].open)
+                }, _this.infoData[params.index].YIGKSL)
               ]);
             }
           },
           {
-            title: '本系统已公开统一系统未公开',
-            key: 'shouldOpen',
+            title: '应公开',
+            key: 'YINGGKSL',
             align: 'center',
             render: (h, params) => {
               var _this = this;
@@ -149,13 +164,43 @@
                       _this.showTable = true;
                     }
                   }
-                }, _this.infoData[params.index].shouldOpen)
+                }, _this.infoData[params.index].YINGGKSL)
+              ]);
+            }
+          },
+          {
+            title: '应公开未公开',
+            key: 'YGKWGKSL',
+            align: 'center',
+            render: (h, params) => {
+              var _this = this;
+              return h('div', [
+                h('span', {
+                  props: {
+                    size: 'small',
+                  },
+                  style: {
+                    marginRight: '5px',
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  },
+                  on: {
+                    click: () => {
+                      this.$bus.$emit('setTable',{
+                        title: _this.infoData[params.index].company,
+                        tableName: 'docArea',
+                        type: params.column.title
+                      });
+                      _this.showTable = true;
+                    }
+                  }
+                }, _this.infoData[params.index].YGKWGKSL)
               ]);
             }
           },
           {
             title: '不公开',
-            key: 'notOpen',
+            key: 'BGKSL',
             align: 'center',
             render: (h, params) => {
               var _this = this;
@@ -179,13 +224,13 @@
                       _this.showTable = true;
                     }
                   }
-                }, _this.infoData[params.index].notOpen)
+                }, _this.infoData[params.index].BGKSL)
               ]);
             }
           },
           {
             title: '公开率',
-            key: 'ratio',
+            key: 'GKL',
             align: 'center',
           },
         ],
@@ -200,28 +245,136 @@
           legend: [],
           title: '文书公开比例',
           color: ['#4589FD','#34ABFE','#8BB3F7']
-        }
+        },
+        chartData: [],//图表数据
+        //父组件传递数据
+        dateValue: '',//时间
+        dwbm: '',//单位编码
+        bhxj: '',//包含下级
       }
     },
     created() {
-      let data = jsonData.caseArea;
-      this.$bus.$emit('setInquisitor',false);
-      data = data.sort(this.compareData('ratio'));
-      data.forEach(function(item,i) {
-        item.order = i + 1;
-        if(i==data.length-1) {
-          item.order = '总计';
-        }
-      });
-      this.infoData = data;
+      // let data = jsonData.caseArea;
+      // data = data.sort(this.compareData('ratio'));
+      // data.forEach(function(item,i) {
+      //   item.order = i + 1;
+      //   if(i==data.length-1) {
+      //     item.order = '总计';
+      //   }
+      // });
+      // this.infoData = data;
     },
     mounted() {
       this.setTableHeight(this);//设置表格高度
-      this.initdocRankEchart();//文书公开排行榜
-      this.initdocAreaEchart();//文书
+      this.initBus();
+      // this.initdocRankEchart();//文书公开排行榜
+      // this.initdocAreaEchart();//文书
       this.watchEcharts();
     },
     methods: {
+      initBus() {
+        let _this = this;
+        this.$bus.$emit('setInquisitor',false);
+        this.$bus.$on('countSearch',function(val){
+          _this.dwbm = val.dwbm;
+          _this.dateValue = val.dateValue;
+          _this.bhxj = val.bhxj;
+          _this.$bus.$emit('myChartLoading',true);
+          _this.initChartAndShowLoad();//显示加载
+          _this.getDocListData();//获取各单位文书公开数据列表
+        });
+        this.$bus.$emit('loadComplete',true);
+      },
+      getDocListData() {
+        let _this = this;
+        let config;
+        config = {
+          dwbm: this.dwbm,
+          bhxj: this.bhxj,
+          startTimeStr: this.dateValue[0],
+          endTimeStr: this.dateValue[1],
+        };
+        this.isLoading = true;
+        this.axios.get(webApi.Stat.GetOpenDocTableByDw.format(config))
+          .then(function(res){
+
+            if(res.data.code === 0){
+              let data = res.data.data;
+              let cData = [];
+              if(data.length > 0) {
+                data = _this.handleDocListData(data);
+                /*排行榜图表*/
+                data.forEach(function(item) {
+                  //图表数据
+                  cData.push({
+                    name: item.CBDW_MC,
+                    value: item.GKL
+                  })
+                })
+              }
+              _this.chartData = cData.reverse();
+              //文书公开占比图表
+              _this.pieData.title = '文书公开比例';
+              _this.pieData.data = _this.handleDocTrendData(data);
+              _this.pieData.legend = [];
+              //表格信息
+              _this.infoData = data;
+              _this. initdocAreaEchart();//文书占比
+              // _this.$bus.$emit('resetMyChart',true);
+            }
+            _this.isLoading = false;
+          }).catch(function(err){
+          console.log(err);
+          _this.isLoading = false;
+        })
+      },
+      handleDocListData(data) {//处理表格数据
+        data.sort(compare('GKL'));
+        function compare(property) {
+          return function(pre,next) {
+            let preVal = pre[property].split('%')[0];
+            let nextVal = next[property].split('%')[0];
+            return  nextVal -  preVal;
+          }
+        }
+        data.forEach(function(item,index){
+          item.order = index + 1;
+        });
+        return data;
+      },
+      handleDocTrendData(data) {//处理文书占比数据
+        let type = '';
+        let relData = [];
+        for(let i in data[0]) {
+          if(i==='BGKSL') {
+            type = '不公开';
+          }else if(i==="YGKWGKSL") {
+            type = '应公开未公开';
+          }else if(i==="YIGKSL") {
+            type = '已公开';
+          }else if(i==="YINGGKSL") {
+            type = '应公开';
+          }else {
+            continue
+          }
+          relData.push({
+            name: type,
+            value: data[0][i]
+          });
+        };
+        return relData
+
+      },
+      initChartAndShowLoad() {
+        if(!this.docAreaEchart) {
+          this.docAreaEchart = this.$echarts.init(this.$refs.docAreaEchart);
+        }
+        this.docAreaEchart.showLoading({//加载中
+          animation:false,
+          text : 'loading',
+          textStyle : {fontSize : 20}
+        });
+      },
       compareData(property,noSplit) {//比较公开率
         return function(pre,next) {
           if(!pre[property]||!next[property]) {
@@ -247,11 +400,15 @@
       //文书类型占比
       initdocAreaEchart() {
         var _this = this;
-        this.docAreaEchart = this.$echarts.init(this.$refs.docAreaEchart);
         var option = {
           title: {
             text: this.pieData.title,
-            textStyle: _this.textStyle,
+            textStyle: {
+              fontSize: 16,
+              fontFamily: 'PingFang-SC-Bold',
+              fontWeight: 'bold',
+              color: 'rgba(85,85,85,1)'
+            },
             x:'center'
           },
           tooltip : {
@@ -290,6 +447,7 @@
         };
 
         this.docAreaEchart.setOption(option);
+        this.docAreaEchart.hideLoading();
         (this.pieData.legend.length==0)&&(this.docAreaEchart.on('click',this.selectdocType));
       },
       //文书公开排行榜图表
@@ -447,7 +605,7 @@
     },
     destroyed() {
       window.removeEventListener('resize',this.repaintEcharts);
-      this.docRankEchart.dispose();
+      // this.docRankEchart.dispose();
       this.docAreaEchart.dispose();
     },
   }
@@ -474,12 +632,14 @@
         height: calc( 100% - 35px - 38px - 20px);
         overflow-y: auto;
         .echarts-wrap {
+          height: 500px;
           text-align: center;
           margin-bottom: 50px;
+          .echarts {
+            height: 100%;
+          }
         }
-        .echarts {
-          height: 500px;
-        }
+
       }
     }
   }

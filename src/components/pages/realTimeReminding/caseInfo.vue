@@ -6,26 +6,26 @@
       <select-group mar-top="30">
         <select-item>
           <label>受理时间: </label>
-          <DatePicker  @on-change="setDate" v-model="dateTime" type="daterange" split-panels placeholder="请选择时间"  style="width: 200px"></DatePicker>
+          <DatePicker  @on-change="setDate" :value="dateTime" type="daterange" split-panels placeholder="请选择时间"  style="width: 200px"></DatePicker>
         </select-item>
-        <select-item>
-          <label>单位: </label>
-          <div class="input-wrap">
-            <Input   readonly type="text"  v-model="company.name"   style="width:200px" />
-          </div>
-          <!--<div   v-if="showCheck" class="input-wrap">-->
-            <!--<input    @blur="blurSelectCompany" type="text" ref="inputCompany" v-model="company.name"  @focus="searchNodes" @keyup.enter="searchNodes"  class="focusCompany" style="width:200px" />-->
-            <!--<my-tree :api="'sub'" @selectUnits="selectUnits" v-show="showCompany"></my-tree>-->
-            <!--<Checkbox  v-model="checkSub" >包含下级院</Checkbox>-->
+        <!--<select-item>-->
+          <!--<label>单位: </label>-->
+          <!--<div class="input-wrap">-->
+            <!--<Input   readonly type="text"  v-model="company.name"   style="width:200px" />-->
           <!--</div>-->
-        </select-item>
+          <!--&lt;!&ndash;<div   v-if="showCheck" class="input-wrap">&ndash;&gt;-->
+            <!--&lt;!&ndash;<input    @blur="blurSelectCompany" type="text" ref="inputCompany" v-model="company.name"  @focus="searchNodes" @keyup.enter="searchNodes"  class="focusCompany" style="width:200px" />&ndash;&gt;-->
+            <!--&lt;!&ndash;<my-tree :api="'sub'" @selectUnits="selectUnits" v-show="showCompany"></my-tree>&ndash;&gt;-->
+            <!--&lt;!&ndash;<Checkbox  v-model="checkSub" >包含下级院</Checkbox>&ndash;&gt;-->
+          <!--&lt;!&ndash;</div>&ndash;&gt;-->
+        <!--</select-item>-->
         <select-item>
           <label>案件类型: </label>
           <Select v-model="status" style="width:200px">
             <Option v-for="item in caseType" :value="item.MC" :key="item.MC">{{ item.MC }}</Option>
           </Select>
         </select-item>
-        <button class="search-btn btn-hover" @click="getCaseList(true)">
+        <button class="search-btn btn-hover" @click="searchData">
           查询
         </button>
       </select-group>
@@ -39,8 +39,8 @@
         <Page :current="pageNum" @on-page-size-change="changePageSize" @on-change="changePageNum"   :total="total" show-sizer show-total show-elevator />
         <!--导出数据-->
         <div id="exportData">
-          <button class="export-page btn-tabDefault-large" @click="handleDownload">导出本页数据</button>
-          <button class="export-all btn-export-large">导出全部数据</button>
+          <button class="export-page btn-tabDefault-large" @click="exportData(infoData)">导出本页数据</button>
+          <button class="export-all btn-export-large" @click="getCaseList(false,true)">导出全部数据</button>
         </div>
       </div>
     </div>
@@ -48,11 +48,7 @@
 </template>
 
 <script>
-  // require('script-loader!file-saver');
-  // // 转二进制用
-  // require('script-loader!@/vendor/Blob');
-  // // xlsx核心
-  // require('script-loader!xlsx/dist/xlsx.core.min');
+  import ExportJsonExcel from 'js-export-excel' //导出excel
   export default {
     data() {
       return {
@@ -60,7 +56,7 @@
         isLoading: false,
         checkSub: false,//是否选择包含下级院
         breadData: ['实时提醒',this.$route.query.bread],
-        gkzt: this.$route.query.status.gkzt,
+        gkzt: JSON.parse(this.$route.query.status).gkzt,
         role: JSON.parse(localStorage.getItem('userInfo')).JS,
         tableHeight: '',//表格高度
         // dateTime: [new Date((new Date()).getTime() - 86400000),new Date()],//时间
@@ -81,6 +77,7 @@
             title: '序号',
             key: 'order',
             align: 'center',
+            maxWidth: 80
           },
           {
             title: '部门受案号',
@@ -111,54 +108,53 @@
             title: '承办人',
             key: 'CBR',
             align: 'center',
+            maxWidth: 100
           },
           {
             title: '受理时间',
             key: 'SLRQ',
             align: 'center',
+            maxWidth: 160
           },
           {
             title: '当前阶段',
             key: 'AJZT',
             align: 'center',
+            maxWidth: 100
           },
           {
             title: '完成时间',
             key: 'WCRQ',
             align: 'center',
+            maxWidth: 160
           }
         ],
         infoData: []//表格数据
       }
     },
     methods: {
-      handleDownload() {
-        // this.downloadLoading = true
-        require.ensure([], () => {
-          const {export_json_to_excel} = require('@/vendor/Export2Excel');
-          const tHeader = this.utilsCutValue(this.columns1, 'title');
-          const filterVal = this.utilsCutValue(this.columns1, 'key');
-          const list = this.infoData;
-          const data = this.formatJson(filterVal, list);
-          export_json_to_excel(tHeader, data, '列表excel')
-          // this.downloadLoading = false
-        })
-      },
-      formatJson(filterVal, jsonData) {
-        return jsonData.map(v => filterVal.map(j => v[j]))
-      },
-      utilsCutValue(target, name){//将tHeader 和filterVal 的值转成数组从而生成表格
-        let arr = []
-        for (let i = 0; i < target.length; i++) {
-          arr.push(target[i][name])
-        }
-        return arr
-      },
-      exportData() {//导出本页数据
-        let _this = this;
-        this.$refs.iTable.exportCsv({
-          filename: _this.breadData[1]
+      exportData(data) {//导出本页数据
+        let header = [];//表头
+        let filter = [];//过滤
+        var option = {};//配置
+        var toExcel;
+        this.columns1.forEach(function(item){
+          if(item.title!='序号'&&item.title!='操作') {
+            header.push(item.title);
+          }
+          if(item.key!='order'&&item.key!='operation') {
+            filter.push(item.key);
+          }
         });
+        option.datas = [{
+          sheetData: data,
+          sheetName: 'sheet',
+          sheetFilter: filter,
+          sheetHeader: header,
+          columnWidths: []
+        }];
+        toExcel = new ExportJsonExcel(option);
+        toExcel.saveExcel();
       },
       getCount() {//获取案件公开数量信息
         let api = '';
@@ -205,13 +201,17 @@
         fmtDate[1]+=' 00:00:00';
         this.dateValue = fmtDate;
       },
+      searchData(){//点击查询
+        this.pageNum = 1;
+        this.getCaseList(true);
+      },
       getStartTime() {//获取初始的开始时间
         let date = new Date();
         let year = date.getFullYear();
-        let month = date.getMonth() + 1;
-        (month < 10)&&(month = '0' + month)
-        let startTime = `${year}-${month}-01 00:00:00`;
-        // let startTime = `${year}-01-01 00:00:00`;
+        // let month = date.getMonth() + 1;
+        // (month < 10)&&(month = '0' + month)
+        // let startTime = `${year}-${month}-01 00:00:00`;
+        let startTime = `${year}-01-01 00:00:00`;
         return startTime;
       },
       changePageNum(num) {//改变页码
@@ -222,12 +222,19 @@
         this.pageSize = size;
         this.getCaseList();
       },
-      getCaseList(getCount) {//获取案件信息列表
+      /*
+      * getCount: 是否获取当前选择条件下的公开信息数量
+      * getAll: 是否获取当前选择条件下的全部数据
+      * */
+      getCaseList(getCount,getAll) {//获取案件信息列表
         this.isLoading = true;
         let api = '';
         let _this = this;
         if(getCount){//获取总数
           _this.getCount();//获取总条数
+        }
+        if(getAll){//下载全部数据
+          this.$Message.info('获取数据中');
         }
         // let endTime = this.getCurrentTime();
         if(this.role=='案管人员') {
@@ -243,15 +250,21 @@
           bhxj: _this.checkSub,//包含下级
           ajlx: _this.getCaseCode(),//案件类型
           pageNum: _this.pageNum,
-          pageSize: _this.pageSize,
+          pageSize: getAll?_this.total:_this.pageSize,
         })).then(function(res){
-          console.log(res);
+          ;
           if(res.data.code==0){
             let data = res.data.data;//表数据
             data.forEach(function(item,index){ //添加序号
               item.order = (_this.pageNum -1) * _this.pageSize +  index + 1;
             });
-            _this.infoData = data;
+            if(getAll){
+              _this.exportData(data);//下载全部数据
+            }else{
+              _this.infoData = data;
+            }
+          }else if(res.data.code==-1){
+            _this.$Message.warning(res.data.errorMessage);
           }
           _this.isLoading = false;
         }).catch(function(err){
