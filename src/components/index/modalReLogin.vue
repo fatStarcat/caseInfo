@@ -19,7 +19,7 @@
               </div>
               <div class="enter-item">
                 <img src="../../assets/login/pwd.png" alt="">
-                <input type="password" v-model="password" placeholder="输入您的密码" @keyup.enter="login">
+                <input type="password" v-model="password" placeholder="输入您的密码" @keyup.enter="reLogin">
               </div>
             </div>
             <!--按钮-->

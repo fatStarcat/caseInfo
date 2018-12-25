@@ -119,7 +119,7 @@
     width: 100%;
     height: 100%;
     .ivu-menu {
-      width: 100%;
+      width: 100% !important;
       height: 100%;
       .ivu-menu-item {
         width: 100%;

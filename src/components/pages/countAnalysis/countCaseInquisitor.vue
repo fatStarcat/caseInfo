@@ -4,7 +4,7 @@
       <!--图表-->
       <div id="echarts-wrap" >
         <div id="echarts" ref="echartsWrap">
-          <rank-chart :config="config" :text="chartText" :chartData="chartData">
+          <rank-chart :chartHeight="chartHeight" :config="config" :text="chartText" :chartData="chartData">
 
           </rank-chart>
         </div>
@@ -15,12 +15,12 @@
         <Table :loading="isLoading" :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
         <!--导出数据-->
         <div id="exportData">
-          <button class="export-all btn-tabDefault-large">导出全部数据</button>
+          <button class="export-all btn-tabDefault-large" @click="exportDataAll">导出全部数据</button>
         </div>
       </div>
     </div>
     <!--弹出表格-->
-    <table-modal  @closeTable='closeTable' v-show="showTable"></table-modal>
+    <table-modal  @closeTable='closeTable' v-show="isShowTable"></table-modal>
   </div>
 </template>
 
@@ -30,7 +30,7 @@
       return {
         chartText: '检察官公开案件排行榜',//图表名称
         tableHeight: '',//表格高度
-        showTable: false,//显示表格
+        isShowTable: false,//显示表格
         isLoading: false,//加载
          config: {//图表配置项
            xAxis:{
@@ -83,12 +83,15 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].inquisitor,
-                        tableName: 'caseArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '检察官分析(程序性公开)',
+                        type: '全部',
+                        index: params.index,
+                        nzzt: '',
+                        gkzt: '',
+                        bmsah: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].ZL)
@@ -113,12 +116,15 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].inquisitor,
-                        tableName: 'caseArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '检察官分析(程序性公开)',
+                        type: '已公开',
+                        index: params.index,
+                        nzzt: '',
+                        gkzt: '3',
+                        bmsah: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].GKSL)
@@ -143,12 +149,15 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].inquisitor,
-                        tableName: 'caseArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '检察官分析(程序性公开)',
+                        type: '本系统已公开统一系统未公开',
+                        index: params.index,
+                        nzzt: '',
+                        gkzt: '2',
+                        bmsah: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].TYWGKBXTYGKSL)
@@ -173,12 +182,15 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].inquisitor,
-                        tableName: 'caseArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '检察官分析(程序性公开)',
+                        type: '不公开',
+                        index: params.index,
+                        nzzt: '',
+                        gkzt: '4',
+                        bmsah: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].BGKSL)
@@ -194,6 +206,7 @@
         ],
         infoData: [//表格数据
         ],
+        chartHeight: '',//图表高度
         chartData: [],//图表数据
         dateValue: '',//时间
         dwbm: '',//单位编码
@@ -212,9 +225,22 @@
       this.$bus.$off('countSearch');
     },
     methods: {
+      exportDataAll() {
+        if(this.infoData.length > 0) {
+          let fileName = '检察官分析(程序性公开)' + '-'+  this.getExportTime();
+          let _this = this;
+          this.$Message.info('导出数据中');
+          setTimeout(function(){
+            _this.exportData(_this.infoData,_this.columns1,fileName);//导出数据
+          },200)
+        }else {
+          this.$Message.warning('暂无数据可导出');
+        }
+      },
       initBus() {
         let _this = this;
         this.$bus.$emit('setInquisitor',true);
+        this.$bus.$emit('setSelectUnit',true);//显示单位选择
         this.$bus.$on('countSearch',function(val){
           _this.dwbm = val.dwbm;
           _this.dateValue = val.dateValue;
@@ -273,7 +299,34 @@
         if(height < 500) {
           height = 500;
         }
-        chartWrap.style.height = height + 'px';
+        this.chartHeight = height;
+        if(chartWrap) {
+          chartWrap.style.height = height + 'px';
+        }
+      },
+      showTable(config) {//显示表格
+        let _this = this;
+        this.$bus.$emit('setTable',{
+          title: config.title,
+          tableName: 'caseInfo',
+          type: config.type,
+          bhxj: _this.bhxj,
+          dateValue: _this.dateValue,
+          nzzt: config.nzzt,
+          gkzt: config.gkzt,
+          bmsah: config.bmsah,
+          dataType: _this.infoData[config.index].CBR,//检察官姓名
+          cbrgh: _this.infoData[config.index].CBRGH,
+          dwbm: _this.infoData[config.index].CBDW_BM,
+          unit: _this.infoData[config.index].CBDW_MC,
+          total: {
+            '全部': _this.infoData[config.index].ZL,
+            '已公开':_this.infoData[config.index].GKSL,
+            '本系统已公开统一系统未公开':_this.infoData[config.index].TYWGKBXTYGKSL,
+            '不公开': _this.infoData[config.index].BGKSL
+          },
+        });
+        this.isShowTable = true;
       },
       compareData(property) {//比较公开率
         return function(pre,next) {
@@ -283,7 +336,7 @@
         }
       },
       closeTable() {
-        this.showTable = false;
+        this.isShowTable = false;
       },
       //检察官公开文书排行榜
       initInquisitorEchart() {

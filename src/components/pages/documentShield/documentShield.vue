@@ -44,7 +44,7 @@
         <Page :current="pageNum" @on-page-size-change="changePageSize" @on-change="changePageNum"   :total="total" show-sizer show-total show-elevator />
         <!--导出数据-->
         <div class="exportData" v-show="showBtnNum===0">
-          <button class="export-page btn-tabDefault-large" @click="exportData(infoData)">导出本页数据</button>
+          <button class="export-page btn-tabDefault-large" @click="exportAllData(infoData)">导出本页数据</button>
           <button class="export-all btn-export-large" @click="getDocList(false,true)">导出全部数据</button>
         </div>
         <div class="exportData" v-show="showBtnNum===1">
@@ -76,6 +76,7 @@
         isLoading: false,//表格加载
         docType: JSON.parse(localStorage.getItem('WSLX')),//文书类型
         showBtnNum: 0,//显示按钮 {0:全部(导出本页,导出全部),1:未拟制(批量拟制),2:审核通过待导出(批量导出)}
+        originalData: [],//列表原始数据
         company: {//单位
           name: JSON.parse(localStorage.getItem('userInfo')).Unit.DWMC,//单位名称
           DWBM: JSON.parse(localStorage.getItem('userInfo')).Unit.DWBM,//单位编码
@@ -175,7 +176,8 @@
                     },
                     on: {
                       click: () => {
-                        let arr = [params.row]
+                        let arr = [params.row];
+                        arr = this.originalData[params.index];
                         console.log("拟制",arr);
                         invoker.createWS(_this.token, arr);
                         // this.$router.push({path:'/drafting',query:{title:params.row.docName}});
@@ -247,28 +249,17 @@
       }
     },
     methods: {
-     exportData(data) {//导出本页数据
-        let header = [];//表头
-        let filter = [];//过滤
-        var option = {};//配置
-        var toExcel;
-        this.columns1.forEach(function(item){
-          if(item.title!='序号'&&item.title!='操作') {
-            header.push(item.title);
-          }
-          if(item.key!='order'&&item.key!='operation') {
-            filter.push(item.key);
-          }
-        });
-        option.datas = [{
-          sheetData: data,
-          sheetName: 'sheet',
-          sheetFilter: filter,
-          sheetHeader: header,
-          columnWidths: []
-        }];
-        toExcel = new ExportJsonExcel(option);
-        toExcel.saveExcel();
+      exportAllData(data) {//导出本页数据
+       if(data.length > 0) {
+         let fileName = '文书屏蔽' + '-'+  this.getExportTime();
+         let _this = this;
+         this.$Message.info('导出数据中');
+         setTimeout(function(){
+           _this.exportData(data,_this.columns1,fileName);//导出数据
+         },200)
+       }else {
+         this.$Message.warning('暂无数据可导出');
+       }
       },
       setNzzt() {//通过当前阶段状态设置nzzt
         if(this.status=='全部') {
@@ -296,15 +287,6 @@
         this.pageNum = 1;
         this.getDocList(true);
       },
-      getStartTime() {//获取初始的开始时间
-        let date = new Date();
-        let year = date.getFullYear();
-        let month = date.getMonth() + 1;
-        (month < 10)&&(month = '0' + month)
-        let startTime = `${year}-${month}-01 00:00:00`;
-        // let startTime = `${year}-01-01 00:00:00`;
-        return startTime;
-      },
       changePageNum(num) {//改变页码
         this.pageNum = num;
         this.getDocList();
@@ -323,7 +305,7 @@
         if(getCount){//获取总数
           _this.getCount();//获取总条数
         }
-        if(getAll){//下载全部数据
+        if(getAll) {
           this.$Message.info('获取数据中');
         }
         this.axios.get(webApi.WSPB.CBR_GetWSSLs.format({
@@ -341,6 +323,7 @@
               item.order = (_this.pageNum -1) * _this.pageSize +  index + 1;
             });
             if(data.length>0) {
+              _this.originalData = [].concat(data);
               _this.getExamineList(data,getAll);//获取审核内容
             }else {
               _this.infoData = data;
@@ -348,7 +331,7 @@
             }
           }
         }).catch(function(err){
-          console.log(err)
+          console.log(err);
           _this.isLoading = false;
         })
       },
@@ -390,7 +373,11 @@
             }
             if(count==data.length) {
               if(getAll){
-                _this.exportData(data);//下载全部数据
+                if(data.length > 0) {
+                  _this.exportAllData(data);//下载全部数据
+                }else {
+                  _this.$Message.warning('暂无数据可导出');
+                }
               }else{
                 _this.infoData = data;
               }

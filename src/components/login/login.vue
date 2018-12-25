@@ -201,6 +201,7 @@
     position: relative;
     width: 100%;
     height: 100%;
+    background-color: #1d6db3;
     #login-content {
       position: relative;
       left: 50%;
@@ -210,6 +211,7 @@
       height: 450px;
       background: url('../../assets/login/loginBgT.png') no-repeat;
       background-size: cover;
+      box-shadow:  0 0 40px  rgba(2,73,135,0.7);
       #login-logo {
         position: relative;
         float: left;

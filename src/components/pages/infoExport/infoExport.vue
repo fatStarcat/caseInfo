@@ -200,9 +200,9 @@
           if(exportContent.length===2) {
             this.flag = 0;
           }else if(exportContent.indexOf('案件信息') > -1) {
-            this.flag = 1;
-          }else if(exportContent.indexOf('法律文书') > -1) {
             this.flag = 2;
+          }else if(exportContent.indexOf('法律文书') > -1) {
+            this.flag = 1;
           }
           this.axios.get(webApi.SJDC.CreatePackage.format({
             startTimeStr: _this.dateValue[0],
@@ -210,14 +210,14 @@
             flag: _this.flag//0:导出全部，1:导出案件;2:导出文书
           })).then(function(res){
 
-            _this.$Message.destroy()
+            _this.$Message.destroy();
             if(res.data.code===0){
               let fileName = '数据导出: ' +  exportContent.join('、') +'-'+  _this.getExportTime() + '.zip';
               _this.exportFlie(res.data.data,fileName);
             }
           }).catch(function(err){
-            console.log(err)
-            _this.$Message.destroy()
+            console.log(err);
+            _this.$Message.destroy();
             _this.$Message.warning('生成导出数据包失败!');
           })
         },
@@ -277,15 +277,6 @@
             fmtDate[1]+=' 00:00:00';
             this.dateValue = fmtDate;
           }
-        },
-        getStartTime() {//获取初始的开始时间
-          let date = new Date();
-          let year = date.getFullYear();
-          let month = date.getMonth() + 1;
-          (month < 10)&&(month = '0' + month)
-          let startTime = `${year}-${month}-01 00:00:00`;
-          // let startTime = `${year}-01-01 00:00:00`;
-          return startTime;
         },
         changePageNum(num) {//改变页码
           this.pageNum = num;

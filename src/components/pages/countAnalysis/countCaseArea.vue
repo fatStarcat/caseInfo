@@ -21,6 +21,7 @@
             <!--<Icon  type="md-return-left" size="26"/>-->
             <img src="../../../assets/countAnalysis/return.png" alt="">
           </span>
+          <no-data v-show="pieNoData"></no-data>
         </div>
 
       </div>
@@ -29,12 +30,12 @@
         <Table :loading='isLoading' :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
         <!--导出数据-->
         <div id="exportData">
-          <button class="export-all btn-tabDefault-large">导出全部数据</button>
+          <button class="export-all btn-tabDefault-large" @click="exportDataAll">导出全部数据</button>
         </div>
       </div>
     </div>
     <!--弹出表格-->
-    <table-modal  @closeTable='closeTable' v-show="showTable"></table-modal>
+    <table-modal  @closeTable='closeTable' v-show="isShowTable"></table-modal>
   </div>
 </template>
 
@@ -45,9 +46,10 @@
         caseAreaEchart: null,//案件公开
         caseRankEchart: null,//案件公开排行榜
         tableHeight: '',//表格高度
-        showTable: false,//弹出表格显示
+        isShowTable: false,//弹出表格显示
         showReturn: false,//显示返回按钮
         isLoading: false,//显示加载
+        pieNoData: false,//占比无数据
         chartText: '案件公开排行榜',//
         config: {//图表配置项
           xAxis:{
@@ -69,7 +71,7 @@
             title: '序号',
             key: 'order',
             align: 'center',
-            width: 100
+            maxWidth: 80
           },
           {
             title: '单位',
@@ -94,12 +96,16 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].company,
-                        tableName: 'caseArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '区域分析(程序性公开)',
+                        type: '全部',
+                        index: params.index,
+                        nzzt: '',
+                        gkzt: '',
+                        bmsah: '',
+                        cbrgh: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].ZL)
@@ -124,12 +130,16 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].company,
-                        tableName: 'caseArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '区域分析(程序性公开)',
+                        type: '已公开',
+                        index: params.index,
+                        nzzt: '',
+                        gkzt: '3',
+                        bmsah: '',
+                        cbrgh: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].GKSL)
@@ -154,12 +164,16 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].company,
-                        tableName: 'caseArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '区域分析(程序性公开)',
+                        type: '本系统已公开统一系统未公开',
+                        index: params.index,
+                        nzzt: '',
+                        gkzt: 2,
+                        bmsah: '',
+                        cbrgh: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].TYWGKBXTYGK)
@@ -184,12 +198,16 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].company,
-                        tableName: 'caseArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '区域分析(程序性公开)',
+                        type: '不公开',
+                        index: params.index,
+                        nzzt: '',
+                        gkzt: 4,
+                        bmsah: '',
+                        cbrgh: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].BGKSL)
@@ -200,6 +218,7 @@
             title: '公开率',
             key: 'GKL',
             align: 'center',
+            maxWidth: 100
           },
         ],
         infoData: [//表格数据
@@ -240,9 +259,22 @@
       this.watchEcharts();
     },
     methods: {
+      exportDataAll() {
+        if(this.infoData.length > 0) {
+          let _this = this;
+          let fileName = '区域分析(程序性公开)' + '-'+  this.getExportTime();
+          this.$Message.info('导出数据中');
+          setTimeout(function(){
+            _this.exportData(_this.infoData,_this.columns1,fileName);//导出数据
+          },200)
+        }else {
+          this.$Message.warning('暂无数据可导出');
+        }
+      },
       initBus() {
         let _this = this;
         this.$bus.$emit('setInquisitor',false);
+        this.$bus.$emit('setSelectUnit',true);
         this.$bus.$on('countSearch',function(val){
           _this.dwbm = val.dwbm;
           _this.dateValue = val.dateValue;
@@ -254,7 +286,30 @@
         });
         this.$bus.$emit('loadComplete',true);
       },
-      getOpenCaseInfo(){//获取案件公开列表信息
+      showTable(config) {//显示表格
+        let _this = this;
+        this.$bus.$emit('setTable',{
+          title: config.title,
+          tableName: 'caseInfo',
+          type: config.type,
+          bhxj: _this.bhxj,
+          dateValue: _this.dateValue,
+          nzzt: config.nzzt,
+          gkzt: config.gkzt,
+          bmsah: config.bmsah,
+          cbrgh: config.cbrgh,
+          dwbm: _this.infoData[config.index].CBDW_BM,
+          unit: _this.infoData[config.index].CBDW_MC,
+          total: {
+            '全部': _this.infoData[config.index].ZL,
+            '已公开':_this.infoData[config.index].GKSL,
+            '本系统已公开统一系统未公开':_this.infoData[config.index].TYWGKBXTYGK,
+            '不公开': _this.infoData[config.index].BGKSL
+          },
+        });
+        this.isShowTable = true;
+      },
+      getOpenCaseInfo(getAll){//获取案件公开列表信息
         let _this = this;
         let config = {
           dwbm: this.dwbm,
@@ -265,7 +320,6 @@
         this.isLoading = true;
         this.axios.get(webApi.Stat.GetOpenCaseTableByDw.format(config))
           .then(function(res){
-            ;
             if(res.data.code === 0) {
               let data = res.data.data;
               let cData = [];
@@ -302,20 +356,66 @@
         };
         this.axios.get(webApi.Stat.GetOpenCasePropByDw.format(config))
           .then(function(res){
-            ;
             if(res.data.code===0) {
               let data = res.data.data;
               _this.openCaseprop = data;
               data = _this.handleOpenCasePropData(data);
-              _this.pieData.title = '案件公开比例';
-              _this.pieData.data = data.relData;
-              _this.pieData.legend = [];
+              _this.pieData = {
+                data:data.relData,
+                  legend: [],
+                  title: '案件公开比例',
+                  color: ['#4589FD','#34ABFE','#8BB3F7']
+              };
               _this.initcaseAreaEchart();//案件公开占比
             }
           })
           .catch(function(err){
             console.log(err);
           })
+      },
+      //获取案件公开占比情况(各区县)
+      getOpenCaseSelfPropByDw(param) {
+        let _this = this;
+        let unitsCode = this.unitsCode;
+        let config;
+        let completeCount = 0;
+        let reData = [];//返回数据
+        let legendData = [];//legend数据
+        this.initChartAndShowLoad();
+        for(let i in unitsCode) {
+          legendData.push(i);
+          config = {
+            dwbm: unitsCode[i],
+            bhxj: false,
+            startTimeStr: this.dateValue[0],
+            endTimeStr: this.dateValue[1],
+          };
+          this.axios.get(webApi.Stat.GetOpenCasePropByDw.format(config))
+            .then(function(res){
+              completeCount++;
+              if(res.data.code===0) {
+                let data = res.data.data;
+                data.CBDW_MC = i;
+                reData.push(data);
+              }
+              if(completeCount === Object.keys(unitsCode).length) {
+                reData = _this.handleSelfCasePropData(reData);
+                _this.pieData = {
+                  data: reData.relObj[param.name],
+                  legend: legendData,
+                  title: param.name,
+                  color: ['#f6bb42','#8cc152','#f97566','#3bafda','#4a89dc','#f8c35d','#114898','#24adf1','#aab2bd','#656d78','#da4453']
+                };
+                _this.initcaseAreaEchart();
+                _this.caseAreaEchart.off('click');
+                _this.showReturn = true;
+              }
+            })
+            .catch(function(err){
+              console.log(err);
+            })
+        }
+
       },
       handleDocListData(data) {//处理表格数据
         data.sort(compare('GKL'));
@@ -350,13 +450,39 @@
             name: type,
             value: data[i]
           });
-          // legendData.push(type);
         }
         return {
           relData: relData,
-          // legendData: legendData
         }
 
+      },
+      handleSelfCasePropData(data) {//处理案件占比数据(各区县)
+        let relObj = {};
+        let type;
+        data.forEach(function(item) {
+          for(let i in item) {
+            if(i==='bgksl') {
+              type = '不公开';
+            }else if(i==="tyywgksl") {
+              type = '统一业务系统未公开';
+            }else if(i==="tywgkbxtygk") {
+              type = '统一业务系统未公开本系统已公开';
+            }else {
+              continue
+            }
+            if(!relObj[type]) {
+              relObj[type] = [];
+            }
+            relObj[type].push({
+              name: item.CBDW_MC,
+              value: item[i]
+            })
+
+          }
+        });
+        return {
+          relObj: relObj,
+        }
       },
       initChartAndShowLoad() {
         if(!this.caseAreaEchart) {
@@ -379,7 +505,7 @@
         }
       },
       closeTable() {//关闭表格
-        this.showTable = false;
+        this.isShowTable = false;
       },
       watchEcharts() {//监听浏览器宽度改变
         window.addEventListener('resize',this.repaintEcharts);
@@ -392,7 +518,6 @@
       },
       //案件类型占比
       initcaseAreaEchart() {
-        console.log('pie',this.pieData)
         var _this = this;
         var option = {
           title: {
@@ -421,7 +546,7 @@
               type: 'pie',
               /*radius : '55%',
               center: ['50%', '50%'],*/
-              radius: ['35%', '65%'],
+              radius: ['35%', '50%'],
               selectedMode: 'single',
               // roseType: 'radius',
               label: {
@@ -442,6 +567,11 @@
 
         this.caseAreaEchart.setOption(option);
         this.caseAreaEchart.hideLoading();
+        if(this.pieData.data.length==0) {
+          this.pieNoData = true;
+        }else {
+          this.pieNoData = false;
+        }
         (this.pieData.legend.length==0)&&(this.caseAreaEchart.on('click',this.selectCaseType));
       },
       //案件公开排行榜图表
@@ -560,41 +690,32 @@
         this.caseRankEchart.setOption(option);
       },
       returnCaseRatio() {//返回公开比例图
-        this.pieData = {
-          data:[
-            {value:100, name: '本系统已公开统一系统未公开'},
-            {value:1899, name: '不公开'},
-            {value:2000, name: '已公开'},
-          ],
-          legend: [],
-          title: '案件公开比例',
-          color: ['#4589FD','#34ABFE','#8BB3F7']
-        };
-        this.initcaseAreaEchart();
+        this.initChartAndShowLoad();
+        this.getOpenCasePropByDw();
+        // let data = this.handleOpenCasePropData(this.infoData);
+        // this.pieData = {
+        //   data:data.relData,
+        //   legend: [],
+        //   title: '案件公开比例',
+        //   color: ['#4589FD','#34ABFE','#8BB3F7']
+        // };
+        //
+        // this.initcaseAreaEchart();
         this.showReturn = false;
       },
       selectCaseType(param) {//选择案件类型
-        this.pieData = {
-          data: [
-            {value:200, name: '黄冈市院'},
-            {value:300, name: '黄冈市黄州区院'},
-            {value:500, name: '团风县院'},
-            {value:200, name: '红安县院'},
-            {value:300, name: '罗田县院'},
-            {value:500, name: '英山县院'},
-            {value:200, name: '浠水县院'},
-            {value:300, name: '蕲春县院'},
-            {value:500, name: '黄梅县院'},
-            {value:500, name: '麻城市院'},
-            {value:500, name: '武穴市院'},
-          ],
-          legend: ['黄冈市院','黄冈市黄州区院','团风县院','红安县院','罗田县院','英山县院','浠水县院','蕲春县院','黄梅县院','麻城市院','武穴市院'],
-          title: param.name,
-          color: ['#f6bb42','#8cc152','#f97566','#3bafda','#4a89dc','#f8c35d','#114898','#24adf1','#aab2bd','#656d78','#da4453']
-        };
-        this.initcaseAreaEchart();
-        this.caseAreaEchart.off('click');
-        this.showReturn = true;
+        this.getOpenCaseSelfPropByDw(param);
+        // let data = this.handleSelfCasePropData(this.infoData);
+        // console.log(data);
+        // this.pieData = {
+        //   data: data.relObj[param.name],
+        //   legend: data.legendData,
+        //   title: param.name,
+        //   color: ['#f6bb42','#8cc152','#f97566','#3bafda','#4a89dc','#f8c35d','#114898','#24adf1','#aab2bd','#656d78','#da4453']
+        // };
+        // this.initcaseAreaEchart();
+        // this.caseAreaEchart.off('click');
+        // this.showReturn = true;
       },
     },
     destroyed() {
@@ -626,6 +747,7 @@
         height: calc( 100% - 35px - 38px - 20px);
         overflow-y: auto;
         .echarts-wrap {
+          position: relative;
           height: 500px;
           text-align: center;
           margin-bottom: 50px;
@@ -633,7 +755,6 @@
         .echarts {
           height:  100%;
         }
-
       }
     }
   }

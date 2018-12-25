@@ -97,9 +97,8 @@
     </div>
     <!--map-->
     <div id="map" class="echarts-wrap">
-      <!--<div class="mapBg">-->
-        <!--<img src="../../../assets/realTimeReminding/mapT.jpg" alt="">-->
-      <!--</div>-->
+      <div class="mapBg">
+      </div>
       <div class="rel-map" ref="mapEchart" id="mapEcharts">
 
       </div>
@@ -261,6 +260,7 @@
                       _this.getDocCount(dwbm,param.name);
                     }
                     return param.name + '<br/>' +
+                      '<br/>'+
                       '程序信息公开信息' + '<br/>' +
                       marker1 +" " + '已公开：' + _this.cityCount[param.name].caseCount[0] + '<br/>' +
                       marker2 +" " + '不公开：' + _this.cityCount[param.name].caseCount[2] + '<br/>' +
@@ -655,22 +655,20 @@
       float: right;
       width: calc( 100% - 369px - 45px);
       height: 100%;
-      background: url('../../../assets/realTimeReminding/mapT.jpg') no-repeat 50% 50% ;
+      /*background: url('../../../assets/realTimeReminding/mapT.jpg') no-repeat 50% 50% ;*/
       background-size: cover;
       border-radius:10px;
       overflow: hidden;
-      /*<!--.mapBg {-->
-        <!--position: absolute;-->
-        <!--top: 55%;-->
-        <!--left: 55%;-->
-        <!--transform: translate(-55%,-55%);-->
-        <!--height: 100%;-->
-        <!--img {-->
-          <!--display: block;-->
-          <!--height: 100%;-->
-        <!--}-->
-
-      <!--}-->*/
+      .mapBg {
+        position: absolute;
+        top: 48%;
+        left: 48%;
+        width: 120%;
+        height: 120%;
+        transform: translate(-50%,-50%);
+        background: url('../../../assets/realTimeReminding/mapT.jpg') no-repeat 50% 50% ;
+        background-size: cover;
+      }
       .rel-map {
         width: 100%;
         height: 100%;

@@ -42,7 +42,7 @@
         <Page :current="pageNum" @on-page-size-change="changePageSize" @on-change="changePageNum"   :total="total" show-sizer show-total show-elevator />
         <!--导出数据-->
         <div id="exportData">
-          <button class="export-page btn-tabDefault-large" @click="exportData(infoData)">导出本页数据</button>
+          <button class="export-page btn-tabDefault-large" @click="exportAllData(infoData)">导出本页数据</button>
           <button class="export-all btn-export-large" @click="getDocList(false,true)">导出全部数据</button>
         </div>
       </div>
@@ -137,28 +137,38 @@
       }
     },
     methods: {
-      exportData(data) {//导出本页数据
-        let header = [];//表头
-        let filter = [];//过滤
-        var option = {};//配置
-        var toExcel;
-        this.columns1.forEach(function(item){
-          if(item.title!='序号'&&item.title!='操作') {
-            header.push(item.title);
-          }
-          if(item.key!='order'&&item.key!='operation') {
-            filter.push(item.key);
-          }
-        });
-        option.datas = [{
-          sheetData: data,
-          sheetName: 'sheet',
-          sheetFilter: filter,
-          sheetHeader: header,
-          columnWidths: []
-        }];
-        toExcel = new ExportJsonExcel(option);
-        toExcel.saveExcel();
+      exportAllData(data) {//导出本页数据
+        // let header = [];//表头
+        // let filter = [];//过滤
+        // var option = {};//配置
+        // var toExcel;
+        // this.columns1.forEach(function(item){
+        //   if(item.title!='序号'&&item.title!='操作') {
+        //     header.push(item.title);
+        //   }
+        //   if(item.key!='order'&&item.key!='operation') {
+        //     filter.push(item.key);
+        //   }
+        // });
+        // option.datas = [{
+        //   sheetData: data,
+        //   sheetName: 'sheet',
+        //   sheetFilter: filter,
+        //   sheetHeader: header,
+        //   columnWidths: []
+        // }];
+        // toExcel = new ExportJsonExcel(option);
+        // toExcel.saveExcel();
+        if(data.length > 0) {
+          let fileName = this.breadData[0] +'-'+  this.breadData[1] + '-'+  this.getExportTime();
+          let _this = this;
+          this.$Message.info('导出数据中');
+          setTimeout(function(){
+            _this.exportData(data,_this.columns1,fileName);//导出数据
+          },200)
+        }else {
+          this.$Message.warning('暂无数据可导出');
+        }
       },
       getCount() {//获取文书公开数量信息
         let api = '';
@@ -240,14 +250,14 @@
         if(getCount){//获取总数
           _this.getCount();//获取总条数
         }
-        if(getAll){//下载全部数据
-          this.$Message.info('获取数据中');
-        }
         // let endTime = this.getCurrentTime();
         if(this.role=='案管人员') {
           api = 'AG_GetWSSLs';
         }else if(this.role=='承办人'){
           api = 'CBR_GetWSSLs';
+        }
+        if(getAll) {
+          this.$Message.info('获取数据中');
         }
         _this.axios.get(webApi.SSTX[api].format({
           startTimeStr: _this.dateValue[0],
@@ -271,7 +281,11 @@
               }
             });
             if(getAll){
-              _this.exportData(data);//下载全部数据
+              if(data.length > 0) {
+                _this.exportAllData(data);//下载全部数据
+              }else {
+                _this.$Message.warning('暂无数据可导出');
+              }
             }else{
               _this.infoData = data;
             }

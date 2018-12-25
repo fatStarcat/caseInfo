@@ -3,17 +3,25 @@
     <div id="main">
       <!--图表-->
       <div id="echarts-wrap" >
-        <!--案件公开趋势-->
-        <div ref="caseTrendEchart"></div>
-        <!--案件类型占比-->
-        <div ref="caseTypeEchart"></div>
+        <div class="echarts-wrap">
+          <!--案件公开趋势-->
+          <div class="charts" ref="caseTrendEchart"></div>
+          <no-data v-show="caseTrendNoData"></no-data>
+        </div>
+        <div class="echarts-wrap">
+          <!--案件类型占比-->
+          <div  class="charts" ref="caseTypeEchart"></div>
+          <no-data v-show="caseTypeNoData"></no-data>
+        </div>
+
+
       </div>
       <!--表格-->
       <div id="table" ref="table">
         <Table :loading='isLoading' :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
         <!--导出数据-->
         <div id="exportData">
-            <button class="export-all btn-tabDefault-large">导出全部数据</button>
+            <button class="export-all btn-tabDefault-large" @click="exportDataAll">导出全部数据</button>
         </div>
       </div>
     </div>
@@ -31,6 +39,9 @@
         tableHeight: '',//表格高度
         showTable: false,//显示表格
         isLoading: false,//显示加载
+        caseTypeNoData: false,//类型无数据
+        caseTrendNoData: false,//蘸水笔无数据
+        caseType: JSON.parse(localStorage.getItem('AJLX')),//案件类型
         columns1: [//表头数据
           {
             title: '案件类型',
@@ -55,10 +66,30 @@
                   },
                   on: {
                     click: () => {
+                      let unit;
+                      for(let i in this.unitsCode) {
+                        if(this.dwbm==this.unitsCode[i]) {
+                          unit = i;
+                          break;
+                        }
+                      }
                       this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].type,
-                        tableName: 'caseArea',
-                        type: params.column.title
+                        title: '案件类型分析(程序性公开)',
+                        tableName: 'caseInfo',
+                        type: '已公开',
+                        bhxj: _this.bhxj,
+                        dateValue: _this.dateValue,
+                        nzzt: '',
+                        gkzt: '',
+                        bmsah: '',
+                        cbrgh: '',
+                        dwbm: _this.dwbm,
+                        unit: unit,
+                        ajlbbm: _this.infoData[params.index].AJLB_BM,
+                        dataType: _this.infoData[params.index].AJLB_MC,
+                        total: {
+                          '已公开':_this.infoData[params.index].GKSL,
+                        },
                       });
                       _this.showTable = true;
                     }
@@ -83,6 +114,8 @@
 
     },
     mounted() {
+      this.caseTrendEchart = this.$echarts.init(this.$refs.caseTrendEchart);
+      this.caseTypeEchart = this.$echarts.init(this.$refs.caseTypeEchart);
       this.initBus();
       this.setTableHeight(this);//设置表格高度
       this.watchEcharts();
@@ -91,11 +124,23 @@
       this.$bus.$off('countSearch');
     },
     methods: {
-
+      exportDataAll() {
+        if(this.infoData.length > 0) {
+          let fileName = '案件类型分析(程序性公开)' + '-'+  this.getExportTime();
+          let _this = this;
+          this.$Message.info('导出数据中');
+          setTimeout(function(){
+            _this.exportData(_this.infoData,_this.columns1,fileName);//导出数据
+          },200)
+        }else {
+          this.$Message.warning('暂无数据可导出');
+        }
+      },
       //bus事件绑定
       initBus() {
         let _this = this;
         this.$bus.$emit('setInquisitor',false);
+        this.$bus.$emit('setSelectUnit',true);//显示单位选择
         this.$bus.$on('countSearch',function(val){
           _this.dwbm = val.dwbm;
           _this.dateValue = val.dateValue;
@@ -107,12 +152,6 @@
         this.$bus.$emit('loadComplete',true);
       },
       initChartAndShowLoad() {
-        if(!this.caseTrendEchart) {
-          this.caseTrendEchart = this.$echarts.init(this.$refs.caseTrendEchart);
-        }
-        if(!this.caseTypeEchart) {
-          this.caseTypeEchart = this.$echarts.init(this.$refs.caseTypeEchart);
-        }
         this.caseTrendEchart.showLoading({//加载中
           animation:false,
           text : 'loading',
@@ -162,7 +201,6 @@
         };
         this.axios.get(webApi.Stat.GetOpenCaseTrendByAjlb.format(config))
           .then(function(res){
-            console.log('趋势',res);
             if(res.data.code === 0){
               let data = res.data.data;
               _this.openCaseChartData = data;
@@ -247,6 +285,11 @@
 
         this.caseTypeEchart.setOption(option);
         this.caseTypeEchart.hideLoading();
+        if(data.data.length==0) {
+          this.caseTypeNoData = true;
+        }else {
+          this.caseTypeNoData = false;
+        }
       },
       handleCaseTypeChartData() {//处理案件类型占比数据
         let legendData = [];
@@ -368,7 +411,23 @@
         };
         this.caseTrendEchart.setOption(option);
         this.caseTrendEchart.hideLoading();
-      }
+        if(data.data.length==0) {
+          this.caseTrendNoData = true;
+        }else {
+          this.caseTrendNoData = false;
+        }
+      },
+      getCaseCode(type) {//根据案件名称获取编码
+        let _this = this;
+        let ajlx = "";
+        this.caseType.forEach(function(item){
+          if(item.MC == type) {
+            ajlx = item.BM;
+            return
+          }
+        });
+        return ajlx;
+      },
     },
     destroyed() {
       window.removeEventListener('resize',this.repaintEcharts);
@@ -398,9 +457,13 @@
         width: 900px;
         height: calc( 100% - 35px - 38px - 20px);
         overflow-y: auto;
-        >div {
-          height: 700px;
+        .echarts-wrap {
+          position: relative;
           margin-bottom: 30px;
+          height: 700px;
+          .charts {
+            height: 100%;
+          }
         }
       }
     }

@@ -23,6 +23,7 @@
            <!-- <Icon  type="md-return-left" size="26"/>
             返回-->
           </span>
+          <no-data v-show="pieNoData"></no-data>
         </div>
 
       </div>
@@ -31,12 +32,12 @@
         <Table :loading="isLoading" :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
         <!--导出数据-->
         <div id="exportData">
-          <button class="export-all btn-tabDefault-large">导出全部数据</button>
+          <button class="export-all btn-tabDefault-large" @click="exportDataAll">导出全部数据</button>
         </div>
       </div>
     </div>
     <!--弹出表格-->
-    <table-modal  @closeTable='closeTable' v-show="showTable"></table-modal>
+    <table-modal  @closeTable='closeTable' v-show="isShowTable"></table-modal>
   </div>
 </template>
 
@@ -47,9 +48,10 @@
         docAreaEchart: null,//文书公开
         docRankEchart: null,//文书公开排行榜
         tableHeight: '',//表格高度
-        showTable: false,//弹出表格显示
+        isShowTable: false,//弹出表格显示
         showReturn: false,//显示返回按钮
         isLoading: false,//显示加载
+        pieNoData: false,//占比无数据
         chartText: '文书公开排行榜',//柱状图名称
         config: {//图表配置项
           xAxis:{
@@ -71,7 +73,7 @@
             title: '序号',
             key: 'order',
             align: 'center',
-            width: 100
+            maxWidth: 80
           },
           {
             title: '单位',
@@ -96,12 +98,16 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].company,
-                        tableName: 'docArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '区域分析(文书公开)',
+                        type: '全部',
+                        index: params.index,
+                        nzzt: '',
+                        gkzt: '',
+                        bmsah: '',
+                        cbrgh: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].ZL)
@@ -126,12 +132,16 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].company,
-                        tableName: 'docArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '区域分析(文书公开)',
+                        type: '已公开',
+                        index: params.index,
+                        nzzt: 8,
+                        gkzt: 0,
+                        bmsah: '',
+                        cbrgh: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].YIGKSL)
@@ -156,12 +166,16 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].company,
-                        tableName: 'docArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '区域分析(文书公开)',
+                        type: '应公开',
+                        index: params.index,
+                        nzzt: '',
+                        gkzt: 0,
+                        bmsah: '',
+                        cbrgh: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].YINGGKSL)
@@ -186,12 +200,16 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].company,
-                        tableName: 'docArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '区域分析(文书公开)',
+                        type: '应公开未公开',
+                        index: params.index,
+                        nzzt: 7,
+                        gkzt: 0,
+                        bmsah: '',
+                        cbrgh: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].YGKWGKSL)
@@ -216,12 +234,16 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].company,
-                        tableName: 'docArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '区域分析(文书公开)',
+                        type: '不公开',
+                        index: params.index,
+                        nzzt: '',
+                        gkzt: 1,
+                        bmsah: '',
+                        cbrgh: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].BGKSL)
@@ -232,10 +254,12 @@
             title: '公开率',
             key: 'GKL',
             align: 'center',
+            maxWidth: 100
           },
         ],
         infoData: [//表格数据
         ],
+        pieCountData: [],//文书类比占比总和数据
         pieData: {
           data:[
             {value:100, name: '本系统已公开统一系统未公开'},
@@ -265,6 +289,7 @@
       // this.infoData = data;
     },
     mounted() {
+      this.docAreaEchart = this.$echarts.init(this.$refs.docAreaEchart);
       this.setTableHeight(this);//设置表格高度
       this.initBus();
       // this.initdocRankEchart();//文书公开排行榜
@@ -272,9 +297,22 @@
       this.watchEcharts();
     },
     methods: {
+      exportDataAll() {
+        if(this.infoData.length > 0) {
+          let fileName = '区域分析(文书公开)' + '-'+  this.getExportTime();
+          let _this = this;
+          this.$Message.info('导出数据中');
+          setTimeout(function(){
+            _this.exportData(_this.infoData,_this.columns1,fileName);//导出数据
+          },200)
+        }else {
+          this.$Message.warning('暂无数据可导出');
+        }
+      },
       initBus() {
         let _this = this;
         this.$bus.$emit('setInquisitor',false);
+        this.$bus.$emit('setSelectUnit',true);
         this.$bus.$on('countSearch',function(val){
           _this.dwbm = val.dwbm;
           _this.dateValue = val.dateValue;
@@ -303,24 +341,59 @@
               let cData = [];
               if(data.length > 0) {
                 data = _this.handleDocListData(data);
-                /*排行榜图表*/
-                data.forEach(function(item) {
-                  //图表数据
-                  cData.push({
-                    name: item.CBDW_MC,
-                    value: item.GKL
-                  })
-                })
               }
+              /*排行榜图表*/
+              data.forEach(function(item) {
+                //图表数据
+                cData.push({
+                  name: item.CBDW_MC,
+                  value: item.GKL
+                })
+              })
               _this.chartData = cData.reverse();
               //文书公开占比图表
-              _this.pieData.title = '文书公开比例';
-              _this.pieData.data = _this.handleDocTrendData(data);
-              _this.pieData.legend = [];
+              _this.pieData = {
+                data:_this.handleDocPropData(data),
+                legend: [],
+                title: '文书公开比例',
+                color: ['#4589fd', '#34abfe','#8bb3f7','#31cdef']
+              };
               //表格信息
               _this.infoData = data;
+              console.log(_this.infoData);
               _this. initdocAreaEchart();//文书占比
               // _this.$bus.$emit('resetMyChart',true);
+            }
+            _this.isLoading = false;
+          }).catch(function(err){
+          console.log(err);
+          _this.isLoading = false;
+        })
+      },
+      getDocListSelfData(param) {//获取全部区县数据
+        let _this = this;
+        let config;
+        config = {
+          dwbm: this.dwbm,
+          bhxj: true,
+          startTimeStr: this.dateValue[0],
+          endTimeStr: this.dateValue[1],
+        };
+        this.isLoading = true;
+        this.axios.get(webApi.Stat.GetOpenDocTableByDw.format(config))
+          .then(function(res){
+            if(res.data.code === 0){
+              let data = res.data.data;
+              data = _this.handleSelfDocPropData(data);
+              _this.pieData = {
+                data: data.relObj[param.name],
+                legend: data.legendData,
+                title: param.name,
+                color: ['#f6bb42','#8cc152','#f97566','#3bafda','#4a89dc','#f8c35d','#114898','#24adf1','#aab2bd','#656d78','#da4453']
+              };
+              _this.initdocAreaEchart();
+              _this.docAreaEchart.off('click');
+              _this.showReturn = true;
             }
             _this.isLoading = false;
           }).catch(function(err){
@@ -339,13 +412,26 @@
         }
         data.forEach(function(item,index){
           item.order = index + 1;
+
         });
         return data;
       },
-      handleDocTrendData(data) {//处理文书占比数据
+      handleDocPropData(data) {//处理文书占比数据(总量)
         let type = '';
         let relData = [];
-        for(let i in data[0]) {
+        let relObj = {};
+        data.forEach(function(item) {
+          for(let i in item) {
+            if(i==='BGKSL'||i==="YGKWGKSL"||i==="YIGKSL"||i==="YINGGKSL"){
+              if(!relObj[i]) {
+                relObj[i] = item[i]?item[i]:0;
+              }else {
+                relObj[i]+=item[i]?item[i]:0;
+              }
+            }
+          };
+        });
+        for(let i in relObj) {
           if(i==='BGKSL') {
             type = '不公开';
           }else if(i==="YGKWGKSL") {
@@ -359,34 +445,77 @@
           }
           relData.push({
             name: type,
-            value: data[0][i]
+            value: relObj[i]
           });
-        };
+        }
         return relData
 
       },
+      handleSelfDocPropData(data) {//处理文书占比数据(各区县)
+        let relObj = {};
+        let legendData = [];
+        let type;
+        data.forEach(function(item) {
+          legendData.push(item.CBDW_MC.replace('人民检察院',''));
+          for(let i in item) {
+            if(i==='BGKSL') {
+              type = '不公开';
+            }else if(i==="YGKWGKSL") {
+              type = '应公开未公开';
+            }else if(i==="YIGKSL") {
+              type = '已公开';
+            }else if(i==="YINGGKSL") {
+              type = '应公开';
+            }else {
+              continue
+            }
+            if(!relObj[type]) {
+              relObj[type] = [];
+            }
+            relObj[type].push({
+              name: item.CBDW_MC.replace('人民检察院',''),
+              value: item[i]
+            })
+          }
+        });
+        return {
+            relObj: relObj,
+            legendData: legendData
+          }
+      },
       initChartAndShowLoad() {
-        if(!this.docAreaEchart) {
-          this.docAreaEchart = this.$echarts.init(this.$refs.docAreaEchart);
-        }
         this.docAreaEchart.showLoading({//加载中
           animation:false,
           text : 'loading',
           textStyle : {fontSize : 20}
         });
       },
-      compareData(property,noSplit) {//比较公开率
-        return function(pre,next) {
-          if(!pre[property]||!next[property]) {
-            return;
-          }
-          let valPre = noSplit?pre[property]:pre[property].split('%')[0];
-          let valNext = noSplit?next[property]:next[property].split('%')[0];
-          return valNext - valPre;
-        }
+      showTable(config) {//显示表格
+        let _this = this;
+        this.$bus.$emit('setTable',{
+          title: config.title,
+          tableName: 'docInfo',
+          type: config.type,
+          bhxj: _this.bhxj,
+          dateValue: _this.dateValue,
+          nzzt: config.nzzt,
+          gkzt: config.gkzt,
+          bmsah: config.bmsah,
+          cbrgh: config.cbrgh,
+          dwbm: _this.infoData[config.index].CBDW_BM,
+          unit: _this.infoData[config.index].CBDW_MC,
+          total: {
+            '全部': _this.infoData[config.index].ZL,
+            '已公开':_this.infoData[config.index].YIGKSL,
+            '应公开':_this.infoData[config.index].YINGGKSL,
+            '不公开': _this.infoData[config.index].BGKSL,
+            '应公开未公开': _this.infoData[config.index].YGKWGKSL
+          },
+        });
+        this.isShowTable = true;
       },
       closeTable() {//关闭表格
-        this.showTable = false;
+        this.isShowTable = false;
       },
       watchEcharts() {//监听浏览器宽度改变
         window.addEventListener('resize',this.repaintEcharts);
@@ -448,11 +577,15 @@
 
         this.docAreaEchart.setOption(option);
         this.docAreaEchart.hideLoading();
+        if(this.pieData.data.length==0) {
+          this.pieNoData = true;
+        }else {
+          this.pieNoData = false;
+        }
         (this.pieData.legend.length==0)&&(this.docAreaEchart.on('click',this.selectdocType));
       },
       //文书公开排行榜图表
       initdocRankEchart() {
-        this.docRankEchart = this.$echarts.init(this.$refs.docRankEchart);
         var _this = this;
         var option;
         var data = [
@@ -567,11 +700,7 @@
       },
       returndocRatio() {//返回公开比例图
         this.pieData = {
-          data:[
-            {value:100, name: '本系统已公开统一系统未公开'},
-            {value:1899, name: '不公开'},
-            {value:2000, name: '已公开'},
-          ],
+          data: this.handleDocPropData(this.infoData),
           legend: [],
           title: '文书公开比例',
           color: ['#4589FD','#34ABFE','#8BB3F7']
@@ -580,27 +709,18 @@
         this.showReturn = false;
       },
       selectdocType(param) {//选择文书类型
-        this.pieData = {
-          data: [
-            {value:200, name: '黄冈市院'},
-            {value:300, name: '黄冈市黄州区院'},
-            {value:500, name: '团风县院'},
-            {value:200, name: '红安县院'},
-            {value:300, name: '罗田县院'},
-            {value:500, name: '英山县院'},
-            {value:200, name: '浠水县院'},
-            {value:300, name: '蕲春县院'},
-            {value:500, name: '黄梅县院'},
-            {value:500, name: '麻城市院'},
-            {value:500, name: '武穴市院'},
-          ],
-          legend: ['黄冈市院','黄冈市黄州区院','团风县院','红安县院','罗田县院','英山县院','浠水县院','蕲春县院','黄梅县院','麻城市院','武穴市院'],
-          title: param.name,
-          color: ['#f6bb42','#8cc152','#f97566','#3bafda','#4a89dc','#f8c35d','#114898','#24adf1','#aab2bd','#656d78','#da4453']
-        };
-        this.initdocAreaEchart();
-        this.docAreaEchart.off('click');
-        this.showReturn = true;
+        this.initChartAndShowLoad();//显示加载
+        this.getDocListSelfData(param);
+        // let data = this.handleSelfDocPropData(this.infoData);
+        // this.pieData = {
+        //   data: data.relObj[param.name],
+        //   legend: data.legendData,
+        //   title: param.name,
+        //   color: ['#f6bb42','#8cc152','#f97566','#3bafda','#4a89dc','#f8c35d','#114898','#24adf1','#aab2bd','#656d78','#da4453']
+        // };
+        // this.initdocAreaEchart();
+        // this.docAreaEchart.off('click');
+        // this.showReturn = true;
       },
     },
     destroyed() {
@@ -632,6 +752,7 @@
         height: calc( 100% - 35px - 38px - 20px);
         overflow-y: auto;
         .echarts-wrap {
+          position: relative;
           height: 500px;
           text-align: center;
           margin-bottom: 50px;

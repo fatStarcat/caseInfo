@@ -2,13 +2,17 @@
     <div id="tableModal">
         <div id="content">
           <!--标题-->
-          <div id="content-header">
+          <div class="content-header">
             {{title}}
             <span class="close" @click="closeTable">
               <img  src="../../../assets/countAnalysis/close.png" alt="">
             </span>
           </div>
-          <select-group>
+          <!--单位以及文书和案件类别-->
+          <div class="content-header">
+            {{unit}}{{dataType?'—'+dataType:''}}
+          </div>
+          <select-group marTop="10">
             <select-item>
               <label>当前类型: </label>
               <RadioGroup v-model="status" @on-change="changeStatus">
@@ -23,10 +27,10 @@
           </div>
           <!--表格分页-->
           <div id="tablePage">
-            <Page :current="pageNum" @on-page-size-change="changePageSize" @on-change="changePageNum"   :total="total" show-sizer show-total show-elevator />
+            <Page :page-size="pageSize" :current="pageNum" @on-page-size-change="changePageSize" @on-change="changePageNum"   :total="total" show-sizer show-total show-elevator />
             <!--导出数据-->
             <div id="exportData">
-              <button class="export-all btn-hover-large" @click="exportAll">导出全部数据</button>
+              <button class="export-all btn-hover-large" @click="exportDataAll">导出全部数据</button>
             </div>
           </div>
         </div>
@@ -46,8 +50,9 @@
               isLoading: false,//显示加载
               total: '',//总条数
               pageNum: 1,//页号
-              pageSize: 10,//页大小
+              pageSize: 20,//页大小
               /*--传值start--*/
+              aLLTotal: {},//所有总量数据
               title: '',//标题
               tableName: '',//表名
               dateValue: '',//时间
@@ -55,6 +60,12 @@
               gkzt: '',//公开状态,
               nzzt: '',//拟制状态
               bhxj: '',//包含下级
+              ajlbbm: '',//案件类别编码
+              cbrgh: '',//承办人工号
+              bmsah: '',//部门受案号
+              unit: '',//单位
+              dataType: '',//类型
+              wslb: '',//文书类别
               /*--传值end--*/
               tableData: {
                 caseInfo: {//区域分析(程序性公开)
@@ -188,35 +199,50 @@
         this.setTableHeight(this);//设置表格高度
       },
       beforeDestroy(){
-          console.log('销毁了')
           this.$bus.$off('setTable');
       },
       methods: {
-        exportAll() {//导出数据
-          let table = this.$refs.iTable;
-          table.exportCsv({
-            filename: 'testData'
-          });
+        exportDataAll() {//导出数据
+          this.$Message.info('导出数据中');
+          if(this.tableName === 'caseInfo') {
+            this.getCaseList(false,true);
+          }else if(this.tableName === 'docInfo') {
+            this.getDocList(false,true);
+          }
         },
         initBus() {
           var _this = this;
           this.$bus.$on('setTable',function(set) {
             // console.log('设置表格',set);
+            let statusData = [];
+            for(let i in set.total) {
+              statusData.push(i);
+            }
             _this.tableName = set.tableName;
             //标题
             _this.title = set.title;
             //当前状态
             _this.status = set.type;
             //状态数据
-            _this.statusData = _this.tableData[set.tableName].statusData;
+            _this.statusData = statusData;
             //表头数据
             _this.columnsData = [].concat(_this.tableData[set.tableName].columns);
             //请求参数
             _this.dateValue = set.dateValue;
             _this.dwbm = set.dwbm;
-            _this.gkzt = set.gkzt;
-            _this.nzzt = set.nzzt;
+            _this.gkzt = set.gkzt?set.gkzt:'';
+            _this.nzzt = set.nzzt?set.nzzt:'';
             _this.bhxj = set.bhxj;
+            _this.ajlbbm = set.ajlbbm?set.ajlbbm:'';//案件类别编码
+            _this.cbrgh = set.cbrgh?set.cbrgh:'';//承办人工号
+            _this.bmsah = set.bmsah?set.bmsah:'';//部门受案号
+            _this.unit = set.unit?set.unit:'';//承办人工号
+            _this.dataType = set.dataType?set.dataType:'';//单位名称
+            _this.wslb = set.wslb?set.wslb:'';//文书类别
+            _this.aLLTotal = set.total;//总量
+            if(_this.title.indexOf('区域分析') > -1) {
+              _this.bhxj = false;
+            }
             //设置表头
             _this.setColumns1();
             //获取表格数据
@@ -244,36 +270,12 @@
             this.getCaseList();
           }
         },
-        getDocCount() {//获取文书公开数量信息
-          let _this = this;
-          _this.axios.get(webApi.SSTX.AG_CountWSSL.format({
-            startTimeStr: _this.dateValue[0],
-            endTimeStr: _this.dateValue[1],
-            dwbm: _this.dwbm,
-            gkzt: _this.gkzt,
-            nzzt: _this.nzzt,
-            bhxj: _this.bhxj,//包含下级
-            wslb: '',//文书类型
-          })).then(function(res){
-            _this.total = res.data.data;
-          }).catch(function(err){
-            console.log(err)
-          })
-        },
-        getCaseCount() {//获取案件公开数量信息
-          let _this = this;
-          _this.axios.get(webApi.SSTX.AG_CountAJGKXX.format({
-            startTimeStr: _this.dateValue[0],
-            endTimeStr: _this.dateValue[1],
-            dwbm: _this.dwbm,
-            gkzt: _this.gkzt,
-            bhxj: _this.bhxj,//包含下级
-            ajlx: '',//案件类型
-          })).then(function(res){
-            _this.total = res.data.data;
-          }).catch(function(err){
-            console.log(err)
-          })
+        getCount() {//获取列表信息总数
+          for(let i in this.aLLTotal) {
+            if(i==this.status) {
+              this.total = this.aLLTotal[i];
+            }
+          }
         },
         /*
     * getCount: 是否获取当前选择条件下的公开信息数量
@@ -283,23 +285,22 @@
           this.isLoading = true;
           let _this = this;
           if(getCount){//获取总数
-            _this.getDocCount();//获取总条数
+            _this.getCount();//获取总条数
           }
-          if(getAll){//下载全部数据
-            this.$Message.info('获取数据中');
-          }
-          _this.axios.get(webApi.SSTX.AG_GetWSSLs.format({
+          this.pageSize = this.pageSize?this.pageSize:0;
+          _this.axios.get(webApi.Stat.GetOpenDocDataList.format({
             startTimeStr: _this.dateValue[0],
             endTimeStr: _this.dateValue[1],
             dwbm: _this.dwbm,
             gkzt: _this.gkzt,
             nzzt: _this.nzzt,
             bhxj: _this.bhxj,//包含下级
-            wslb: '',//文书类型
+            wslb: _this.wslb,//案件类别编码
+            cbrgh: _this.cbrgh,//承办人工号
+            bmsah: _this.bmsah,//部门受案号
             pageNum: _this.pageNum,
             pageSize: getAll?_this.total:_this.pageSize,
           })).then(function(res){
-            ;
             if(res.data.code==0){
               let data = res.data.data;//表数据
               data.forEach(function(item,index){ //添加序号
@@ -310,7 +311,15 @@
                 }
               });
               if(getAll){
-                _this.exportData(data);//下载全部数据
+                if(data.length > 0) {
+                  let fileName = _this.title + '-' + _this.dataType + '-'+  _this.getExportTime();
+                  setTimeout(function(){
+                    _this.exportData(data,_this.columnsData,fileName);//下载全部数据
+                  },200)
+                }else {
+                  _this.$Message.warning('暂无数据可导出');
+                }
+
               }else{
                 _this.infoData = data;
               }
@@ -331,18 +340,18 @@
           this.isLoading = true;
           let _this = this;
           if(getCount){//获取总数
-            _this.getCaseCount();//获取总条数
+            _this.getCount();//获取总条数
           }
-          if(getAll){//下载全部数据
-            this.$Message.info('获取数据中');
-          }
-          _this.axios.get(webApi.SSTX.AG_GetAJGKXXs.format({
+          this.pageSize = this.pageSize?this.pageSize:0;
+          _this.axios.get(webApi.Stat.GetOpenCaseDataList.format({
             startTimeStr: _this.dateValue[0],
             endTimeStr: _this.dateValue[1],
             dwbm: _this.dwbm,
             gkzt: _this.gkzt,
             bhxj: _this.bhxj,//包含下级
-            ajlx: '',//案件类型
+            ajlbbm: _this.ajlbbm,//案件类别编码
+            cbrgh: _this.cbrgh,//承办人工号
+            bmsah: _this.bmsah,//部门受案号
             pageNum: _this.pageNum,
             pageSize: getAll?_this.total:_this.pageSize,
           })).then(function(res){
@@ -353,7 +362,14 @@
                 item.order = (_this.pageNum -1) * _this.pageSize +  index + 1;
               });
               if(getAll){
-                _this.exportData(data);//下载全部数据
+                if(data.length > 0) {
+                  let fileName = _this.title + '-' + _this.dataType + '-'+  _this.getExportTime();
+                  setTimeout(function(){
+                    _this.exportData(data,_this.columnsData,fileName);//下载全部数据
+                  },200)
+                }else {
+                  _this.$Message.warning('暂无数据可导出');
+                }
               }else{
                 _this.infoData = data;
               }
@@ -423,6 +439,9 @@
                 _this.gkzt = 4;
                 break;
             }
+            _this.columnsData = [].concat(_this.tableData[_this.tableName].columns);
+            _this.pageNum = 1;
+            _this.setColumns1();
             _this.getCaseList(true);
           };
           let docChangeStatus = function() {
@@ -448,6 +467,9 @@
                 _this.nzzt = 7;
                 break;
             }
+            _this.columnsData = [].concat(_this.tableData[_this.tableName].columns);
+            _this.pageNum = 1;
+            _this.setColumns1();
             _this.getDocList(true);
           };
           initChangeType();
@@ -481,10 +503,16 @@
       background: white;
       padding: 30px;
       /*标题*/
-      #content-header {
+      .content-header {
         position: relative;
-        font-size: 20px;
-        height: 40px;
+        font-size: 14px;
+        height: 30px;
+        color: #999;
+        line-height: 30px;
+        &:nth-child(2) {
+          font-size: 20px;
+          color: #333;
+        }
         /*关闭*/
         .close {
           position: absolute;
@@ -496,18 +524,18 @@
       /*表格*/
       #infoTable {
         margin-top: 20px;
-        height: calc(100% - 20px - 40px - 35px - 1px - 20px  - 65px);
+        height: calc(100% - 20px - 30px - 30px - 10px - 35px - 1px - 20px  - 65px);
       }
       /*表格分页*/
       #tablePage {
         position: relative;
-        padding-top: 16px;
+        padding-top: 26px;
         height: 65px;
         #exportData {
           position: absolute;
           right: 0;
           top: 50%;
-          transform: translate(0,-50%);
+          /*transform: translate(0,-50%);*/
         }
       }
     }

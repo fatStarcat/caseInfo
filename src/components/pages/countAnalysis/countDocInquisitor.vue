@@ -4,7 +4,7 @@
       <!--图表-->
       <div id="echarts-wrap">
         <div id="echarts" ref="echartsWrap">
-          <rank-chart :config="config" :text="chartText" :chartData="chartData">
+          <rank-chart :chartHeight="chartHeight" :config="config" :text="chartText" :chartData="chartData">
 
           </rank-chart>
         </div>
@@ -16,12 +16,12 @@
         <Table :loading="isLoading" :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
         <!--导出数据-->
         <div id="exportData">
-          <button class="export-all btn-tabDefault-large">导出全部数据</button>
+          <button class="export-all btn-tabDefault-large" @click="exportDataAll">导出全部数据</button>
         </div>
       </div>
     </div>
     <!--弹出表格-->
-    <table-modal  @closeTable='closeTable' v-show="showTable"></table-modal>
+    <table-modal  @closeTable='closeTable' v-show="isShowTable"></table-modal>
   </div>
 </template>
 
@@ -31,7 +31,7 @@
       return {
         chartText: '检察官公开文书排行榜',//图表名称
         tableHeight: '',//表格高度
-        showTable: false,//显示表格
+        isShowTable: false,//显示表格
         isLoading: false,//加载
         config: {//图表配置项
           xAxis:{
@@ -84,12 +84,15 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].inquisitor,
-                        tableName: 'docArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '检察官分析(文书公开)',
+                        type: '全部',
+                        index: params.index,
+                        nzzt: '',
+                        gkzt: '',
+                        bmsah: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].ZL)
@@ -114,12 +117,15 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].inquisitor,
-                        tableName: 'docArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '检察官分析(文书公开)',
+                        type: '已公开',
+                        index: params.index,
+                        nzzt: 8,
+                        gkzt: 0,
+                        bmsah: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].YIGKSL)
@@ -144,15 +150,51 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].inquisitor,
-                        tableName: 'docArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '检察官分析(文书公开)',
+                        type: '应公开未公开',
+                        index: params.index,
+                        nzzt: 7,
+                        gkzt: 0,
+                        bmsah: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].YGKWGKSL)
+              ]);
+            }
+          },
+          {
+            title: '应公开',
+            key: 'YINGGKSL',
+            align: 'center',
+            render: (h, params) => {
+              var _this = this;
+              return h('div', [
+                h('span', {
+                  props: {
+                    size: 'small',
+                  },
+                  style: {
+                    marginRight: '5px',
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  },
+                  on: {
+                    click: () => {
+                      let config = {
+                        title: '检察官分析(文书公开)',
+                        type: '应公开',
+                        index: params.index,
+                        nzzt: '',
+                        gkzt: 0,
+                        bmsah: '',
+                      };
+                      this.showTable(config);
+                    }
+                  }
+                }, _this.infoData[params.index].YINGGKSL)
               ]);
             }
           },
@@ -174,12 +216,15 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].inquisitor,
-                        tableName: 'docArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        title: '检察官分析(文书公开)',
+                        type: '不公开',
+                        index: params.index,
+                        nzzt: '',
+                        gkzt: 1,
+                        bmsah: '',
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].BGKSL)
@@ -195,6 +240,7 @@
         ],
         infoData: [//表格数据
         ],
+        chartHeight: '',//图表高度
         chartData: [],//图表数据
         dateValue: '',//时间
         dwbm: '',//单位编码
@@ -213,9 +259,22 @@
       this.$bus.$off('countSearch');
     },
     methods: {
+      exportDataAll() {
+        if(this.infoData.length > 0) {
+          let fileName = '检察官分析(文书公开)' + '-'+  this.getExportTime();
+          let _this = this;
+          this.$Message.info('导出数据中');
+          setTimeout(function(){
+            _this.exportData(_this.infoData,_this.columns1,fileName);//导出数据
+          },200)
+        }else {
+          this.$Message.warning('暂无数据可导出');
+        }
+      },
       initBus() {
         let _this = this;
         this.$bus.$emit('setInquisitor',true);
+        this.$bus.$emit('setSelectUnit',true);//显示单位选择
         this.$bus.$on('countSearch',function(val){
           _this.dwbm = val.dwbm;
           _this.dateValue = val.dateValue;
@@ -270,6 +329,31 @@
             _this.isLoading = false;
           })
       },
+      showTable(config) {//显示表格
+        let _this = this;
+        this.$bus.$emit('setTable',{
+          title: config.title,
+          tableName: 'docInfo',
+          type: config.type,
+          bhxj: _this.bhxj,
+          dateValue: _this.dateValue,
+          nzzt: config.nzzt,
+          gkzt: config.gkzt,
+          bmsah: config.bmsah,
+          dataType: _this.infoData[config.index].CBR,//检察官姓名
+          cbrgh: _this.infoData[config.index].CBRGH,
+          dwbm: _this.infoData[config.index].CBDW_BM,
+          unit: _this.infoData[config.index].CBDW_MC,
+          total: {
+            '全部': _this.infoData[config.index].ZL,
+            '已公开':_this.infoData[config.index].YIGKSL,
+            '应公开':_this.infoData[config.index].YINGGKSL,
+            '不公开': _this.infoData[config.index].BGKSL,
+            '应公开未公开': _this.infoData[config.index].YGKWGKSL
+          },
+        });
+        this.isShowTable = true;
+      },
       //设置图表高度
       setChartHeight(data) {
         let chartWrap = this.$refs.echartsWrap;
@@ -277,7 +361,10 @@
         if(height < 500) {
           height = 500;
         }
-        chartWrap.style.height = height + 'px';
+        this.chartHeight = height;
+        if(chartWrap) {
+          chartWrap.style.height = height + 'px';
+        }
       },
       compareData(property) {//比较公开率
         return function(pre,next) {
@@ -287,7 +374,7 @@
         }
       },
       closeTable() {
-        this.showTable = false;
+        this.isShowTable = false;
       },
     },
     destroyed() {

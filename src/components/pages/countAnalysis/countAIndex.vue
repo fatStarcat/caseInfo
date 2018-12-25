@@ -16,7 +16,7 @@
             <p>案件总量</p>
           </div>
         </div>
-        <div class="count-item" @click="showTable('case','已公开',{gkzt: 3})">
+        <div class="count-item" @click="showTable('case','已公开',{gkzt: '3'})">
           <span class="count-img">
             <img src="../../../assets/countAnalysis/open.png" alt="">
           </span>
@@ -151,13 +151,13 @@
       <div class="count-data">
         <!--案件-->
         <div class="count-echarts" >
-          <rank-chart  :text="caseChartText" :chartData="caseChartData">
+          <rank-chart :noProp="true" :text="caseChartText" :chartData="caseChartData">
 
           </rank-chart>
         </div>
         <!--文书-->
         <div class="count-echarts" >
-          <rank-chart  :text="docChartText" :chartData="docChartData">
+          <rank-chart :noProp="true"  :text="docChartText" :chartData="docChartData">
 
           </rank-chart>
         </div>
@@ -224,8 +224,8 @@
       initBus() {
         let _this = this;
         this.$bus.$emit('setInquisitor',false);//
+        this.$bus.$emit('setSelectUnit',true);//显示单位选择
         this.$bus.$on('countSearch',function(val){
-          console.log(val);
           _this.dwbm = val.dwbm;
           _this.dateValue = val.dateValue;
           _this.bhxj = val.bhxj;
@@ -270,7 +270,6 @@
         this.docLoading = true;
         this.axios.get(webApi.Stat.GetOpenDocOverview.format(config))
           .then(function(res){
-            ;
             _this.docLoading = false;
             if(res.data.code === 0){
               _this.openDocInfo = res.data.data[0]
@@ -283,117 +282,116 @@
       },
       getOpenCaseTableByDw(){//获取案件公开列表信息
 
-        let _this = this;
-        let config = {
-          dwbm: this.dwbm,
-          bhxj: true,
-          startTimeStr: this.dateValue[0],
-          endTimeStr: this.dateValue[1],
-        };
-        this.axios.get(webApi.Stat.GetOpenCaseTableByDw.format(config))
-          .then(function(res){
-            if(res.data.code === 0) {
-              let data = res.data.data;
-              if(data.length > 0) {
-                data = _this.handleListData(data,'GKSL');
-                _this.caseChartData = data.sort(_this.compare('value')).reverse();
-                // _this.$bus.$emit('resetMyChart',true);
-              }
-            }
-          })
-          .catch(function(err){
-            console.log(err);
-          })
         // let _this = this;
-        // let unitsCode = this.unitsCode;
-        // let completeCount = 0;
-        // let reData = [];
-        // let config;
-        // for(let i in unitsCode) {
-        //   config = {
-        //     dwbm: unitsCode[i],
-        //     bhxj: false,
-        //     startTimeStr: this.dateValue[0],
-        //     endTimeStr: this.dateValue[1],
-        //   };
-        //   this.axios.get(webApi.Stat.GetOpenCaseTableByDw.format(config))
-        //     .then(function(res){
-        //       ;
-        //       completeCount++;
-        //       if(res.data.code === 0) {
-        //         let data = res.data.data;
-        //         if(data.length > 0) {
-        //           data = _this.handleListData(data,'GKSL');
-        //           reData = reData.concat(data);
-        //           // _this.$bus.$emit('resetMyChart',true);
-        //         }
+        // let config = {
+        //   dwbm: this.dwbm,
+        //   bhxj: true,
+        //   startTimeStr: this.dateValue[0],
+        //   endTimeStr: this.dateValue[1],
+        // };
+        // this.axios.get(webApi.Stat.GetOpenCaseTableByDw.format(config))
+        //   .then(function(res){
+        //     if(res.data.code === 0) {
+        //       let data = res.data.data;
+        //       if(data.length > 0) {
+        //         data = _this.handleListData(data,'GKSL');
+        //         _this.caseChartData = data.sort(_this.compare('value')).reverse();
+        //         // _this.$bus.$emit('resetMyChart',true);
         //       }
-        //       if(completeCount === Object.keys(unitsCode).length) {
-        //         _this.caseChartData = reData.sort(_this.compare('value')).reverse();
-        //       }
-        //     })
-        //     .catch(function(err){
-        //       console.log(err);
-        //     })
-        // }
+        //     }
+        //   })
+        //   .catch(function(err){
+        //     console.log(err);
+        //   })
+        let _this = this;
+        let unitsCode = this.unitsCode;
+        let completeCount = 0;
+        let reData = [];
+        let config;
+        for(let i in unitsCode) {
+          config = {
+            dwbm: unitsCode[i],
+            bhxj: false,
+            startTimeStr: this.dateValue[0],
+            endTimeStr: this.dateValue[1],
+          };
+          this.axios.get(webApi.Stat.GetOpenCaseTableByDw.format(config))
+            .then(function(res){
+              completeCount++;
+              if(res.data.code === 0) {
+                let data = res.data.data;
+                if(data.length > 0) {
+                  data = _this.handleListData(data,'GKSL');
+                  reData = reData.concat(data);
+                  // _this.$bus.$emit('resetMyChart',true);
+                }
+              }
+              if(completeCount === Object.keys(unitsCode).length) {
+                _this.caseChartData = reData.sort(_this.compare('value')).reverse();
+              }
+            })
+            .catch(function(err){
+              console.log(err);
+            })
+        }
 
 
       },
       getOpenDocTableByDw(){//获取文书公开列表信息
-        let _this = this;
-        let config = {
-          dwbm: this.dwbm,
-          bhxj: true,
-          startTimeStr: this.dateValue[0],
-          endTimeStr: this.dateValue[1],
-        };
-        this.axios.get(webApi.Stat.GetOpenDocTableByDw.format(config))
-          .then(function(res){
-            if(res.data.code === 0) {
-              let data = res.data.data;
-              if(data.length > 0) {
-                data = _this.handleListData(data,'YIGKSL');
-                _this.docChartData = data.sort(_this.compare('value')).reverse();
-                // _this.$bus.$emit('resetMyChart',true);
-              }
-            }
-          })
-          .catch(function(err){
-            console.log(err);
-          })
-
         // let _this = this;
-        // let unitsCode = this.unitsCode;
-        // let completeCount = 0;
-        // let reData = [];
-        // let config;
-        // for(let i in unitsCode) {
-        //   config = {
-        //     dwbm: unitsCode[i],
-        //     bhxj: false,
-        //     startTimeStr: this.dateValue[0],
-        //     endTimeStr: this.dateValue[1],
-        //   };
-        //   this.axios.get(webApi.Stat.GetOpenDocTableByDw.format(config))
-        //     .then(function(res){
-        //       ;
-        //       completeCount++;
-        //       if(res.data.code === 0) {
-        //         let data = res.data.data;
-        //         if(data.length > 0) {
-        //           data = _this.handleListData(data,'YIGKSL');
-        //           reData = reData.concat(data);
-        //           // _this.$bus.$emit('resetMyChart',true);
-        //         }
+        // let config = {
+        //   dwbm: this.dwbm,
+        //   bhxj: true,
+        //   startTimeStr: this.dateValue[0],
+        //   endTimeStr: this.dateValue[1],
+        // };
+        // this.axios.get(webApi.Stat.GetOpenDocTableByDw.format(config))
+        //   .then(function(res){
+        //     if(res.data.code === 0) {
+        //       let data = res.data.data;
+        //       if(data.length > 0) {
+        //         data = _this.handleListData(data,'YIGKSL');
+        //         _this.docChartData = data.sort(_this.compare('value')).reverse();
+        //         // _this.$bus.$emit('resetMyChart',true);
         //       }
-        //       if(completeCount === Object.keys(unitsCode).length) {
-        //         _this.docChartData = reData.sort(_this.compare('value')).reverse();
-        //       }
-        //     })
-        //     .catch(function(err){
-        //       console.log(err);
-        //     })
-        // }
+        //     }
+        //   })
+        //   .catch(function(err){
+        //     console.log(err);
+        //   })
+
+        let _this = this;
+        let unitsCode = this.unitsCode;
+        let completeCount = 0;
+        let reData = [];
+        let config;
+        for(let i in unitsCode) {
+          config = {
+            dwbm: unitsCode[i],
+            bhxj: false,
+            startTimeStr: this.dateValue[0],
+            endTimeStr: this.dateValue[1],
+          };
+          this.axios.get(webApi.Stat.GetOpenDocTableByDw.format(config))
+            .then(function(res){
+              ;
+              completeCount++;
+              if(res.data.code === 0) {
+                let data = res.data.data;
+                if(data.length > 0) {
+                  data = _this.handleListData(data,'YIGKSL');
+                  reData = reData.concat(data);
+                  // _this.$bus.$emit('resetMyChart',true);
+                }
+              }
+              if(completeCount === Object.keys(unitsCode).length) {
+                _this.docChartData = reData.sort(_this.compare('value')).reverse();
+              }
+            })
+            .catch(function(err){
+              console.log(err);
+            })
+        }
 
       },
       /*
@@ -417,7 +415,6 @@
             return  nextVal -  preVal;
           }
         }
-        console.log(pro,relData);
         return relData;
       },
       showTable(type,val,status) {//显示表格
@@ -426,15 +423,37 @@
         let tableName = '';
         let gkzt;
         let nzzt;
+        let unit;
+        let total;//总量
         status = status?status:{};
         gkzt = status.gkzt?status.gkzt:'';
         nzzt = status.nzzt?status.nzzt:'';
+        for(let i in this.unitsCode) {
+          if(this.dwbm==this.unitsCode[i]) {
+            unit = i;
+            break;
+          }
+        }
         if(type=='doc'){
           title = '文书公开信息';
           tableName = 'docInfo';
+          total = {
+            '全部': this.openDocInfo.ZL,
+            '已公开': this.openDocInfo.YIGKSL,
+            '应公开': this.openDocInfo.YINGGKSL,
+            '应公开未公开': this.openDocInfo.YGKWGKSL,
+            '不公开': this.openDocInfo.BGKSL,
+          }
         }else {
           title = '案件公开信息';
           tableName = 'caseInfo';
+          total = {
+            '全部': this.openCaseInfo.ZL,
+            '已公开': this.openCaseInfo.GKSL,
+            '本系统已公开统一系统未公开': this.openCaseInfo.TYWGKBXTYGKSL,
+            '不公开': this.openCaseInfo.BGKSL,
+          }
+
         }
         this.$bus.$emit('setTable',{
           title: title,
@@ -444,7 +463,9 @@
           bhxj: _this.bhxj,
           dateValue: _this.dateValue,
           nzzt: nzzt,
-          gkzt: gkzt
+          gkzt: gkzt,
+          unit: unit,//单位名称
+          total: total,//总量
         });
         this.isShowTable = true;
       },

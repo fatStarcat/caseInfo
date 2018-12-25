@@ -20,7 +20,7 @@
                   <!--<Option v-for="item in companyList" :value="item.value" :key="item.value">{{ item.label }}</Option>-->
                 <!--</Select>-->
                 <!--<Checkbox  v-show="showInquisitor">包含下级院</Checkbox>-->
-                <select-item>
+                <select-item v-show="showSelectUnit">
                   <label>单位: </label>
                   <div class="input-wrap">
                     <input v-if="unit=='黄冈市院'?false:true"  readonly  type="text" ref='inputCompany' v-model="keywords"  class="focusCompany" style="width:200px" />
@@ -58,8 +58,9 @@
           resetMenu: false,
           showInquisitor: false,//显示包含下级院
           showCompany: false,//显示单位选择
+          showSelectUnit: false,//显示单位选择
           inquisitor: '',//检察官
-          checkSub: false,//包含下级
+          checkSub: true,//包含下级
           currNum: "",//菜单被选项
           theme3: 'light',
           dateValue:[this.getStartTime(),this.getCurrentTime()],
@@ -137,8 +138,7 @@
           }
         },
         select(name) {
-          console.log(this.currNum)
-          console.log(name)
+
         }
       },
       updated(){
@@ -148,6 +148,9 @@
         var _this = this;
         this.$bus.$on('setInquisitor',function(set) {//设置是否显示检察官输入框
           _this.showInquisitor = set;
+        });
+        this.$bus.$on('setSelectUnit',function(set) {//设置是否显示单位选择
+          _this.showSelectUnit = set;
         });
         this.$bus.$on('loadComplete',function(load){//加载完成
           if(load){

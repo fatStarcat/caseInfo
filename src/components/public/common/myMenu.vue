@@ -110,6 +110,21 @@
               this.caseData.shift();
               this.docData.shift();
             }
+            if(this.$route.path == "/countAnalysis") {
+              this.selected =  0;
+            }else if(this.$route.path == "/countCaseArea") {
+              this.selected =  1;
+            }if(this.$route.path == "/countCaseType") {
+              this.selected =  2;
+            }if(this.$route.path == "/countCaseInquisitor") {
+              this.selected =  3;
+            }if(this.$route.path == "/countDocArea") {
+              this.selected =  4;
+            }if(this.$route.path == "/countDocType") {
+              this.selected =  5;
+            }if(this.$route.path == "/countDocInquisitor") {
+              this.selected =  6;
+            }
           },
           openMenu(type) {
             if(type=='doc') {

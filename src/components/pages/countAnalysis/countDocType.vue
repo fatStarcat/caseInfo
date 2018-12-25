@@ -3,23 +3,30 @@
     <div id="main">
       <!--图表-->
       <div id="echarts-wrap" >
-        <!--文书公开趋势-->
-        <div ref="docTrendEchart"></div>
-        <!--文书公开类型占比-->
-        <div ref="docTypeEchart"></div>
+        <div class="echarts-wrap">
+          <!--文书公开趋势-->
+          <div class='charts' ref="docTrendEchart"></div>
+          <no-data v-show="docTrendNoData"></no-data>
+        </div>
+        <div  class="echarts-wrap">
+          <!--文书公开类型占比-->
+          <div class='charts' ref="docTypeEchart"></div>
+          <no-data v-show="docTypeNoData"></no-data>
+        </div>
+
       </div>
       <!--表格-->
       <div id="table" ref="table">
         <Table :loading="isLoading" :height="tableHeight"  border stripe :columns="columns1" :data="infoData" ></Table>
         <!--导出数据-->
         <div id="exportData">
-          <button class="export-all btn-tabDefault-large">导出全部数据</button>
+          <button class="export-all btn-tabDefault-large" @click="exportDataAll">导出全部数据</button>
         </div>
       </div>
     </div>
 
     <!--弹出表格-->
-    <table-modal  @closeTable='closeTable' v-show="showTable"></table-modal>
+    <table-modal  @closeTable='closeTable' v-show="isShowTable"></table-modal>
   </div>
 </template>
 
@@ -30,13 +37,16 @@
         docTypeEchart: null,//文书类型占比
         docTrendEchart: null,//文书公开趋势
         tableHeight: '',//表格高度
-        showTable: false,//显示表格
+        isShowTable: false,//显示表格
         isLoading: false,//显示加载
+        docTrendNoData: false,//占比无数据
+        docTypeNoData: false,//类型无数据
         columns1: [//表头数据
           {
             title: '时间',
             key: 'YF',
             align: 'center',
+            maxWidth: 160
           },
           {
             title: '起诉书',
@@ -56,12 +66,16 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].time,
-                        tableName: 'docArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        dataType: '起诉书',
+                        index: params.index,
+                        nzzt:'',
+                        gkzt:'',
+                        bmsah:'',
+                        count: params.row.QSSSL,
+                        cbrgh: ''
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].QSSSL)
@@ -86,12 +100,16 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].time,
-                        tableName: 'docArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        dataType: '抗诉书',
+                        index: params.index,
+                        nzzt:'',
+                        gkzt:'',
+                        bmsah:'',
+                        count: params.row.KSSSL,
+                        cbrgh: ''
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].KSSSL)
@@ -116,12 +134,16 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].time,
-                        tableName: 'docArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        dataType: '不起诉决定书',
+                        index: params.index,
+                        nzzt:'',
+                        gkzt:'',
+                        bmsah:'',
+                        count: params.row.BQSJDSSL,
+                        cbrgh: ''
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].BQSJDSSL)
@@ -146,12 +168,16 @@
                   },
                   on: {
                     click: () => {
-                      this.$bus.$emit('setTable',{
-                        title: _this.infoData[params.index].time,
-                        tableName: 'docArea',
-                        type: params.column.title
-                      });
-                      _this.showTable = true;
+                      let config = {
+                        dataType: '刑事申诉复查决定书',
+                        index: params.index,
+                        nzzt:'',
+                        gkzt:'',
+                        bmsah:'',
+                        count: params.row.XSSSFCJDSSL,
+                        cbrgh: ''
+                      };
+                      this.showTable(config);
                     }
                   }
                 }, _this.infoData[params.index].XSSSFCJDSSL)
@@ -172,19 +198,32 @@
 
     },
     mounted() {
+      this.docTrendEchart = this.$echarts.init(this.$refs.docTrendEchart);
+      this.docTypeEchart = this.$echarts.init(this.$refs.docTypeEchart);
       this.initBus();
       this.setTableHeight(this);//设置表格高度
-      // this.initDocTrendEchart();//文书公开趋势
-      // this.initDocTypeEchart();//文书占比
       this.watchEcharts();
     },
     beforeDestroy() {
       this.$bus.$off('countSearch');
     },
     methods: {
+      exportDataAll() {
+        if(this.infoData.length > 0) {
+          let fileName = '文书类型分析(文书公开)' + '-'+  this.getExportTime();
+          let _this = this;
+          this.$Message.info('导出数据中');
+          setTimeout(function(){
+            _this.exportData(_this.infoData,_this.columns1,fileName);//导出数据
+          },200)
+        }else {
+          this.$Message.warning('暂无数据可导出');
+        }
+      },
       initBus() {
         let _this = this;
         this.$bus.$emit('setInquisitor',false);
+        this.$bus.$emit('setSelectUnit',true);//显示单位选择
         this.$bus.$on('countSearch',function(val){
           _this.dwbm = val.dwbm;
           _this.dateValue = val.dateValue;
@@ -194,13 +233,16 @@
         });
         this.$bus.$emit('loadComplete',true);
       },
+      setTime(time) {//设置时间
+        let year = time.split('-')[0];
+        let month = parseInt(time.split('-')[1]);
+        let startTime = new Date(year,month - 1,1);
+        let endTime = new Date(year,month,0 );
+        startTime = this.timeFormat(startTime);
+        endTime = this.timeFormat(endTime);
+        return [startTime,endTime]
+      },
       initChartAndShowLoad() {
-        if(!this.docTrendEchart) {
-          this.docTrendEchart = this.$echarts.init(this.$refs.docTrendEchart);
-        }
-        if(!this.docTypeEchart) {
-          this.docTypeEchart = this.$echarts.init(this.$refs.docTypeEchart);
-        }
         this.docTrendEchart.showLoading({//加载中
           animation:false,
           text : 'loading',
@@ -224,12 +266,11 @@
         this.isLoading = true;
         this.axios.get(webApi.Stat.GetOpenDocTableByWslb.format(config))
           .then(function(res){
-
             _this.isLoading = false;
             if(res.data.code === 0){
               let data = res.data.data;
               _this.infoData = data;
-              _this.openDocChartData = data;
+              _this.openDocChartData = [].concat(data);
               _this.initDocTrendEchart();//文书公开情况趋势图
               _this.initDocTypeEchart();//文书类型占比图
             }
@@ -267,7 +308,6 @@
                   "type":"line",
                   "stack":"总量",
                   "data":[]
-                  // "data":[46,9,8,4,50,26,27,11,25,16,14,24]
                 });
               }
             }
@@ -349,8 +389,37 @@
           legendData: legendData
         }
       },
+      showTable(config) {//显示表格
+        let _this = this;
+        let unit;
+        for(let i in this.unitsCode) {
+          if(this.dwbm==this.unitsCode[i]) {
+            unit = i;
+            break;
+          }
+        }
+        this.$bus.$emit('setTable',{
+          title: '文书类型分析(文书公开)',
+          tableName: 'docInfo',
+          type: '已公开',
+          bhxj: _this.bhxj,
+          dateValue: _this.setTime(_this.infoData[config.index].YF),
+          nzzt: config.nzzt,
+          gkzt: config.gkzt,
+          bmsah: config.bmsah,
+          wslb: config.dataType,
+          dataType: config.dataType,//文书类型
+          cbrgh: config.cbrgh,
+          dwbm: this.dwbm,
+          unit: unit,
+          total: {
+            '已公开': config.count,
+          },
+        });
+        this.isShowTable = true;
+      },
       closeTable() {//关闭表格
-        this.showTable =false;
+        this.isShowTable =false;
       },
       watchEcharts() {//监听浏览器宽度改变
         window.addEventListener('resize',this.repaintEcharts);
@@ -358,8 +427,8 @@
       repaintEcharts() {//重绘图表
         this.docTrendEchart.dispose();
         this.docTypeEchart.dispose();
-        // this.initDocTrendEchart();
-        // this.initDocTypeEchart();
+        this.initDocTrendEchart();
+        this.initDocTypeEchart();
       },
       //文书类型占比
       initDocTypeEchart() {
@@ -383,7 +452,6 @@
           legend: {
             bottom: 70,
             data: data.legendData,
-            // data: ['起诉书', '抗诉书','不起诉决定书','刑事申诉复查决定书'],
             itemWidth: 14,
             itemHeight: 14
           },
@@ -402,18 +470,17 @@
                 color: '#555555'
               },
               data: data.data
-              // data:[
-              //   {value:535, name: '起诉书'},
-              //   {value:510, name: '抗诉书'},
-              //   {value:634, name: '不起诉决定书'},
-              //   {value:735, name: '刑事申诉复查决定书'}
-              // ],
             }
           ]
         };
 
         this.docTypeEchart.setOption(option);
         this.docTypeEchart.hideLoading();
+        if(data.data.length==0) {
+          this.docTypeNoData = true;
+        }else {
+          this.docTypeNoData = false;
+        }
       },
       //文书公开趋势图表
       initDocTrendEchart() {
@@ -434,7 +501,6 @@
           },
           legend: {
             data: data.legData,
-            // data:['起诉书','抗诉书','不起诉决定书','刑事申述复查决定书'],
             bottom: 0,
 
           },
@@ -456,7 +522,6 @@
               color: 'rgba(85,85,85,1)',
             },
             data: data.xAxisData
-            // data: ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月']
           },
           yAxis: {
             type: 'value',
@@ -467,36 +532,14 @@
           },
           color: ['#4589FD','#34ABFE','#8BB3F7','#31CDEF'],
           series: data.data
-
-          //   [
-          //   {
-          //     name:'起诉书',
-          //     type:'line',
-          //     stack: '总量',
-          //     data:[20, 25, 30, 20, 25, 30, 20,25,30,20,25,30]
-          //   },
-          //   {
-          //     name:'抗诉书',
-          //     type:'line',
-          //     stack: '总量',
-          //     data:[12, 12, 11, 13, 15, 16, 13,12,11,15,12,16]
-          //   },
-          //   {
-          //     name:'不起诉决定书',
-          //     type:'line',
-          //     stack: '总量',
-          //     data:[10, 5, 0, 10, 5, 0, 10, 5, 0, 10, 5, 0]
-          //   },
-          //   {
-          //     name:'刑事申述复查决定书',
-          //     type:'line',
-          //     stack: '总量',
-          //     data:[5, 10, 5, 5, 10, 5, 5, 10, 5,5, 10, 5]
-          //   },
-          // ]
         };
         this.docTrendEchart.setOption(option);
         this.docTrendEchart.hideLoading();
+        if(data.data.length==0) {
+          this.docTrendNoData = true;
+        }else {
+          this.docTrendNoData = false;
+        }
       }
     },
     destroyed() {
@@ -527,9 +570,13 @@
         height: calc( 100% - 35px - 38px - 20px);
         /*height: 100%;*/
         overflow-y: auto;
-        >div {
+        .echarts-wrap {
+          position: relative;
           height: 500px;
           margin-bottom: 0;
+          .charts {
+            height: 100%;
+          }
         }
       }
     }

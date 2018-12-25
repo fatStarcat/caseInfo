@@ -18,11 +18,10 @@ import './script/webApi' //接口
 import './script/format' //字符串格式化
 import './script/chartData' //图表对象
 import './script/onMaximize'
-
+import ExportJsonExcel from 'js-export-excel' //导出excel
 
 import axios  from 'axios'
-/**/
-import './../src/script/ajax' //ajax(测试用)
+
 import '../static/json/jsonData' //数据(测试用)
 const Bus = new Vue();
 let timer = null;
@@ -31,6 +30,7 @@ Vue.prototype.$echarts = echarts;
 window.$echarts = echarts;
 Vue.prototype.$bus = Bus;
 Vue.prototype.axios = axios;
+Vue.prototype.ExportJsonExcel = ExportJsonExcel;
 Vue.use(iView);
 Vue.use(common);
 Vue.use(tableModal);

@@ -3,7 +3,8 @@
     <div id="ranChart" ref="myChart">
 
     </div>
-    <span>公开率</span>
+    <span v-show="!noProp">公开率</span>
+    <no-data v-show="noData"></no-data>
   </div>
 
 </template>
@@ -13,6 +14,12 @@
       name: "rank-chart",
       // props: ['text','chartData','config'],
       props: {
+        noProp: {//显示公开率
+          default: false,
+        },
+        chartHeight: {
+          default: '500'
+        },
         text: {
           default: '',
         },
@@ -39,6 +46,8 @@
             myChart: null,//图表对象
             nameData: [],//名称数据
             data: [],//表数据
+            isLoading: false,//加载
+            noData: false,//无数据
           }
       },
       created() {
@@ -48,14 +57,12 @@
         window.addEventListener('resize',this.repaintEcharts);
         this.myChart = this.$echarts.init(this.$refs.myChart);
         this.$bus.$on('myChartLoading',function(){
-          if(!_this.myChart){
-            _this.myChart = this.$echarts.init(this.$refs.myChart);
-          }
           _this.myChart.showLoading({//加载中
             animation:false,
             text : 'loading',
             textStyle : {fontSize : 20}
           });
+          _this.isLoading = true;
         })
         //设置chart
         // this.$bus.$on('resetMyChart',function(){
@@ -87,26 +94,26 @@
         }
       },
       methods:{
-        resetEchart() {//设置echart数据
-          let _this = this;
-          this.nameData = [];
-          this.data = [];
-          console.log('rank',this.chartData)
-          this.chartData.forEach(function(item){
-            _this.nameData.push(item.name);
-            if(String(item.value).indexOf('%') > -1) {
-              _this.data.push(item.value.split('%')[0]);
-            }else {
-              _this.data.push(item.value);
-            }
-
-          });
-          this.resetHeight();
-          this.initChart();
-        },
+        // resetEchart() {//设置echart数据
+        //   let _this = this;
+        //   this.nameData = [];
+        //   this.data = [];
+        //   console.log('rank',this.chartData)
+        //   this.chartData.forEach(function(item){
+        //     _this.nameData.push(item.name);
+        //     if(String(item.value).indexOf('%') > -1) {
+        //       _this.data.push(item.value.split('%')[0]);
+        //     }else {
+        //       _this.data.push(item.value);
+        //     }
+        //
+        //   });
+        //   this.resetHeight();
+        //   this.initChart();
+        // },
         //设置chart高度
         resetHeight() {
-          let autoHeight = this.$refs.myChart.clientHeight;
+          let autoHeight = this.chartHeight - 40;
           this.myChart.getDom().style.height = autoHeight + "px";
           this.myChart.getDom().childNodes[0].style.height = autoHeight + "px";
           this.myChart.getDom().childNodes[0].childNodes[0].setAttribute("height",autoHeight);
@@ -194,6 +201,12 @@
             };
             this.myChart.setOption(option);
             this.myChart.hideLoading();//加载完毕
+            this.isLoading = false;
+            if(this.data.length==0) {
+              this.noData = true;
+            }else {
+              this.noData = false;
+            }
           }
       }
     }
@@ -201,10 +214,13 @@
 
 <style scoped lang="scss">
   .chart {
+    position: relative;
     width: 100%;
     height: calc(100% + 40px);
+    text-align: center;
     #ranChart {
       width: 100%;
+      padding-right: 15px;
       height: calc(100% - 40px);
     }
   }
