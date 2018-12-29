@@ -181,7 +181,7 @@
                       align: 'center',
                     },
                     {
-                      title: '移送法院日期/办结日期',
+                      title: '办结日期',
                       key: 'SJRQ_BJRQ',
                       align: 'center',
                       maxWidth: 160
@@ -213,8 +213,8 @@
         initBus() {
           var _this = this;
           this.$bus.$on('setTable',function(set) {
-            // console.log('设置表格',set);
             let statusData = [];
+            _this.pageNum = 1;
             for(let i in set.total) {
               statusData.push(i);
             }

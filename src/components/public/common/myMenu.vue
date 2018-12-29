@@ -147,7 +147,7 @@
 <style scoped lang="scss">
  #menu {
    height: 100%;
-   width: 138px;
+   width: 144px;
    padding-top: 109px;
    overflow-y: auto;
    background:rgba(242,242,242,1);
@@ -155,6 +155,7 @@
    font-weight: 400;
    color: #555555;
    box-shadow: 4px 0px 4px rgba(189,189,189,.27);
+   font-size: 14px;
    li {
      height: 48px;
      line-height: 48px;

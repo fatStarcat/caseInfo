@@ -1,0 +1,25 @@
+{
+  "tableData": [
+    {
+      "order": 1,
+      "contacts": "张三",
+      "contactsGroup": "浠水县检察院",
+      "phoneNumber": "134562879569",
+      "remarks": ""
+    },
+    {
+      "order": 2,
+      "contacts": "张三",
+      "contactsGroup": "辩护与代理",
+      "phoneNumber": "134562879569",
+      "remarks": ""
+    },
+    {
+      "order": 3,
+      "contacts": "张三",
+      "contactsGroup": "自定义",
+      "phoneNumber": "134562879569",
+      "remarks": ""
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+/*信息模板管理页面样式*/
+.msgTemp-main {
+  height: 100%;
+  padding: 2rem;
+  background-color: #fff;
+  /*分类标题样式*/
+  .msgTemp-head {
+    position: relative;
+    color: #4589FD;
+    font-weight: bold;
+    font-size: 0.9rem;
+    padding-left: 0.75rem;
+    margin-bottom: 1.5rem;
+    &:before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translate(0,-50%);
+      width: 0.25rem;
+      height: 1rem;
+      background: #4589FD;
+    }
+    &:after {
+      content: '';
+      position: absolute;
+      left: 7.35rem;
+      top: 50%;
+      transform: translate(0,-50%);
+      width: calc(100% - 7.35rem);
+      height: 1px;
+      background: rgba(69,137,253,0.3);
+    }
+  }
+  /*表格*/
+  .msgTemp-table {
+    display: table;
+    width: 90%;
+    margin: 0 auto 2rem;
+  }
+}

@@ -28,7 +28,8 @@ export default {
   }
   html,body {
     height: 100%;
-    font-size: 14px;
+    font-size: 20px;
+    /*font-size: 14px;*/
     /*min-width: 1600px;*/
     /*min-height: 900px;*/
   }

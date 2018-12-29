@@ -1,0 +1,300 @@
+/*
+*通用样式
+*/
+/*定义颜色*/
+$maiColorBlue: #4589FD;
+$maiColorYellow: #E78B28;
+
+/*主要内容区域*/
+.main-content {
+  height: 100%;
+  min-height: 25rem;
+  background-color: #fff;
+  padding-top: 2rem;
+  color: #555555;
+  .main-select-wrap {
+    position: relative;
+    padding-bottom: 1.25rem;
+    /*内容筛选条件区域*/
+    .main-select {
+      padding: 0 2rem 1rem 2rem ;
+      /*每一项选择内容*/
+      .main-sItem {
+        //display: table;
+        float: left;
+        overflow: hidden;
+        height: 1.75rem;
+        line-height: 1.75px;
+        font-size: 0.8rem;
+        +.main-sItem {
+          margin-left: 7.75rem;
+        }
+        >span {
+          display: inline-block;
+          //display: table-cell;
+          //vertical-align: middle;
+        }
+        /*项名称*/
+        .sItem-name {
+          padding-right: 1rem;
+        }
+      }
+
+    }
+    /*不同右边距*/
+    .main-sItemOffset {
+      .main-sItem +.main-sItem {
+        margin-left: 5.65rem
+      }
+    }
+    /*两项内容边距*/
+    .main-sItemOffsetTwo {
+      .main-sItem  +.main-sItem {
+        margin-left: 8rem
+      }
+    }
+    /*三项内容边距*/
+    .main-sItemOffsetThree {
+      .main-sItem  +.main-sItem {
+        margin-left: 5rem;
+      }
+    }
+    /*按钮*/
+    .main-sBtn {
+      position: absolute;
+      //right: 5.95rem;
+      right: 2rem;
+      top: 50%;
+      margin-top: -2rem;
+      button {
+        box-shadow: none;
+      }
+    }
+  }
+  /*表格区域*/
+  .main-table {
+    position: relative;
+    padding: 0  0.95rem;
+    font-size: 0.7rem;
+    &:before {
+      content: " ";
+      position: absolute;
+      left: 2rem;
+      top: -1.25rem;
+      height: 1px;
+      width: calc(100% - 4rem);
+      background-color: rgba(187,187,187,0.32);
+    }
+    /*按钮组*/
+    .main-btn {
+      padding: 0 0.95rem  1.25rem 0.95rem;
+      text-align: right;
+      button {
+        width: auto;
+        padding: 0 1.4rem;
+        box-shadow: none;
+      }
+    }
+  }
+  /*分页区域*/
+  .main-pages {
+    //padding: 1.5rem 0.95rem 1rem 0.95rem;
+    padding: 1.5rem 0.95rem 1rem 0.95rem;
+    font-size: 0.7rem;
+  }
+  /*重置iview样式*/
+  /*输入框*/
+  .ivu-input-wrapper-default {
+    width: 13.5rem;
+  }
+  .ivu-input-default {
+    height: 1.75rem;
+  }
+
+  /*日期选择器*/
+  .ivu-date-picker {
+   .ivu-input-wrapper-default {
+     width: 12.2rem;
+    }
+    .ivu-input-default {
+      height: 1.75rem;
+    }
+  }
+  /*单选按钮*/
+  .ivu-radio-group {
+    min-width: 10.15rem;
+    padding-bottom: 3px;
+  }
+  /*选择框*/
+  .main-select-wrap {
+    .ivu-select {
+      width: 10.15rem;
+      height: 1.75rem;
+    }
+    .ivu-select-multiple .ivu-select-input {
+      height: 1.55rem;
+      line-height: 1.75rem;
+    }
+  }
+}
+
+/*弹出框*/
+.modal-wrap {
+  display: table;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0,0,0,0.3);
+  z-index: 1000;
+  .main-modal {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    color: #555555;
+    /*填写内容弹出框*/
+    .modal-content {
+      display: inline-block;
+      width: 18rem;
+      font-size: 0.8rem;
+      background-color: #FFFFFF;
+      border-radius:  0.5rem;
+      /*标题*/
+      .main-modal-title {
+        height: 3rem;
+        line-height: 3rem;
+        font-size: 1.2rem;
+        color: #FFFFFF;
+        background-color: $maiColorBlue;
+        border-radius: 0.5rem 0.5rem 0 0;
+      }
+      /*搜索输入*/
+      .main-modal-input {
+        width: 10.5rem;
+        margin: 1.25rem auto 1rem;
+      }
+      /*联系人列表*/
+      .modal-contacts-list {
+        width: calc(100% - 2rem);
+        margin:  0 auto;
+        text-align: left;
+        padding-bottom:  1.65rem;
+        max-height: 10rem;
+        overflow-y: auto;
+      }
+      /*填写内容*/
+      .main-modal-fill {
+        padding: 1.1rem 0 1.25rem 0;
+        text-align: left;
+        .main-modal-item {
+          //padding-left: 2.6rem;
+          display: flex;
+          justify-content: center;
+          >span {
+            display: inline-block;
+            /*项名称*/
+            &:first-child{
+              width: 4.5rem;
+              text-align: right;
+            }
+            &:last-child {
+              width: 8.5rem;
+              margin-left: 1rem;
+            }
+            >span {
+              display: inline-block;
+              font-size: 0.6rem;
+              line-height: 0.8rem;
+              margin-top: 0.7rem;
+              opacity: 0.8;
+            }
+          }
+          +.main-modal-item {
+            margin-top: 1rem;
+
+          }
+          /*textare*/
+          textarea {
+            width: 100%;
+            height: 4.75rem;
+            font-size: 0.6rem;
+            resize: none;
+            overflow-y: auto;
+            padding: 4px 7px;
+            border-radius: 4px;
+            vertical-align: top;
+            color: #515a6e;
+            border: 1px solid #dcdee2;
+          }
+        }
+        /*按钮组*/
+        .main-modal-btn {
+          margin-top: 2rem;
+          text-align: center;
+          /*取消按钮*/
+          .cus-cancel-btn {
+            margin-left: 3.1rem;
+          }
+        }
+      }
+    }
+    /*提示框*/
+    .main-modal-tip {
+      display: inline-block;
+      width: 15.5rem;
+      background: #fff;
+      border-radius: 0.5rem;
+      font-size: 1.2rem;
+      padding: 2.95rem 0 1.6rem 0;
+      /*按钮组*/
+      .main-modal-btn {
+        margin-top: 2.9rem;
+        text-align: center;
+        /*取消按钮*/
+        .cus-cancel-btn {
+          margin-left: 3.1rem;
+        }
+      }
+    }
+    /*重置iview样式*/
+    /*选择框*/
+    .ivu-select {
+      width: 7.35rem;
+      height: 1.55rem;
+      text-align: left;
+    }
+    /*日期选择*/
+   .ivu-date-picker .ivu-input-wrapper-default {
+     width: 100%;
+     height: 1.4rem;
+    }
+    /*输入框*/
+    .ivu-input-wrapper-default {
+      width: 100%;
+    }
+  }
+
+}
+/*按钮样式*/
+@mixin btn-default-s($color){
+  width: 4.5rem;
+  height: 2rem;
+  color: $color;
+  font-size: 0.9rem;
+  border: 1px solid $color;
+  box-shadow: 0 4px 4px 0 rgba($color, 0.42);
+  border-radius: 1rem;
+  background-color: transparent;
+  &:hover {
+    background-color: $color;
+    cursor: pointer;
+    color: #fff;
+  }
+}
+.cus-info-btn {
+  @include btn-default-s($maiColorBlue);
+}
+.cus-cancel-btn {
+  @include btn-default-s($maiColorYellow);
+}

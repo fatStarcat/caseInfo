@@ -47,7 +47,24 @@ import countDocInquisitor from '@/components/pages/countAnalysis/countDocInquisi
 
 
 import infoExport from '@/components/pages/infoExport/infoExport' //信息导出
+/*信息推送*/
 import messagePush from '@/components/pages/messagePush/messagePush' //消息推送
+
+/*案件受理通知*/
+import CaseAcceptNotice from '@/components/pages/messagePush/caseAcceptNotice/caseAcceptNotice'
+/*案件分配通知*/
+import CaseAllotNotice from '@/components/pages/messagePush/caseAllotNotice/caseAllotNotice'
+/*案件审结通知*/
+import CaseConcludeNotice from '@/components/pages/messagePush/caseConcludeNotice/caseConcludeNotice'
+/*自定义短信发送*/
+import CustomMessageSend from '@/components/pages/messagePush/customMessageSend/customMessageSend'
+/*通讯录管理*/
+import MailListManage from '@/components/pages/messagePush/mailListManage/mailListManage'
+/*短信模板管理*/
+import MsgTemplateManage from '@/components/pages/messagePush/msgTemplateManage/msgTemplateManage'
+
+
+
 import relevantRegulations from '@/components/pages/relevantRegulations/relevantRegulations' //相关规定
 //查看pdf
 import pdf from '@/components/pages/pdf/pdf'
@@ -187,6 +204,44 @@ export default new Router({
           path: '/messagePush',
           name: 'messagePush',
           component: messagePush,
+          children: [
+            /*案件受理通知*/
+            {
+              path: '/',
+              name: 'CaseAcceptNotice',
+              component: CaseAcceptNotice
+            },
+            /*案件分配通知*/
+            {
+              path: '/CaseAllotNotice',
+              name: 'CaseAllotNotice',
+              component: CaseAllotNotice
+            },
+            /*案件审结通知*/
+            {
+              path: '/CaseConcludeNotice',
+              name: 'CaseConcludeNotice',
+              component: CaseConcludeNotice
+            },
+            /*自定义短信发送*/
+            {
+              path: '/CustomMessageSend',
+              name: 'CustomMessageSend',
+              component: CustomMessageSend
+            },
+            /*通讯录管理*/
+            {
+              path: '/MailListManage',
+              name: 'MailListManage',
+              component: MailListManage
+            },
+            /*短信模板管理*/
+            {
+              path: '/MsgTemplateManage',
+              name: 'MsgTemplateManage',
+              component: MsgTemplateManage
+            },
+          ]
         },
         //相关规定
         {

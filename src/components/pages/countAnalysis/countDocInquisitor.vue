@@ -315,9 +315,6 @@
                   value: item.GKL
                 })
               });
-              if(cData.length === 0) {
-                cData = [' '];
-              }
               _this.setChartHeight(data);
               _this.chartData = cData.reverse();
               _this.infoData = data;

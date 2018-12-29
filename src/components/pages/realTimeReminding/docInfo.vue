@@ -5,7 +5,7 @@
       <!--条件选择区-->
       <select-group mar-top="30">
         <select-item>
-          <label>移送法院日期/办结日期: </label>
+          <label>办结日期: </label>
           <DatePicker  @on-change="setDate" v-model="dateTime" type="daterange" split-panels placeholder="请选择时间"  style="width: 200px"></DatePicker>
         </select-item>
         <!--<select-item>-->
@@ -127,7 +127,7 @@
             align: 'center',
           },
           {
-            title: '移送法院日期/办结日期',
+            title: '办结日期',
             key: 'SJRQ_BJRQ',
             align: 'center',
             maxWidth: 160

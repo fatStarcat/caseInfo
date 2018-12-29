@@ -14,7 +14,8 @@
       <!--用户信息-->
       <div class="infoItem">
         <img src="../../assets/index/user.png" alt="">
-        <span>欢迎您，{{userName}}</span>
+        <!--<span>欢迎您，{{userName}}</span>-->
+        <span>欢迎您，王豪</span>
       </div>
       <!--消息-->
       <!--<div class="infoItem">-->
@@ -22,10 +23,11 @@
         <!--<span>消息</span>-->
       <!--</div>-->
       <!--退出-->
-      <div class="infoItem" @click="exit">
-        <img src="../../assets/index/toggle.png" alt="">
-        <span>切换用户</span>
-      </div>
+
+      <!--<div class="infoItem" @click="exit">-->
+        <!--<img src="../../assets/index/toggle.png" alt="">-->
+        <!--<span>切换用户</span>-->
+      <!--</div>-->
 
     </div>
     <!--关闭-->
@@ -117,10 +119,10 @@
         display: table-cell;
         vertical-align: middle;
         padding: 0 20px;
-         &:hover {
-           background: rgba(6,14,128,0.5);
-           cursor: pointer;
-         }
+         /*&:hover {*/
+           /*background: rgba(6,14,128,0.5);*/
+           /*cursor: pointer;*/
+         /*}*/
          &:nth-child(3) {
            cursor: pointer;
          }

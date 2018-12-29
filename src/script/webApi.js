@@ -1,5 +1,18 @@
 var webApi = {
   Host: '',
+  /*测试用*/
+  // getCaseAcceptNoticeList: './../static/mokeData/caseAcceptNotice.json',
+  // getCaseConcludeNoticeList: './../static/mokeData/caseConcludeNotice.json',
+  // getCaseAllotNoticeList: './../static/mokeData/caseAllotNotice.json',
+  // getCustomMessageSendList: './../static/mokeData/customMessageSend.json',
+  // getMailListManageList: './../static/mokeData/mailListManage.json',
+  // getMsgTempManageList: './../static/mokeData/msgTempManage.json',
+  getCaseAcceptNoticeList: './../Pages/static/mokeData/caseAcceptNotice.json',
+  getCaseConcludeNoticeList: './../Pages/static/mokeData/caseConcludeNotice.json',
+  getCaseAllotNoticeList: './../Pages/static/mokeData/caseAllotNotice.json',
+  getCustomMessageSendList: './../Pages/static/mokeData/customMessageSend.json',
+  getMailListManageList: './../Pages/static/mokeData/mailListManage.json',
+  getMsgTempManageList: './../Pages/static/mokeData/msgTempManage.json',
 //通知发送控制器(暂不对接)
   TZFS : {
     GetTZs: '/api/TZFS/GetTZs?startTimeStr={startTimeStr}&endTimeStr={endTimeStr}&tzlbStr={tzlbStr}&fszt={fszt}&keywords={keywords}&pageNum={pageNum}&pageSize={pageSize}', //获取通知列表; HttpMethod:GET; NeedToken:True(管理员)
@@ -71,6 +84,8 @@ var webApi = {
     AG_CountWSSL: '/api/SJDC/AG_CountWSSL?startTimeStr={startTimeStr}&endTimeStr={endTimeStr}&wslb={wslb}&dczt={dczt}', //计算文书公开信息数量; HttpMethod:GET; NeedToken:True(案管人员)
     CreatePackage: '/api/SJDC/CreatePackage?flag={flag}&startTimeStr={startTimeStr}&endTimeStr={endTimeStr}', //生成导出数据包; HttpMethod:GET; NeedToken:True(案管人员)
   },
+
+
 }
 
 window.webApi = webApi;

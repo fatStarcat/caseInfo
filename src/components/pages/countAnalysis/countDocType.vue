@@ -48,143 +48,6 @@
             align: 'center',
             maxWidth: 160
           },
-          {
-            title: '起诉书',
-            key: 'QSSSL',
-            align: 'center',
-            render: (h, params) => {
-              var _this = this;
-              return h('div', [
-                h('span', {
-                  props: {
-                    size: 'small',
-                  },
-                  style: {
-                    marginRight: '5px',
-                    cursor: 'pointer',
-                    textDecoration: 'underline'
-                  },
-                  on: {
-                    click: () => {
-                      let config = {
-                        dataType: '起诉书',
-                        index: params.index,
-                        nzzt:'',
-                        gkzt:'',
-                        bmsah:'',
-                        count: params.row.QSSSL,
-                        cbrgh: ''
-                      };
-                      this.showTable(config);
-                    }
-                  }
-                }, _this.infoData[params.index].QSSSL)
-              ]);
-            }
-          },
-          {
-            title: '抗诉书',
-            key: 'KSSSL',
-            align: 'center',
-            render: (h, params) => {
-              var _this = this;
-              return h('div', [
-                h('span', {
-                  props: {
-                    size: 'small',
-                  },
-                  style: {
-                    marginRight: '5px',
-                    cursor: 'pointer',
-                    textDecoration: 'underline'
-                  },
-                  on: {
-                    click: () => {
-                      let config = {
-                        dataType: '抗诉书',
-                        index: params.index,
-                        nzzt:'',
-                        gkzt:'',
-                        bmsah:'',
-                        count: params.row.KSSSL,
-                        cbrgh: ''
-                      };
-                      this.showTable(config);
-                    }
-                  }
-                }, _this.infoData[params.index].KSSSL)
-              ]);
-            }
-          },
-          {
-            title: '不起诉决定书',
-            key: 'BQSJDSSL',
-            align: 'center',
-            render: (h, params) => {
-              var _this = this;
-              return h('div', [
-                h('span', {
-                  props: {
-                    size: 'small',
-                  },
-                  style: {
-                    marginRight: '5px',
-                    cursor: 'pointer',
-                    textDecoration: 'underline'
-                  },
-                  on: {
-                    click: () => {
-                      let config = {
-                        dataType: '不起诉决定书',
-                        index: params.index,
-                        nzzt:'',
-                        gkzt:'',
-                        bmsah:'',
-                        count: params.row.BQSJDSSL,
-                        cbrgh: ''
-                      };
-                      this.showTable(config);
-                    }
-                  }
-                }, _this.infoData[params.index].BQSJDSSL)
-              ]);
-            }
-          },
-          {
-            title: '刑事申诉复查决定书',
-            key: 'XSSSFCJDSSL',
-            align: 'center',
-            render: (h, params) => {
-              var _this = this;
-              return h('div', [
-                h('span', {
-                  props: {
-                    size: 'small',
-                  },
-                  style: {
-                    marginRight: '5px',
-                    cursor: 'pointer',
-                    textDecoration: 'underline'
-                  },
-                  on: {
-                    click: () => {
-                      let config = {
-                        dataType: '刑事申诉复查决定书',
-                        index: params.index,
-                        nzzt:'',
-                        gkzt:'',
-                        bmsah:'',
-                        count: params.row.XSSSFCJDSSL,
-                        cbrgh: ''
-                      };
-                      this.showTable(config);
-                    }
-                  }
-                }, _this.infoData[params.index].XSSSFCJDSSL)
-              ]);
-            }
-          },
-
         ],
         infoData: [//表格数据
         ],
@@ -192,12 +55,60 @@
         dwbm: '',//单位编码
         bhxj: '',//包含下级
         openDocChartData: [],//公开文书趋势图数据
+        docTypeAllData:[//文书类型数据
+          { LABEL: '刑事抗诉书',
+            VALUE: 'SSKSS'
+          },
+          { LABEL: '刑事附带民事公益诉讼起诉书',
+            VALUE: 'SSFDMSGYSSQSS'
+          },
+          { LABEL: '起诉书',
+            VALUE: 'QSS'
+          },
+          { LABEL: '不起诉决定书',
+            VALUE: 'BQSJDS'
+          },
+          { LABEL: '行政公益诉讼起诉书',
+            VALUE: 'XZGYSSQSS'
+          },
+          { LABEL: '刑事申诉复查决定书',
+            VALUE: 'XSSSFCJDS'
+          },
+          { LABEL: '民事抗诉书',
+            VALUE: 'MSKSS'
+          },
+          { LABEL: '支持起诉书',
+            VALUE: 'ZCQSS'
+          },
+          { LABEL: '抗诉书',
+            VALUE: 'KSS'
+          },
+          { LABEL: '补充起诉决定书',
+            VALUE: 'BCQSJDS'
+          },
+          { LABEL: '民事公益诉讼起诉书',
+            VALUE: 'MSGYSSQSS'
+          },
+          { LABEL: '追加起诉书',
+            VALUE: 'ZJQSS'
+          },
+          { LABEL: '行政赔偿抗诉书',
+            VALUE: 'XZPCKSS'
+          },
+          { LABEL: '民事提请抗诉书',
+            VALUE: 'MSTQKSS'
+          },
+          { LABEL: '刑事附带民事起诉书',
+            VALUE: 'XSFDMSQSS'
+          }
+        ]
       }
     },
     created() {
 
     },
     mounted() {
+      this.createTableColumns();
       this.docTrendEchart = this.$echarts.init(this.$refs.docTrendEchart);
       this.docTypeEchart = this.$echarts.init(this.$refs.docTypeEchart);
       this.initBus();
@@ -219,6 +130,45 @@
         }else {
           this.$Message.warning('暂无数据可导出');
         }
+      },
+      /*生成表头数据*/
+      createTableColumns() {
+        let _this = this;
+        this.docTypeAllData.forEach(function(item) {
+          _this.columns1.push({
+            title: item.LABEL,
+            key: item.VALUE,
+            align: 'center',
+            render: (h, params) => {
+              return h('div', [
+                h('span', {
+                  props: {
+                    size: 'small',
+                  },
+                  style: {
+                    marginRight: '5px',
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  },
+                  on: {
+                    click: () => {
+                      let config = {
+                        dataType: params.column.title,
+                        index: params.index,
+                        nzzt:'',
+                        gkzt:'',
+                        bmsah:'',
+                        count: params.row[item.VALUE],
+                        cbrgh: ''
+                      };
+                      _this.showTable(config);
+                    }
+                  }
+                }, _this.infoData[params.index][item.VALUE])
+              ]);
+            }
+          })
+        })
       },
       initBus() {
         let _this = this;
@@ -293,15 +243,12 @@
             }else {//
               if(!obj[i]) {
                 obj[i] = i;
-                if(i==="BQSJDSSL") {
-                  docType = '不起诉决定书';
-                }else if(i==="KSSSL") {
-                  docType = '抗诉书';
-                }else if(i==="QSSSL") {
-                  docType = '起诉书';
-                }else if(i==="XSSSFCJDSSL") {
-                  docType = '刑事申诉复查决定书';
-                }
+                _this.docTypeAllData.some(function(item){
+                  if(item.VALUE === i) {
+                    docType = item.LABEL;
+                    return item.LABEL;
+                  }
+                });
                 data.push({
                   name: docType,
                   AJLB_MC: i,
@@ -354,15 +301,12 @@
         for(let i in dataItem) {
           if(i!="YF") {
             let name;
-            if(i==="BQSJDSSL") {
-              name = '不起诉决定书';
-            }else if(i==="KSSSL") {
-              name = '抗诉书';
-            }else if(i==="QSSSL") {
-              name = '起诉书';
-            }else if(i==="XSSSFCJDSSL") {
-              name = '刑事申诉复查决定书';
-            }
+            this.docTypeAllData.some(function(item){
+              if(item.VALUE === i) {
+                name = item.LABEL
+                return item.LABEL;
+              }
+            });
             docType.push({
               name: name,
               AJLB_MC: i
@@ -484,8 +428,16 @@
       },
       //文书公开趋势图表
       initDocTrendEchart() {
-        let data = this.getXAxisDataAndSData();
-        var option = {
+        let data = {
+          legData: [],
+          xAxisData: [],
+          data: []
+        };
+        let option;
+        if(this.openDocChartData.length > 0){
+          data = this.getXAxisDataAndSData();
+        }
+        option = {
           title: {
             text: '文书公开趋势',
             x: 'center',
@@ -507,7 +459,7 @@
           grid: {
             left: '3%',
             right: '4%',
-            bottom: '10%',
+            height: '70%',
             containLabel: true
           },
           xAxis: {
@@ -533,6 +485,7 @@
           color: ['#4589FD','#34ABFE','#8BB3F7','#31CDEF'],
           series: data.data
         };
+        this.docTrendEchart.clear();
         this.docTrendEchart.setOption(option);
         this.docTrendEchart.hideLoading();
         if(data.data.length==0) {
@@ -572,12 +525,15 @@
         overflow-y: auto;
         .echarts-wrap {
           position: relative;
-          height: 500px;
+          height: 700px;
           margin-bottom: 0;
           .charts {
             height: 100%;
           }
         }
+        /*.chartsTrend {*/
+          /*height: 700px;*/
+        /*}*/
       }
     }
   }

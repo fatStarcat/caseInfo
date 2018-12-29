@@ -105,12 +105,8 @@ hr {
   z-index: 1000;
 }
 /*清除浮动*/
-.clearfix:after {
-  content: '';
-  display: block;
-  height: 0;
-  clear: both;
-  visibility: hidden;
+.clearfix {
+  overflow: auto;
 }
 
 /*设置滚动条*/

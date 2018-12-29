@@ -201,6 +201,7 @@
         dateValue: '',//时间
         dwbm: '',//单位编码
         bhxj: '',//包含下级
+        unit: JSON.parse(localStorage.getItem('userInfo')).Unit.DWMC,//单位名称
       }
     },
     created() {
@@ -309,6 +310,10 @@
         let reData = [];
         let config;
         for(let i in unitsCode) {
+          if(i==="黄冈市院"&& i!== this.unit) {
+            completeCount++;
+            continue;
+          }
           config = {
             dwbm: unitsCode[i],
             bhxj: false,
@@ -366,6 +371,10 @@
         let reData = [];
         let config;
         for(let i in unitsCode) {
+          if(i==="黄冈市院"&& i!== this.unit) {
+            completeCount++;
+            continue;
+          }
           config = {
             dwbm: unitsCode[i],
             bhxj: false,
@@ -374,7 +383,6 @@
           };
           this.axios.get(webApi.Stat.GetOpenDocTableByDw.format(config))
             .then(function(res){
-              ;
               completeCount++;
               if(res.data.code === 0) {
                 let data = res.data.data;

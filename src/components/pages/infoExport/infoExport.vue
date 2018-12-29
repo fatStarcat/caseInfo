@@ -500,6 +500,7 @@
       #tablePage {
         padding-top: 16px;
         height: 65px;
+        margin-top: 40px;
       }
     }
   }

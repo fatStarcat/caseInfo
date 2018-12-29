@@ -1,0 +1,46 @@
+{
+  "tableData": [
+    {
+      "order": 1,
+      "acceptNumber": "浠检公诉刑诉〔2018〕46号",
+      "caseName": "张三纵火案",
+      "caseAbstract": "张三纵火烧毁森林",
+      "unit": "浠水县检察院",
+      "caseProcess": "起诉",
+      "people": "李四",
+      "party": "王五",
+      "agentParty": "赵六",
+      "createTime": "2018/10/09",
+      "content": "XX检察院于XX年XX月XX日受理了某某案件。",
+      "status": "等待确认"
+    },
+    {
+      "order": 2,
+      "acceptNumber": "浠检公诉刑诉〔2018〕46号",
+      "caseName": "张三纵火案",
+      "caseAbstract": "张三纵火烧毁森林",
+      "unit": "浠水县检察院",
+      "caseProcess": "起诉",
+      "people": "李四",
+      "party": "王五",
+      "agentParty": "赵六",
+      "createTime": "2018/10/09",
+      "content": "XX检察院于XX年XX月XX日受理了某某案件。",
+      "status": "已发送"
+    },
+    {
+      "order": 3,
+      "acceptNumber": "浠检公诉刑诉〔2018〕46号",
+      "caseName": "张三纵火案",
+      "caseAbstract": "张三纵火烧毁森林",
+      "unit": "浠水县检察院",
+      "caseProcess": "起诉",
+      "people": "李四",
+      "party": "王五",
+      "agentParty": "赵六",
+      "createTime": "2018/10/09",
+      "content": "XX检察院于XX年XX月XX日受理了某某案件。",
+      "status": "发送中"
+    }
+  ]
+}

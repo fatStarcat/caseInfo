@@ -6,6 +6,7 @@ import router from './router'
 import iView from 'iview' //引入iview
 import 'iview/dist/styles/iview.css'
 import common from './../src/script/common' //公用方法
+import commonMessage from './../src/script/messagePush/common' //信息推送公用方法
 import echarts from 'echarts'
 import tableModal from './components/public/countAnalysis/index'  //表格
 import commonComp from './components/public/common/index' //公用组件(面包屑,选择项)
@@ -36,6 +37,7 @@ Vue.use(common);
 Vue.use(tableModal);
 Vue.use(commonComp);
 Vue.use(docShield);
+Vue.use(commonMessage);
 
 
 //axios请求拦截器

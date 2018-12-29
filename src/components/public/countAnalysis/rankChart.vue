@@ -79,7 +79,6 @@
           let _this = this;
           this.nameData = [];
           this.data = [];
-          console.log('rank',this.chartData)
           this.chartData.forEach(function(item){
             _this.nameData.push(item.name);
             if(String(item.value).indexOf('%') > -1) {

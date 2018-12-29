@@ -422,7 +422,7 @@
         let relObj = {};
         data.forEach(function(item) {
           for(let i in item) {
-            if(i==='BGKSL'||i==="YGKWGKSL"||i==="YIGKSL"||i==="YINGGKSL"){
+            if(i==='BGKSL'||i==="YGKWGKSL"||i==="YIGKSL"){//不公开数量,应公开未公开,已公开
               if(!relObj[i]) {
                 relObj[i] = item[i]?item[i]:0;
               }else {
@@ -438,8 +438,6 @@
             type = '应公开未公开';
           }else if(i==="YIGKSL") {
             type = '已公开';
-          }else if(i==="YINGGKSL") {
-            type = '应公开';
           }else {
             continue
           }
@@ -464,8 +462,6 @@
               type = '应公开未公开';
             }else if(i==="YIGKSL") {
               type = '已公开';
-            }else if(i==="YINGGKSL") {
-              type = '应公开';
             }else {
               continue
             }

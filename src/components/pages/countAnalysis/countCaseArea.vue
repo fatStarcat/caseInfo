@@ -442,9 +442,9 @@
           if(i==='bgksl') {
             type = '不公开';
           }else if(i==="tyywgksl") {
-            type = '统一业务系统未公开';
+            type = '已公开';
           }else if(i==="tywgkbxtygk") {
-             type = '统一业务系统未公开本系统已公开';
+             type = '统一系统未公开本系统已公开';
           }
           relData.push({
             name: type,
@@ -464,9 +464,9 @@
             if(i==='bgksl') {
               type = '不公开';
             }else if(i==="tyywgksl") {
-              type = '统一业务系统未公开';
+              type = '已公开';
             }else if(i==="tywgkbxtygk") {
-              type = '统一业务系统未公开本系统已公开';
+              type = '统一系统未公开本系统已公开';
             }else {
               continue
             }
