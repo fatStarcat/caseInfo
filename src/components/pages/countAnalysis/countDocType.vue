@@ -46,7 +46,7 @@
             title: '时间',
             key: 'YF',
             align: 'center',
-            maxWidth: 160
+            width: 90
           },
         ],
         infoData: [//表格数据
@@ -468,7 +468,7 @@
             axisLabel: {
               interval: 0,
               rotate: "45",
-              fontSize:14,
+              fontSize: 14,
               fontFamily: 'PingFang-SC-Regular',
               fontWeight: 400,
               color: 'rgba(85,85,85,1)',
@@ -477,7 +477,7 @@
           },
           yAxis: {
             type: 'value',
-            fontSize:14,
+            fontSize:12,
             fontFamily: 'PingFang-SC-Regular',
             fontWeight: 400,
             color: 'rgba(85,85,85,1)',

@@ -40,7 +40,7 @@
         showTable: false,//显示表格
         isLoading: false,//显示加载
         caseTypeNoData: false,//类型无数据
-        caseTrendNoData: false,//蘸水笔无数据
+        caseTrendNoData: false,//占比无数据
         caseType: JSON.parse(localStorage.getItem('AJLX')),//案件类型
         columns1: [//表头数据
           {
@@ -108,6 +108,9 @@
         bhxj: '',//包含下级
         openCaseChartData: [],//案件公开趋势图数据
         caseTypeChartData: [],//案件类型占比数据
+        chartColor:  ["#3f86ff", "#48cfad", "#fc6e51", "#ac92ec", "#8cb7ff", "#7cfddd", "#ffc2b5", "#cdb9ff", "#015fff", "#0fef8d", "#ff6a4c", "#9067f5", "#003999", "#2eb57d", "#e24829", "#735bae", "#3065bf", "#027847", "#c4563f", "#993bfa", "#024ecf", "#28ac4a", "#bb7061", "#9100e5"]
+        // chartColor:  ["#3f86ff", "#48cfad", "#fc6e51", "#ac92ec"]
+
       }
     },
     created() {
@@ -256,6 +259,7 @@
             x: 'center',
             top: 60
           },
+          color: this.chartColor,
           tooltip : {
             trigger: 'item',
             formatter: "{b} : {c} ({d}%)"
@@ -277,7 +281,7 @@
           series : [
             {
               type: 'pie',
-              radius: ['40%', '50%'],
+              radius: ['50%', '70%'],
               selectedMode: 'single',
               data: data.data
               // data:[{"value":3256,"name":"审查逮捕案件"},{"value":2276,"name":"一审公诉案件"},{"value":4100,"name":"二审上诉案件"},{"value":4752,"name":"二审抗诉案件"},{"value":4096,"name":"对民事、行政生效判决、裁定、调解书的监督案件"},{"value":3960,"name":"刑事申诉审查案件"},{"value":3120,"name":"刑事赔偿案件"},{"value":5732,"name":"生效刑事赔偿决定执行案件"},{"value":2276,"name":"刑事赔偿复议案件"},{"value":4100,"name":"刑事赔偿及民事行政诉讼赔偿监督案件件"},{"value":3952,"name":"行政赔偿监督案件"},{"value":3164,"name":"国家司法救助案件"},{"value":6432,"name":"行政公益诉讼一审案件"},{"value":2276,"name":"民事公益诉讼一审案件"},{"value":3260,"name":"行政公益诉讼二审上案件"},{"value":3072,"name":"民事公益诉讼二审上案件"},{"value":5868,"name":"行政公益诉讼二审支上案件"},{"value":3956,"name":"民事公益诉讼二审支上案件"},{"value":3168,"name":"民事公益诉讼重（再）审案件"},{"value":6436,"name":"行政公益诉讼重（再）审案件"},{"value":2276,"name":"违法所得没收申请案件"},{"value":3260,"name":"没收违法所得启动监督案件"},{"value":1260,"name":"提请批准延长侦察羁押期限案件"},{"value":3160,"name":" 批准延长侦察羁押期限案件"}],
@@ -368,6 +372,7 @@
             text: '公开案件类型趋势图',
             x: 'center'
           },
+          color: this.chartColor,
           tooltip: {
             trigger: 'axis',
             position: ['40%','10%']

@@ -122,9 +122,9 @@
               this.timer = null;
             }
             this.timer = setInterval(function(){
-              console.log(1,_this.isInitZTree);
+              //console.log(1,_this.isInitZTree);
               if(_this.isInitZTree) {
-                console.log('timer',_this.timer);
+                //console.log('timer',_this.timer);
                 clearInterval(_this.timer);
                 _this.timer = null;
                 if(_this.keywords) {//有关键字
@@ -140,7 +140,7 @@
             (_this.keywords)&&(type='search')
             _this.searchNodesPromise(type)
               .then(function(res){
-                console.log('promiseOver',res)
+                //console.log('promiseOver',res)
                 _this.loadComplete = true;
               })
               .catch(function(err){
@@ -157,7 +157,7 @@
           let _this = this;
           worker.postMessage(data);
           worker.onmessage = function (e) {
-            console.log(e.data);
+            //console.log(e.data);
             _this.zTreeObj.showNodes(e.data);
             worker.terminate();//关闭
           }

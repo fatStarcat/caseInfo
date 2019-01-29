@@ -20,11 +20,12 @@ $maiColorYellow: #E78B28;
       padding: 0 2rem 1rem 2rem ;
       /*每一项选择内容*/
       .main-sItem {
-        //display: table;
+        display: flex;
+        align-items: center;
         float: left;
         overflow: hidden;
         height: 1.75rem;
-        line-height: 1.75px;
+        //line-height: 1.75px;
         font-size: 0.8rem;
         +.main-sItem {
           margin-left: 7.75rem;
@@ -83,7 +84,7 @@ $maiColorYellow: #E78B28;
       top: -1.25rem;
       height: 1px;
       width: calc(100% - 4rem);
-      background-color: rgba(187,187,187,0.32);
+      background-color: rgba(187,187,187,0.2);
     }
     /*按钮组*/
     .main-btn {
@@ -160,6 +161,7 @@ $maiColorYellow: #E78B28;
       font-size: 0.8rem;
       background-color: #FFFFFF;
       border-radius:  0.5rem;
+      box-shadow: 0 0 1.6rem rgba(136,136,136,0.55);
       /*标题*/
       .main-modal-title {
         height: 3rem;
@@ -191,12 +193,14 @@ $maiColorYellow: #E78B28;
           //padding-left: 2.6rem;
           display: flex;
           justify-content: center;
+          min-height: 1.75rem;
           >span {
-            display: inline-block;
+            display: flex;
+            align-items: center;
             /*项名称*/
             &:first-child{
               width: 4.5rem;
-              text-align: right;
+              justify-content: flex-end;
             }
             &:last-child {
               width: 8.5rem;
@@ -209,6 +213,14 @@ $maiColorYellow: #E78B28;
               margin-top: 0.7rem;
               opacity: 0.8;
             }
+            >div {
+              width: 100%;
+              font-size: 0.6rem;
+            }
+          }
+          /*顶对齐内容*/
+          .modal-span-top {
+            align-items: flex-start !important;
           }
           +.main-modal-item {
             margin-top: 1rem;
@@ -283,7 +295,7 @@ $maiColorYellow: #E78B28;
   color: $color;
   font-size: 0.9rem;
   border: 1px solid $color;
-  box-shadow: 0 4px 4px 0 rgba($color, 0.42);
+  box-shadow: 0 2px 2px 0 rgba($color, 0.3);
   border-radius: 1rem;
   background-color: transparent;
   &:hover {

@@ -9,15 +9,15 @@
         <!--填写内容-->
         <div class="main-modal-fill">
           <div class="main-modal-item">
-            <span>通知接收人 :</span>
+            <span>通知接收人 : </span>
             <span>{{lookInfo.acceptPerson}}</span>
           </div>
           <div class="main-modal-item">
-            <span>案件名称 :</span>
+            <span>案件名称 : </span>
             <span>{{lookInfo.caseName}}</span>
           </div>
           <div class="main-modal-item">
-            <span>通知内容 :</span>
+            <span class="modal-span-top">通知内容 : </span>
             <span>
                   <textarea>{{lookInfo.content}}</textarea>
                 </span>

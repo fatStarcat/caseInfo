@@ -49,7 +49,7 @@ export default {
     cursor: pointer;
   }
   #app {
-    font-family: '微软雅黑';
+    font-family: 'Microsoft YaHei';
     width: 100%;
     height: 100%;
   }

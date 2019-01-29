@@ -44,11 +44,6 @@
               DWBM: JSON.parse(localStorage.getItem('userInfo')).Unit.DWBM,//单位编码
             },
             user: JSON.parse(localStorage.getItem('userInfo')).MC,//用户名
-            // company: {//单位
-            //   name: '',//单位名称
-            //   DWBM: '',//单位编码
-            // },
-            // user: '',//用户名
             passwrod: '',//密码
             isLoading: false,//加载显示
           }
@@ -66,15 +61,13 @@
             if(res.data.code==0) {
               let token = res.data.data;
               localStorage.setItem('token',token);
-              console.log(_this.$route)
+              invoker.reLogin(token);
               location.reload();
               _this.isLoading = false;
             }else {
-              _this.$Message.warning(res.data.errorMessage);
               _this.isLoading = false;
             }
           }).catch(function(err){
-            _this.$Message.warning('登录失败!');
             _this.isLoading = false;
             console.log(err)
           })
@@ -104,7 +97,7 @@
      height:112px;
      line-height: 112px;
      font-size:24px;
-     font-family:'PingFang-SC-Bold';
+     font-family:'PingFang-SC-Bold','Microsoft YaHei';
      font-weight:bold;
      color:rgba(255,255,255,1);
      background: url('../../../static/images/index/bg.jpg') no-repeat;
@@ -149,7 +142,7 @@
            border-bottom: 1px solid rgba(220,220,220,1);
            background: transparent;
            font-size: 16px;
-           font-family: 'PingFang-SC-Regular';
+           font-family: 'PingFang-SC-Regular','Microsoft YaHei';
            font-weight:400;
            color:rgba(85,85,85,1);
            &:first-child {
@@ -189,12 +182,12 @@
      .rel-btn {
       button {
         width: 92px;
-        height: 28px;
+        /*height: 28px;*/
         line-height: 28px;
         border: 1px solid rgba(69,137,253,1);
         border-radius: 14px;
         font-size: 20px;
-        font-family:'PingFang-SC-Regular';
+        font-family:'PingFang-SC-Regular','Microsoft YaHei';
         font-weight:400;
         color:rgba(51,51,51,1);
         background-color: transparent;

@@ -60,7 +60,7 @@
             已公开
           </div>
           <div class="info-content-count" @click="toPage({path:'/docInfo',status:{gkzt: 0,nzzt: 8},bread:'已公开(法律文书公开信息)'})">
-           {{docCount[0]}}
+            {{docCount[0]}}
             <loading type="w" :width="25" :height="25" :isLoading="docLoading"></loading>
           </div>
         </div>
@@ -104,400 +104,440 @@
       </div>
       <!--返回按钮-->
       <!--<span class='echarts-return' v-show="showReturn" @click="returnMap">-->
-            <!--<img src="../../../assets/countAnalysis/return.png" alt="">-->
+      <!--<img src="../../../assets/countAnalysis/return.png" alt="">-->
       <!--</span>-->
     </div>
   </div>
 </template>
 
 <script>
-    export default {
-        name: "real-time-reminding",
-        data() {
-          return {
-            isLoading: false,
-            docLoading: false,//文书信息加载
-            role: JSON.parse(localStorage.getItem('userInfo')).JS,//角色身份,
-            dwbm: JSON.parse(localStorage.getItem('userInfo')).Unit.DWBM,//单位编码
-            dwmc: JSON.parse(localStorage.getItem('userInfo')).Unit.DWMC,//单位名称,
-            mapEchart: null,//地图
-            mapData: [],//地图数据
-            caseCount: [],//案件统计数据
-            docCount: [],//文书统计数据
-            mapType: '',//地图类型
-            showReturn: false,//显示返回按钮
-            mapJsonData: '',//地图绘图数据
-            cityCount: {//各区县公开信息统计信息
+  export default {
+    name: "real-time-reminding",
+    data() {
+      return {
+        isLoading: false,
+        docLoading: false,//文书信息加载
+        role: JSON.parse(localStorage.getItem('userInfo')).JS,//角色身份,
+        dwbm: JSON.parse(localStorage.getItem('userInfo')).Unit.DWBM,//单位编码
+        dwmc: JSON.parse(localStorage.getItem('userInfo')).Unit.DWMC,//单位名称,
+        mapEchart: null,//地图
+        mapData: [],//地图数据
+        caseCount: [],//案件统计数据
+        docCount: [],//文书统计数据
+        mapType: '',//地图类型
+        showReturn: false,//显示返回按钮
+        mapJsonData: '',//地图绘图数据
+        cityCount: {//各区县公开信息统计信息
 
-            },
-            unitsInfo: {//单位编码信息
-              "蕲春县" :421126,
-              "红安县" :421122,
-              "团风县" :421121,
-              "浠水县" :421125,
-              "武穴市" :421182,
-              "麻城市" :421181,
-              "黄梅县" :421127,
-              "黄州区": 421102,
-              "罗田县" :421123,
-              "英山县" :421124,
+        },
+        unitsInfo: {//单位编码信息
+          "黄冈市院" :421100,
+          "蕲春县" :421126,
+          "红安县" :421122,
+          "团风县" :421121,
+          "浠水县" :421125,
+          "武穴市" :421182,
+          "麻城市" :421181,
+          "黄梅县" :421127,
+          "黄州区": 421102,
+          "罗田县" :421123,
+          "英山县" :421124,
+        }
+      }
+    },
+    methods: {
+      setCity() {//注册地图数据
+        let _this = this;
+        $echarts.registerMap('HG',_this.mapJsonData);//全局注册黄冈地图
+        _this.mapType = 'HG';
+        //注册黄冈地图和各区县地图
+        // if((this.dwmc.indexOf('黄冈市') > -1)||this.dwmc === '湖北省院') {
+        //   $echarts.registerMap('HG',_this.mapJsonData);//全局注册黄冈地图
+        //   _this.mapType = 'HG';
+        // }else {//注册区县地图
+        //   for(let i = 0, len = _this.mapJsonData.features.length; i < len; i++){
+        //     let oriData = _this.mapJsonData.features[i];
+        //     if(this.dwmc.indexOf(oriData.properties.name) > -1) {
+        //       let selfData = { //各个区县地图数据
+        //         "type": "FeatureCollection",
+        //         "features": [oriData]
+        //       };
+        //       $echarts.registerMap(oriData.properties.name,selfData);//注册地图
+        //       _this.mapType = oriData.properties.name;
+        //       break
+        //     }
+        //   }
+        // }
+        this.setMapData();
+      },
+      setMapData() {//设置地图数据
+        let mapData = [];
+        let showAllMap = false;//是否所有地图移入都显示信息
+        let _this = this;
+        if(((_this.dwmc.indexOf('黄冈市') > -1)||_this.dwmc === '湖北省院')&&(_this.dwmc.indexOf('黄州区') == -1)&&(_this.role=='案管人员')) {
+          showAllMap = true;
+        }
+        for( let i = 0;i < this.mapJsonData.features.length;i++ ){
+          let color = '#4589fd';
+          if(!showAllMap) {
+            let name = _this.dwmc;
+            // if(name.indexOf('黄冈市')>-1) {
+            //   name = '黄州区';
+            // }
+            if(!(name.indexOf(this.mapJsonData.features[i].properties.name) > -1)) {//地图名称与当前单位不符
+              color = '#ccc'
             }
           }
-        },
-      methods: {
-          setCity() {//注册地图数据
-            let _this = this;
-            $echarts.registerMap('HG',_this.mapJsonData);//全局注册黄冈地图
-            _this.mapType = 'HG';
-            //注册黄冈地图和各区县地图
-            // if((this.dwmc.indexOf('黄冈市') > -1)||this.dwmc === '湖北省院') {
-            //   $echarts.registerMap('HG',_this.mapJsonData);//全局注册黄冈地图
-            //   _this.mapType = 'HG';
-            // }else {//注册区县地图
-            //   for(let i = 0, len = _this.mapJsonData.features.length; i < len; i++){
-            //     let oriData = _this.mapJsonData.features[i];
-            //     if(this.dwmc.indexOf(oriData.properties.name) > -1) {
-            //       let selfData = { //各个区县地图数据
-            //         "type": "FeatureCollection",
-            //         "features": [oriData]
-            //       };
-            //       $echarts.registerMap(oriData.properties.name,selfData);//注册地图
-            //       _this.mapType = oriData.properties.name;
-            //       break
-            //     }
-            //   }
-            // }
-            this.setMapData();
-          },
-          setMapData() {//设置地图数据
-            let mapData = [];
-            let showAllMap = false;//是否所有地图移入都显示信息
-            let _this = this;
-            if(((_this.dwmc.indexOf('黄冈市') > -1)||_this.dwmc === '湖北省院')&&(_this.dwmc.indexOf('黄州区') == -1)&&(_this.role=='案管人员')) {
-              showAllMap = true;
-            }
-            for( let i = 0;i < this.mapJsonData.features.length;i++ ){
-              let color = '#4589fd';
-              if(!showAllMap) {
-                let name = _this.dwmc;
-                if(name.indexOf('黄冈市')>-1) {
-                  name = '黄州区';
-                }
-                if(!(name.indexOf(this.mapJsonData.features[i].properties.name) > -1)) {//地图名称与当前单位不符
-                  color = '#ccc'
-                }
+          mapData.push({
+            name: this.mapJsonData.features[i].properties.name,
+            itemStyle: {
+              normal: {
+                areaColor: color,
               }
-              mapData.push({
-                name: this.mapJsonData.features[i].properties.name,
-                itemStyle: {
-                  normal: {
-                    areaColor: color,
-                  }
-                },
-              })
-            }
-            this.mapData = mapData;
-            chartData.mapData = mapData;
-            this.initMap();
-            // _this.setMapClick();//设置地图点击事件
-          },
-        getCity() {//获取地图数据
-          let _this = this;
-          this.axios({
-            url: '@/../static/map/421100.json'
-          }).then(function(res){
-            ;
-            _this.mapJsonData = res.data;
-            _this.setCity();
+            },
           })
+        }
+        this.mapData = mapData;
+        chartData.mapData = mapData;
+        this.initMap();
+        // _this.setMapClick();//设置地图点击事件
+      },
+      getCity() {//获取地图数据
+        let _this = this;
+        this.axios({
+          url: '@/../static/map/421100.json'
+        }).then(function(res){
+          _this.mapJsonData = res.data;
+          _this.setCity();
+        })
           .catch(function(err){
             console.log(err);
           })
-        },
-        setMapClick() {
-          let _this = this;
-          this.mapEchart.on('click', function(param) {
-            _this.initMap(param.name);
-            _this.showReturn = true;
-          })
-        },
-        returnMap() {//返回上级地图
-          this.showReturn = false;
-          this.initMap('HG');
-          this.setMapClick();//设置地图点击事件
-        },
-          getUnitsCode(name) {//获取单位编码
-            let dwbm = '';
-            for(let item in this.unitsInfo){
-              if(item==name){
-                dwbm = this.unitsInfo[item];
-                break
+      },
+      setMapClick() {
+        let _this = this;
+        this.mapEchart.on('click', function(param) {
+          _this.initMap(param.name);
+          _this.showReturn = true;
+        })
+      },
+      returnMap() {//返回上级地图
+        this.showReturn = false;
+        this.initMap('HG');
+        this.setMapClick();//设置地图点击事件
+      },
+      getUnitsCode(name) {//获取单位编码
+        let dwbm = '';
+        for(let item in this.unitsInfo){
+          if(item==name){
+            dwbm = this.unitsInfo[item];
+            break
+          }
+        }
+        return dwbm;
+      },
+      initMap(type) {
+        let tMap = [].concat({
+          name: '黄冈市院',
+          value: [114.87,30.45]
+        });
+        var _this = this;
+        (type)&&(this.mapType = type);
+        // if(this.mapEchart) {
+        //   this.mapEchart.dispose();
+        // }
+        this.mapEchart = this.$echarts.init(this.$refs.mapEchart);
+        let option = {
+          backgroundColor: 'transparent',
+          tooltip: {
+            trigger: 'item',
+            formatter: function (param) {
+              let marker1 = '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:#65e0fa;"></span>';
+              let marker2 = '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:#e78b28;"></span>';
+              let marker3 = '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:#4589fd;"></span>';
+              let marker4 = '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:#e8bf30;"></span>';
+              if(((_this.dwmc.indexOf('黄冈市') > -1)||_this.dwmc === '湖北省院')&&(_this.dwmc.indexOf('黄州区') == -1)&&(_this.role=='案管人员')){
+                // console.log(param.name,_this.getUnitsCode(param.name))
+                if(!_this.cityCount.hasOwnProperty(param.name)){
+                  let dwbm = _this.getUnitsCode(param.name);
+                  _this.getCaseCount(dwbm,param.name);
+                  _this.getDocCount(dwbm,param.name);
+                }
+                return param.name + '<br/>' +
+                  '<br/>'+
+                  '程序信息公开信息' + '<br/>' +
+                  marker1 +" " + '已公开：' + _this.cityCount[param.name].caseCount[0] + '<br/>' +
+                  marker2 +" " + '不公开：' + _this.cityCount[param.name].caseCount[2] + '<br/>' +
+                  marker3 +" " + '本系统已公开统一系统未公开：' + _this.cityCount[param.name].caseCount[1] + '<br/>' +
+                  marker1 +" " + '程序信息公开率：' + _this.cityCount[param.name].caseCount[3] + '<br/>'+
+                  '<br/>'+
+                  '法律文书公开信息' + '<br/>' +
+                  marker1 +" " + '已公开：' + _this.cityCount[param.name].docCount[0] + '<br/>' +
+                  marker2 +" " + '不公开：' + _this.cityCount[param.name].docCount[1] + '<br/>' +
+                  marker4 +" " + '应公开：' + _this.cityCount[param.name].docCount[2] + '<br/>' +
+                  marker3 +" " + '应公开未公开：' + _this.cityCount[param.name].docCount[3] + '<br/>' +
+                  marker1 +" " + '法律文书公开率：' + _this.cityCount[param.name].docCount[4] + '<br/>'
+              }else {//显示本区县数据
+                let name = _this.dwmc;
+                // if(name.indexOf('黄冈市')>-1) {
+                //   name = '黄州区';
+                // }
+                if(!(name.indexOf(param.name) > -1)) {//移入地图与当前单位不符
+                  return
+                }
+                return param.name + '<br/>' +
+                  '程序信息公开信息' + '<br/>' +
+                  marker1 +" " + '已公开：' + _this.caseCount[0] + '<br/>' +
+                  marker2 +" " + '不公开：' + _this.caseCount[2] + '<br/>' +
+                  marker3 +" " + '本系统已公开统一系统未公开：' + _this.caseCount[1] + '<br/>' +
+                  marker1 +" " + '程序信息公开率：' + _this.caseCount[3] + '<br/>'+
+                  '<br/>'+
+                  '法律文书公开信息' + '<br/>' +
+                  marker1 +" " + '已公开：' + _this.docCount[0] + '<br/>' +
+                  marker2 +" " + '不公开：' + _this.docCount[1] + '<br/>' +
+                  marker4 +" " + '应公开：' + _this.docCount[2] + '<br/>' +
+                  marker3 +" " + '应公开未公开：' + _this.docCount[3] + '<br/>' +
+                  marker1 +" " + '法律文书公开率：' + _this.docCount[4] + '<br/>'
               }
-            }
-            return dwbm;
+            },
           },
-          initMap(type) {
-            var _this = this;
-            (type)&&(this.mapType = type);
-            // if(this.mapEchart) {
-            //   this.mapEchart.dispose();
-            // }
-            this.mapEchart = this.$echarts.init(this.$refs.mapEchart);
-            let option = {
-              backgroundColor: 'transparent',
-              tooltip: {
-                trigger: 'item',
-                formatter: function (param) {
-                  let marker1 = '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:#65e0fa;"></span>';
-                  let marker2 = '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:#e78b28;"></span>';
-                  let marker3 = '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:#4589fd;"></span>';
-                  let marker4 = '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:#e8bf30;"></span>';
-                  if(((_this.dwmc.indexOf('黄冈市') > -1)||_this.dwmc === '湖北省院')&&(_this.dwmc.indexOf('黄州区') == -1)&&(_this.role=='案管人员')){
-                    // console.log(param.name,_this.getUnitsCode(param.name))
-                    if(!_this.cityCount.hasOwnProperty(param.name)){
-                      let dwbm = _this.getUnitsCode(param.name);
-                      _this.getCaseCount(dwbm,param.name);
-                      _this.getDocCount(dwbm,param.name);
-                    }
-                    return param.name + '<br/>' +
-                      '<br/>'+
-                      '程序信息公开信息' + '<br/>' +
-                      marker1 +" " + '已公开：' + _this.cityCount[param.name].caseCount[0] + '<br/>' +
-                      marker2 +" " + '不公开：' + _this.cityCount[param.name].caseCount[2] + '<br/>' +
-                      marker3 +" " + '本系统已公开统一系统未公开：' + _this.cityCount[param.name].caseCount[1] + '<br/>' +
-                      marker1 +" " + '程序信息公开率：' + _this.cityCount[param.name].caseCount[3] + '<br/>'+
-                      '<br/>'+
-                      '法律文书公开信息' + '<br/>' +
-                      marker1 +" " + '已公开：' + _this.cityCount[param.name].docCount[0] + '<br/>' +
-                      marker2 +" " + '不公开：' + _this.cityCount[param.name].docCount[1] + '<br/>' +
-                      marker4 +" " + '应公开：' + _this.cityCount[param.name].docCount[2] + '<br/>' +
-                      marker3 +" " + '应公开未公开：' + _this.cityCount[param.name].docCount[3] + '<br/>' +
-                      marker1 +" " + '法律文书公开率：' + _this.cityCount[param.name].docCount[4] + '<br/>'
-                  }else {//显示本区县数据
-                    let name = _this.dwmc;
-                    if(name.indexOf('黄冈市')>-1) {
-                      name = '黄州区';
-                    }
-                    if(!(name.indexOf(param.name) > -1)) {//移入地图与当前单位不符
-                      return
-                    }
-                    return param.name + '<br/>' +
-                      '程序信息公开信息' + '<br/>' +
-                      marker1 +" " + '已公开：' + _this.caseCount[0] + '<br/>' +
-                      marker2 +" " + '不公开：' + _this.caseCount[2] + '<br/>' +
-                      marker3 +" " + '本系统已公开统一系统未公开：' + _this.caseCount[1] + '<br/>' +
-                      marker1 +" " + '程序信息公开率：' + _this.caseCount[3] + '<br/>'+
-                      '<br/>'+
-                      '法律文书公开信息' + '<br/>' +
-                      marker1 +" " + '已公开：' + _this.docCount[0] + '<br/>' +
-                      marker2 +" " + '不公开：' + _this.docCount[1] + '<br/>' +
-                      marker4 +" " + '应公开：' + _this.docCount[2] + '<br/>' +
-                      marker3 +" " + '应公开未公开：' + _this.docCount[3] + '<br/>' +
-                      marker1 +" " + '法律文书公开率：' + _this.docCount[4] + '<br/>'
+          animationDuration:1000,
+          animationEasing:'cubicOut',
+          animationDurationUpdate:1000,
+          geo: {
+            map: 'HG',
+            roam: false,
+            label: {
+              normal:{
+                show:true,
+                textStyle:{
+                  color:'#fff',
+                  fontSize:13
+                }
+              },
+              emphasis: {
+                show: true,
+                textStyle:{
+                  color:'#fff',
+                  fontSize:13
+                }
+              }
+            },
+            itemStyle: {
+              normal: {
+                areaColor: '#4589fd',
+                borderColor: '#095be6'
+              },
+              emphasis: {
+                areaColor: 'darkorange'
+              }
+            },
+          },
+          series : [
+            {
+              type: 'scatter',
+              coordinateSystem: 'geo',
+              data: tMap,
+              symbolSize: 18,
+              symbol: 'image://data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwEAYAAAAHkiXEAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAZiS0dEAAAAAAAA+UO7fwAAAAlwSFlzAAAASAAAAEgARslrPgAAB0xJREFUeNrtm21QVOcVx//nwt4Vo1IpaAF3V1BcEMXELcY4aCOdJWYQBQM1xI6mmIpBWkwnUUajQYyC0SSI2EowTVprJjLUpi+ZmqlGZJzG1t1YXoRdwOAukMBA5KUosMvepx/k8oEOg8heL0v292Vndp97zv+cc8/e52Uu4MaNGzdu3LgY5kiNUnklOrrmqmq1Mj4mRm493xkYAwCOM69R9fGrjEaTQf0BrykvF7+XW9+kp+aE6g+KrVu2mExqNc8zJn6av1L1KH61ebPc+saKy9wxDUzDgClTuIvoRFx29vDfWRX9FOGHDxsM/oXA1Kly6510mE+pbvHbMjOH3/n/1wkxajX/6u7dcut9UCZ8B5hP+RcCvr6sAwAyM0cbz06yLDTt3XtrVnDLY7+fNUtu/aMx4QuAdxVpith9+5BAq/Ght/eo4x2UhfPTp9sNA/G2v+7ZI7f80ZiwBahNVquVOcHB7Lesnb5OTR3r9aRje+hGWlr13sASvi0kRO54RtQpt4CRMNWoVbyiuBgEAiUlPbShq1gMr+Li0Jesn9q6Nm6UO67hTLgOqPWZ84rnpWXLYIYGysTEcRv0RRccSUkmvbrZ8+UVK+SObzgTrgDCW1wpV/n22wiFFTYaf4cO2qFOVsNNP3bs/oLNCXadxIQpQK2P5j1+Q0ICovAtdkVFOds+O0MpyHvqqdrCOQZ+2/r1cscr4imX45uJwUFTctVqz2t2L+G/TzzBepgP25GbCwD0NwkdZ3K3WdaRI+Y5qoW8H2MDyxW93PQbN8JLvmroy7RaH3UenN6KptOqI16mgADsQ4rjS52OfQ1flqzTcSnkhc90OjBWBkNkJMukRMqePftRBzwif2KX8WJXF56lxQiqqqKN6GdXjUb8nXVBazQ6XsV/kG00hv2xMco+rabm/p+YIIzX7agFuMwAwNNz9nOqq4oerdbjGB7Hfp0Oz5I3zDodm48ARCxcSOUIIm7pUnYRt3HUx0fufEoFLUIG1vb0wBfH0WM2s5+jBdOqqxHH7qLQaKQvYRWSjUY+lQseuGgwBJGFgL6+Ee2N9IM5UqNUlL/5Jrsg/IteeO01tNE61PG83AlwGfzYXxBis9Ea7kn20dGj2uuWfvuS118fPmzEh/DU5x1p9iWHDuEZ+jN2XbsmdzyuBq1BO2KNxr5VfavsS3JyRhw3mqG69Pn5wIwZQontGB/z+eesFECpTid3gBOWHhyAf0WFjccbNsvTT0dEWK1AR8dIwx/4IVyX/oOfAX5+jjWKrYqesjLMpxfIJzRU7ngnCnQCMayivn6glYoUFStXhpdY6N5PWlpGu+6B1wEhBS0fAG1tHheEc56P6/UUy06xTywWuQOXnfNIZO83NQkFVMRp9foHTbzImBdiIQXNJ3rrm5oczwv3KFKvp1xWwva3tsqdh0dOB1JwsL2d4+ifVBQTE0YW6qfbt8dqZtzrAPPUwEpFXkQEojxiqam0lOUDyJ85U+78SIaZfYjk7m62gF5kH0VHh4VZrXa70fiw5sa9FaG917zYvrOiQoijDYJXbCwlYR30d+/KnSenUwRvLO/t5eazMKEsLm68iRdx2l5Q2C8seQMHv/hC4Fg0zU1IwLesHOH9/fJmbfzQSlYAtd3OAUdxMilpQXiT/0BDWZnT7EslvOZlzXJ+1YYN1MtWo7a4GJk4izseHo8mbU7gE0RhmiBwZ9kldnnTpgWVja32JR9/7Gw3km/Lmv6tsvNtGRmYQfMQmJcntT+n0c1uoXnnztBljQqb3/HjUrmRfDuaGP2aPquqktqP03Xv4KZRdWWl1H6kPw9Ip11Czty5kvtxMqwICUKm9LolLwBLFbJxSaOR2o/T2S+k4x/S65a+Ayy0j9JcrwPQSa/Q9knQAWjDc3jGBQtwD2uhnwwF6EIU+57rFYAC2feZtwsXwHBdtxRQKKBEE2UEBEgdiLNhM6mZtgcGDsUhEZIVYMY7be3KHJVKsgVYLjbBx+EY+nQ2g7qH4pAIyQrA6qkVK5zYwoNHfDiLFqw9c4aW02GsW7SIbtI7dC4khNajmenz88U9G2e5FX5MW5Es3WxIugKMcx4tHn6LifV4Q3jfo3/evNCDVpvt/ObN2u0Wsr1nMmmvW/r7f9TQoDVbHfZPMzLsvMeTisagIKZlFtZ/4AAOsQakdnY+dCAG4bCQKt2zQLqH8Fjn0YP762LiBuKFJtt5jUZMrHgOMZqZxTkNp+82tLaGUSPZKSvLw1t50nZCoxG3FmgpOthb33zzoLLYb9CHCy7YAaPNo2k328WKrVYxMT0Ku79tt0YjJi68pOld4M6d8coIKaj/JdDdLe7pcCn8IfvOoCDiWTVL37JFPEocMUGFlEoSdoBkmH6oPsD/7sqVoTdXdqhfUpjq6sTNufuH/Uql3DrFWY74jpkpSf0Yz928OaQ7UV3MF5eWyq1zzJhOq2N573PnzKfmGPht8fGu8hbj0FuYg7rFOOTW5caNGzduJh//Ay2KCq4AllagAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDE5LTAxLTIyVDE0OjA5OjI4KzA4OjAwRbHpLAAAACV0RVh0ZGF0ZTptb2RpZnkAMjAxOS0wMS0yMlQxNDowOToyOCswODowMDTsUZAAAABMdEVYdHN2ZzpiYXNlLXVyaQBmaWxlOi8vL2hvbWUvYWRtaW4vaWNvbi1mb250L3RtcC9pY29uX29kd3l1eWNwMTRlL3N0YXJfZnVsbC5zdmcWu/mRAAAAAElFTkSuQmCC',
+            },
+            {
+              data: _this.mapData,
+              name: 'HG',
+              type: 'map',
+              nameMap:{
+                'china':'中国'
+              },
+              mapType: _this.mapType,
+              roam: false,
+              label: {
+                normal:{
+                  show:true,
+                  textStyle:{
+                    color:'#fff',
+                    fontSize:13
                   }
                 },
-              },
-              animationDuration:1000,
-              animationEasing:'cubicOut',
-              animationDurationUpdate:1000,
-              series : [
-                {
-                  name: 'HG',
-                  type: 'map',
-                  mapType: _this.mapType,
-                  roam: false,
-                  nameMap:{
-                    'china':'中国'
-                  },
-                  label: {
-                    normal:{
-                      show:true,
-                      textStyle:{
-                        color:'#fff',
-                        fontSize:13
-                      }
-                    },
-                    emphasis: {
-                      show: true,
-                      textStyle:{
-                        color:'#fff',
-                        fontSize:13
-                      }
-                    }
-                  },
-                  itemStyle: {
-                    normal: {
-                      areaColor: '#4589fd',
-                      borderColor: '#095be6'
-                    },
-                    emphasis: {
-                      areaColor: 'darkorange'
-                    }
-                  },
-                  data: _this.mapData
+                emphasis: {
+                  show: true,
+                  textStyle:{
+                    color:'#fff',
+                    fontSize:13
+                  }
                 }
-              ]
-
-            };
-            this.mapEchart.setOption(option);
-            chartData.chartObj[this.$route.path] = this;
-          },
-          toPage(config) {//跳转页面
-            this.$router.push({
-              path: config.path,
-              query: {
-                status: JSON.stringify(config.status),
-                bread: config.bread
-              }
-            });
-          },
-        getDocCount(dwbm,cityName){//获取文书公开数量信息
-          if(!cityName){
-            this.docLoading = true;
-          }
-          let api = '';
-          let _this = this;
-          let date = new Date();
-          let year = date.getFullYear();
-          let startTime = `${year}-01-01 00:00:00`;
-          let endTime = this.getCurrentTime();
-          dwbm = dwbm?dwbm:this.dwbm;
-          if(this.role=='案管人员') { //判断身份
-            api = 'AG_CountWSSL';
-          }else if(this.role=='承办人'){
-            api = 'CBR_CountWSSL';
-          }
-          if(cityName) {//指定地图统计信息
-            (!_this.cityCount[cityName])&&( _this.cityCount[cityName]={});
-            _this.cityCount[cityName].docCount = ['loading','loading','loading','loading','loading'];
-          }
-          console.log(this.cityCount)
-          function getAxios(gkzt,nzzt) {
-            return _this.axios.get(webApi.SSTX[api].format({
-              startTimeStr: startTime,
-              endTimeStr: endTime,
-              dwbm: dwbm,
-              gkzt: gkzt,//公开状态(公开状态 0:应公开 1:不公开)
-              nzzt: nzzt,//拟制状态(拟制状态 1:待拟制 2:已拟制待审核 4:案管审核退回 8:审核通过;支持位域)
-              bhxj: false,//包含下级
-              wslb: '',//文书类型
-            }))
-          }
-          //获取已公开
-          function getOpen() {
-            return getAxios(0,8)
-          }
-          //获取不公开
-          function getNotOpen() {
-            return getAxios(1,"")
-          }
-          //获取应公开
-          function getShouldOpen() {
-            return getAxios(0,"")
-          }
-          //获取未公开
-          function getUndisclosed() {
-            return getAxios(0,7)
-          }
-
-          this.axios.all([getOpen(),getNotOpen(),getShouldOpen(), getUndisclosed()])
-            .then(_this.axios.spread(function (open,notOpen, shouldOpen, undisclosed,) {
-              let openVal = open.data.data;
-              let undisclosedVal = undisclosed.data.data;
-              let shouldOpenVal = shouldOpen.data.data;
-              let notOpenVal = notOpen.data.data;
-              let ratio = '0%';
-              _this.docLoading = false;
-              if((shouldOpenVal + notOpenVal)!=0){//判断值是否为0
-                ratio = Number((openVal/(shouldOpenVal + notOpenVal))*100).toFixed(1) + '%';
-              }
-              if(cityName) {//指定地图统计信息
-                _this.cityCount[cityName].docCount = [openVal,notOpenVal,shouldOpenVal,undisclosedVal,ratio];
-
-              }else {//当前地图统计信息
-                _this.docCount = [openVal,notOpenVal,shouldOpenVal,undisclosedVal,ratio];
-              }
-              console.log(arguments)
-            }))
-            .catch(_this.axios.spread(function (open,notOpen ,shouldOpen,undisclosed) {
-              console.log(arguments)
-            }))
-        },
-          getCaseCount(dwbm,cityName) {//获取案件公开数量信息
-            if(!cityName){
-              this.isLoading = true;
+              },
+              itemStyle: {
+                normal: {
+                  areaColor: '#4589fd',
+                  borderColor: '#095be6'
+                },
+                emphasis: {
+                  areaColor: 'darkorange'
+                }
+              },
             }
-            let api = '';
-            let _this = this;
-            let date = new Date();
-            let year = date.getFullYear();
-            let startTime = `${year}-01-01 00:00:00`;
-            let endTime = this.getCurrentTime();
-            dwbm = dwbm?dwbm:this.dwbm;
-            if(this.role=='案管人员') {
-              api = 'AG_CountAJGKXX';
-            }else if(this.role=='承办人'){
-              api = 'CBR_CountAJGKXX';
+          ]
+
+        };
+        this.mapEchart.setOption(option);
+        chartData.chartObj[this.$route.path] = this;
+      },
+      toPage(config) {//跳转页面
+        this.$router.push({
+          path: config.path,
+          query: {
+            status: JSON.stringify(config.status),
+            bread: config.bread
+          }
+        });
+      },
+      getDocCount(dwbm,cityName){//获取文书公开数量信息
+        if(!cityName){
+          this.docLoading = true;
+        }
+        let api = '';
+        let _this = this;
+        let date = new Date();
+        let year = date.getFullYear();
+        let startTime = `${year}-01-01 00:00:00`;
+        let endTime = this.getCurrentTime();
+        dwbm = dwbm?dwbm:this.dwbm;
+        if(this.role=='案管人员') { //判断身份
+          api = 'AG_CountWSSL';
+        }else if(this.role=='承办人'){
+          api = 'CBR_CountWSSL';
+        }
+        if(cityName) {//指定地图统计信息
+          (!_this.cityCount[cityName])&&( _this.cityCount[cityName]={});
+          _this.cityCount[cityName].docCount = ['loading','loading','loading','loading','loading'];
+        }
+        //console.log(this.cityCount)
+        function getAxios(gkzt,nzzt) {
+          return _this.axios.get(webApi.SSTX[api].format({
+            startTimeStr: startTime,
+            endTimeStr: endTime,
+            dwbm: dwbm,
+            gkzt: gkzt,//公开状态(公开状态 0:应公开 1:不公开)
+            nzzt: nzzt,//拟制状态(拟制状态 1:待拟制 2:已拟制待审核 4:案管审核退回 8:审核通过;支持位域)
+            bhxj: false,//包含下级
+            wslb: '',//文书类型
+          }))
+        }
+        //获取已公开
+        function getOpen() {
+          return getAxios(0,8)
+        }
+        //获取不公开
+        function getNotOpen() {
+          return getAxios(1,"")
+        }
+        //获取应公开
+        function getShouldOpen() {
+          return getAxios(0,"")
+        }
+        //获取未公开
+        function getUndisclosed() {
+          return getAxios(0,7)
+        }
+
+        this.axios.all([getOpen(),getNotOpen(),getShouldOpen(), getUndisclosed()])
+          .then(_this.axios.spread(function (open,notOpen, shouldOpen, undisclosed,) {
+            let openVal = open.data.data;
+            let undisclosedVal = undisclosed.data.data;
+            let shouldOpenVal = shouldOpen.data.data;
+            let notOpenVal = notOpen.data.data;
+            let ratio = '0%';
+            _this.docLoading = false;
+            if((shouldOpenVal + notOpenVal)!=0){//判断值是否为0
+              ratio = Number((openVal/(shouldOpenVal + notOpenVal))*100).toFixed(1) + '%';
             }
             if(cityName) {//指定地图统计信息
-              (!_this.cityCount[cityName])&&( _this.cityCount[cityName]={});
-              _this.cityCount[cityName].caseCount = ['loading','loading','loading','loading'];
-            }
-            function getAxios(gkzt) {
-              return _this.axios.get(webApi.SSTX[api].format({
-                startTimeStr: startTime,
-                endTimeStr: endTime,
-                dwbm: dwbm ,
-                gkzt: gkzt,//公开状态(1:统一业务系统已公开 2:本系统已公开统一业务系统未公开 4:不公开;支持位域)
-                bhxj: false,//包含下级
-                ajlx: '',//案件类型
-              }))
-            }
-            //获取已公开
-            function getOpen() {
-              return getAxios(3)
-            }
-            //获取本系统已公开统一系统未公开
-            function getUndisclosed() {
-              return getAxios(2)
-            }
-            //获取不公开
-            function getNotOpen() {
-              return getAxios(4)
-            }
-            this.axios.all([getOpen(), getUndisclosed(),getNotOpen()])
-              .then(_this.axios.spread(function (open, undisclosed,notOpen) {
-                let openVal = open.data.data;
-                let undisclosedVal = undisclosed.data.data;
-                let notOpenVal = notOpen.data.data;
-                let ratio = '100.0%';
-                _this.isLoading = false;
-                // if((openVal + notOpenVal)!=0){//程序性公开率
-                //   ratio = Number((openVal/(openVal + notOpenVal))*100).toFixed(1) + '%';
-                // }
-                if(cityName) {//指定地图统计信息
-                  _this.cityCount[cityName].caseCount = [openVal,undisclosedVal,notOpenVal,ratio];
-                }else {//当前地图统计信息
-                  _this.caseCount = [openVal,undisclosedVal,notOpenVal,ratio];
-                }
+              _this.cityCount[cityName].docCount = [openVal,notOpenVal,shouldOpenVal,undisclosedVal,ratio];
 
-                console.log(arguments)
-              }))
-              .catch(_this.axios.spread(function (open, undisclosed,notOpen) {
-                console.log(arguments);
-              }))
-          }
+            }else {//当前地图统计信息
+              _this.docCount = [openVal,notOpenVal,shouldOpenVal,undisclosedVal,ratio];
+            }
+            //console.log(arguments)
+          }))
+          .catch(_this.axios.spread(function (open,notOpen ,shouldOpen,undisclosed) {
+            //console.log(arguments)
+          }))
       },
-      create() {
-      },
-      mounted() {
+      getCaseCount(dwbm,cityName) {//获取案件公开数量信息
+        if(!cityName){
+          this.isLoading = true;
+        }
+        let api = '';
+        let _this = this;
+        let date = new Date();
+        let year = date.getFullYear();
+        let startTime = `${year}-01-01 00:00:00`;
+        let endTime = this.getCurrentTime();
+        dwbm = dwbm?dwbm:this.dwbm;
+        if(this.role=='案管人员') {
+          api = 'AG_CountAJGKXX';
+        }else if(this.role=='承办人'){
+          api = 'CBR_CountAJGKXX';
+        }
+        if(cityName) {//指定地图统计信息
+          (!_this.cityCount[cityName])&&( _this.cityCount[cityName]={});
+          _this.cityCount[cityName].caseCount = ['loading','loading','loading','loading'];
+        }
+        function getAxios(gkzt) {
+          return _this.axios.get(webApi.SSTX[api].format({
+            startTimeStr: startTime,
+            endTimeStr: endTime,
+            dwbm: dwbm ,
+            gkzt: gkzt,//公开状态(1:统一业务系统已公开 2:本系统已公开统一业务系统未公开 4:不公开;支持位域)
+            bhxj: false,//包含下级
+            ajlx: '',//案件类型
+          }))
+        }
+        //获取已公开
+        function getOpen() {
+          return getAxios(3)
+        }
+        //获取本系统已公开统一系统未公开
+        function getUndisclosed() {
+          return getAxios(2)
+        }
+        //获取不公开
+        function getNotOpen() {
+          return getAxios(4)
+        }
+        this.axios.all([getOpen(), getUndisclosed(),getNotOpen()])
+          .then(_this.axios.spread(function (open, undisclosed,notOpen) {
+            let openVal = open.data.data;
+            let undisclosedVal = undisclosed.data.data;
+            let notOpenVal = notOpen.data.data;
+            let ratio = '100.0%';
+            _this.isLoading = false;
+            // if((openVal + notOpenVal)!=0){//程序性公开率
+            //   ratio = Number((openVal/(openVal + notOpenVal))*100).toFixed(1) + '%';
+            // }
+            if(cityName) {//指定地图统计信息
+              _this.cityCount[cityName].caseCount = [openVal,undisclosedVal,notOpenVal,ratio];
+            }else {//当前地图统计信息
+              _this.caseCount = [openVal,undisclosedVal,notOpenVal,ratio];
+            }
 
-        // this.initMap();
-        this.getCity();
-        this.getCaseCount();
-        this.getDocCount();
+            //console.log(arguments)
+          }))
+          .catch(_this.axios.spread(function (open, undisclosed,notOpen) {
+            //console.log(arguments);
+          }))
       }
+    },
+    create() {
+    },
+    mounted() {
+
+      // this.initMap();
+      this.getCity();
+      this.getCaseCount();
+      this.getDocCount();
     }
+  }
 </script>
 
 <style scoped lang="scss">
@@ -542,7 +582,7 @@
           /*line-height: 70px;*/
           margin: 0 auto;
           /*box-shadow: 0 1px 7px 0 rgba(214,212,212,1);*/
-          font-family: 'PingFang-SC-Medium';
+          font-family: 'PingFang-SC-Medium','Microsoft YaHei';
           font-weight:500;
           padding: 0 23px;
           text-align: center;
@@ -595,7 +635,7 @@
           box-shadow: 0 3px 7px 0 #daac0a;
         }
         .info-circle-one .info-content-text {
-          font-family: 'PingFang-SC-Bold';
+          font-family: 'PingFang-SC-Bold','Microsoft YaHei';
           font-weight: 500;
           color: rgba(85,85,85,1);
           cursor: auto;
@@ -613,7 +653,7 @@
           }
         }
         .info-circle-two .info-content-text {
-          font-family: 'PingFang-SC-Bold';
+          font-family: 'PingFang-SC-Bold','Microsoft YaHei';
           font-weight: 500;
           color: rgba(85,85,85,1);
           cursor: auto;
@@ -632,7 +672,7 @@
         }
         .info-circle-one .info-content-count,
         .info-circle-two .info-content-count {
-          font-family: 'PingFang-SC-Bold';
+          font-family: 'PingFang-SC-Bold','Microsoft YaHei';
           font-weight: 600;
           color: rgba(85,85,85,1);
           font-size: 20px;
@@ -676,13 +716,13 @@
     }
   }
   /*@media screen and (max-width: 1200px) {*/
-    /*#map {*/
-      /*position: absolute;*/
-      /*right: 0;*/
-      /*top: 20px;*/
-      /*width: 100% !important;*/
+  /*#map {*/
+  /*position: absolute;*/
+  /*right: 0;*/
+  /*top: 20px;*/
+  /*width: 100% !important;*/
 
-    /*}*/
+  /*}*/
   /*}*/
   @media screen and (max-width: 1680px) {
     /*信息内容*/

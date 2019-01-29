@@ -15,19 +15,20 @@
             </span>
           </div>
           <div class="main-modal-item">
-            <span>模板内容 :</span>
+            <span class="modal-span-top">模板内容 :</span>
             <span>
-              <textarea >{{info.tempContent}}</textarea>
-              <br/>
-              <span>
-                注：模板支持文本替换<br/>
-                案件名称：{案件名称}<br/>
-                当前阶段：{当前阶段}
-              </span>
+              <div><textarea >{{info.tempContent}}</textarea>
+                <br/>
+                <span>
+                  注：模板支持文本替换<br/>
+                  案件名称：{案件名称}<br/>
+                  当前阶段：{当前阶段}
+                </span>
+              </div>
             </span>
           </div>
           <div class="main-modal-item">
-            <span>备注 :</span>
+            <span class="modal-span-top">备注 :</span>
             <span>
                   <textarea >{{info.remarks}}</textarea>
             </span>

@@ -23,7 +23,6 @@ import ExportJsonExcel from 'js-export-excel' //导出excel
 
 import axios  from 'axios'
 
-import '../static/json/jsonData' //数据(测试用)
 const Bus = new Vue();
 let timer = null;
 Vue.config.productionTip = false;
@@ -114,6 +113,7 @@ axios.interceptors.response.use(function (response) {
     }
   }else{
     const config = err.config;
+    Bus.$Message.warning("无法连接服务器");
     console.dir(err)
     Bus.$emit('failModal',{
       failShow: true,

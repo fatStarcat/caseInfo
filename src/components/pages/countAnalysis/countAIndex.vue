@@ -13,7 +13,7 @@
              </span>
               <loading type="w" :width="25" :height="25" :isLoading="caseLoading"></loading>
             </p>
-            <p>案件总量</p>
+            <p>统计案件总量</p>
           </div>
         </div>
         <div class="count-item" @click="showTable('case','已公开',{gkzt: '3'})">
@@ -27,7 +27,7 @@
               </span>
               <loading type="w" :width="25" :height="25" :isLoading="caseLoading"></loading>
             </p>
-            <p>已公开</p>
+            <p>已公开案件总量</p>
           </div>
 
         </div>
@@ -43,7 +43,7 @@
 
               <loading type="w" :width="25" :height="25" :isLoading="caseLoading"></loading>
             </p>
-            <p>不公开</p>
+            <p>不公开案件总量</p>
 
           </div>
 
@@ -60,7 +60,7 @@
 
               <loading type="w" :width="25" :height="25" :isLoading="caseLoading"></loading>
             </p>
-            <p>本系统已公开统一系统未公开</p>
+            <p>本系统已公开统一系统未公开案件总量</p>
           </div>
         </div>
       </div>
@@ -83,6 +83,23 @@
           </div>
         </div>
 
+        <div class="count-item" @click="showTable('doc','已公开',{gkzt: 0,nzzt: 8})">
+          <span class="count-img">
+            <img src="../../../assets/countAnalysis/open.png" alt="">
+          </span>
+          <div class="count-content">
+            <p>
+              <span v-show="!docLoading">
+                {{openDocInfo.YIGKSL|filterNull}}
+              </span>
+
+              <loading type="w" :width="25" :height="25" :isLoading="docLoading"></loading>
+            </p>
+            <p>已公开文书总量</p>
+
+          </div>
+        </div>
+
         <div class="count-item" @click="showTable('doc','不公开',{gkzt: 1})">
           <span class="count-img">
             <img src="../../../assets/countAnalysis/noOpen.png" alt="">
@@ -95,7 +112,7 @@
 
               <loading type="w" :width="25" :height="25" :isLoading="docLoading"></loading>
             </p>
-            <p>不公开总量</p>
+            <p>不公开文书总量</p>
 
           </div>
         </div>
@@ -110,23 +127,7 @@
               </span>
 
               <loading type="w" :width="25" :height="25" :isLoading="docLoading"></loading></p>
-            <p>应公开总量</p>
-
-          </div>
-        </div>
-        <div class="count-item" @click="showTable('doc','已公开',{gkzt: 0,nzzt: 8})">
-          <span class="count-img">
-            <img src="../../../assets/countAnalysis/open.png" alt="">
-          </span>
-          <div class="count-content">
-            <p>
-              <span v-show="!docLoading">
-                {{openDocInfo.YIGKSL|filterNull}}
-              </span>
-
-              <loading type="w" :width="25" :height="25" :isLoading="docLoading"></loading>
-            </p>
-            <p>已公开总量</p>
+            <p>应公开文书总量</p>
 
           </div>
         </div>
@@ -143,7 +144,7 @@
 
               <loading type="w" :width="25" :height="25" :isLoading="docLoading"></loading>
             </p>
-            <p>应公开未公开总量</p>
+            <p>应公开未公开文书总量</p>
           </div>
         </div>
       </div>
@@ -1074,14 +1075,14 @@
               position: relative;
               &:first-child {
                 font-size:34px;
-                font-family: 'PingFang-SC-Bold';
+                font-family: 'PingFang-SC-Bold','Microsoft YaHei';
                 font-weight:bold;
                 height: 50px;
                 line-height: 50px;
               }
               &:last-child {
                 font-size: 18px;
-                font-family:'PingFang-SC-Regular';
+                font-family:'PingFang-SC-Regular','Microsoft YaHei';
                 font-weight: 400;
               }
             }

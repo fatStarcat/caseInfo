@@ -176,7 +176,7 @@
         this.$refs.inputCompany.blur();
       },
       listenClick(e) {//监听点击
-        console.log('点击',e)
+        //console.log('点击',e)
         if(!(e.target.parentNode.className=="searchBtn focusCompany" ||e.target.className=='focusCompany' ||e.target.outerHTML.indexOf('treenode_switch') > -1)) {
           this.blurSelectCompany();
         }
@@ -337,7 +337,7 @@
     },
     created() {
       this.initConfig();//初始化配置
-      console.log(this.$route)
+      //console.log(this.$route)
 
     },
     mounted() {

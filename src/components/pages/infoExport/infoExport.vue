@@ -270,6 +270,8 @@
           }if(this.exportStatus=='已导出') {
             this.dczt = 1;
           }
+          this.pageNum = 1;
+          this.getCaseList(true);
         },
         setDate(fmtDate) {//设置时间
           if(fmtDate){
@@ -470,7 +472,7 @@
           background: transparent;
           text-align: center;
           font-size:18px;
-          font-family:'PingFang-SC-Medium';
+          font-family:'PingFang-SC-Medium','Microsoft YaHei';
           font-weight: 500;
           color: rgba(69,137,253,1);
           box-shadow: 0 3px 3px rgba(69,137,253,.2);

@@ -9,13 +9,13 @@
         <!--填写内容-->
         <div class="main-modal-fill">
           <div class="main-modal-item">
-            <span>模板名称:</span>
+            <span>模板名称 : </span>
             <span>
               <Input v-model="info.tempName" placeholder="请输入模板名称" />
             </span>
           </div>
           <div class="main-modal-item">
-            <span>模板内容 :</span>
+            <span class="modal-span-top">模板内容 :</span>
             <span><textarea v-model="info.tempContent"></textarea></span>
           </div>
           <div class="main-modal-item">
@@ -33,13 +33,13 @@
           <!--</span>-->
           <!--</div>-->
           <div class="main-modal-item">
-            <span>已选联系人 :</span>
+            <span class="modal-span-top">已选联系人 :</span>
             <span>
                   <textarea v-model="info.contacts"></textarea>
             </span>
           </div>
           <div class="main-modal-item">
-            <span>备注 :</span>
+            <span class="modal-span-top">备注 :</span>
             <span>
                   <textarea v-model="info.remarks"></textarea>
             </span>

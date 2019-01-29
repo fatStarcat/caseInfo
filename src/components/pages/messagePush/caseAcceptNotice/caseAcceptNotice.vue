@@ -5,17 +5,16 @@
         <div class="main-sItem">
           <span class="sItem-name">发送时间 :</span>
           <span>
-            <DatePicker  @on-change="setDate" :value="dateTime" type="datetimerange" format="yyyy-MM-dd" placeholder="请选择发送时间" clearable></DatePicker>
+            <DatePicker split-panels  @on-change="setDate" :value="dateTime" type="daterange" format="yyyy-MM-dd" placeholder="请选择发送时间"></DatePicker>
           </span>
         </div>
         <div class="main-sItem">
-          <span class="sItem-name">发送状态 :</span>
+          <span class="sItem-name">案件名称 :</span>
           <span>
-            <RadioGroup v-model="sendStatus" @on-change="changeSendStatus">
-                <Radio  v-for="item,index in sendValue" :key="index" :label="item.label"></Radio>
-            </RadioGroup>
+             <Input v-model="caseName" placeholder="请输入案件名称" />
           </span>
         </div>
+
       </div>
       <div class="main-select clearfix main-sItemOffset">
         <div class="main-sItem ">
@@ -25,9 +24,11 @@
           </span>
         </div>
         <div class="main-sItem">
-          <span class="sItem-name">案件名称 :</span>
+          <span class="sItem-name">发送状态 :</span>
           <span>
-             <Input v-model="caseName" placeholder="请输入案件名称" />
+            <RadioGroup v-model="sendStatus" @on-change="changeSendStatus">
+                <Radio  v-for="item,index in sendValue" :key="index" :label="item.label"></Radio>
+            </RadioGroup>
           </span>
         </div>
       </div>
@@ -291,7 +292,7 @@
             break;
           }
         }
-        console.log(status,statusCode)
+        this.getList();
       },
       /*改变一页条数*/
       changePageSize(size) {

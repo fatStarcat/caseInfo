@@ -1,5 +1,5 @@
 function onMaximize(){
   window.chartData.initMap();
-  console.log('maxSize');
+  //console.log('maxSize');
 }
 window.onMaximize = onMaximize;

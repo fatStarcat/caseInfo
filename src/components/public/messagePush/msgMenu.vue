@@ -127,7 +127,7 @@
     padding-top: 109px;
     overflow-y: auto;
     background:rgba(242,242,242,1);
-    font-family:'PingFang-SC-Regular';
+    font-family:'PingFang-SC-Regular','Microsoft YaHei';
     font-weight: 400;
     color: #555555;
     box-shadow: 4px 0 4px rgba(189,189,189,0.27);
@@ -170,7 +170,7 @@
     }
     .item-content {/*内容选择项*/
       /*position: relative;*/
-      font-family:'PingFang-SC-Regular';
+      font-family:'PingFang-SC-Regular','Microsoft YaHei';
       color:rgba(102,102,102,1);
       &:hover {
         color: #4589FD;
@@ -201,7 +201,7 @@
     /*选中菜单项*/
     .menu-selected {
       background-color: #4589FD;
-      font-family:'PingFang-SC-Bold';
+      font-family:'PingFang-SC-Bold','Microsoft YaHei';
       font-weight:bold;
       color:rgba(255,255,255,1);
       >span {

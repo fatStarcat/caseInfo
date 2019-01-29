@@ -43,15 +43,10 @@
       <div id="tablePage">
         <Page :current="pageNum" @on-page-size-change="changePageSize" @on-change="changePageNum"   :total="total" show-sizer show-total show-elevator />
         <!--导出数据-->
-        <div class="exportData" v-show="showBtnNum===0">
+        <div class="exportData">
+          <button class="export-all btn-batch" @click="getBatchList">批量拟制</button>
           <button class="export-page btn-tabDefault-large" @click="exportAllData(infoData)">导出本页数据</button>
           <button class="export-all btn-export-large" @click="getDocList(false,true)">导出全部数据</button>
-        </div>
-        <div class="exportData" v-show="showBtnNum===1">
-          <button class="export-all btn-export-large">批量拟制</button>
-        </div>
-        <div class="exportData" v-show="showBtnNum===2">
-          <button class="export-all btn-export-large">批量导出</button>
         </div>
       </div>
     </div>
@@ -75,7 +70,6 @@
         total: 0,//总条数
         isLoading: false,//表格加载
         docType: JSON.parse(localStorage.getItem('WSLX')),//文书类型
-        showBtnNum: 0,//显示按钮 {0:全部(导出本页,导出全部),1:未拟制(批量拟制),2:审核通过待导出(批量导出)}
         originalData: [],//列表原始数据
         company: {//单位
           name: JSON.parse(localStorage.getItem('userInfo')).Unit.DWMC,//单位名称
@@ -141,7 +135,7 @@
             align: 'center',
             render: (h, params) => {
               let _this = this;
-              if(params.row.NZZT=='案管审核退回'){
+              if(params.row.NZZT=='审核退回'){
                 return h('div', [
                   h('span', {
                     props: {
@@ -153,10 +147,12 @@
                       color: '#3B7AFF',
                     },
                     on: {
-                      click: () => {
-                        let arr = [params.row]
-                        console.log("修订",arr);
-                        invoker.createWS(_this.token,arr);
+                      click: async () => {
+                        let val = this.originalData[params.index];
+                        val = JSON.parse(JSON.stringify(val));
+                        await invoker.editWS(JSON.stringify([val]))
+                          this.getDocList(true);
+
                         // this.$router.push({path:'/revise',query:{title:params.row.docName}});
                       }
                     }
@@ -175,17 +171,20 @@
                       color: '#3B7AFF',
                     },
                     on: {
-                      click: () => {
-                        let arr = [params.row];
-                        arr = this.originalData[params.index];
-                        console.log("拟制",arr);
-                        invoker.createWS(_this.token, arr);
-                        // this.$router.push({path:'/drafting',query:{title:params.row.docName}});
+                      click:async () => {
+                        let val = this.originalData[params.index];
+                        val = JSON.parse(JSON.stringify(val));
+                        await invoker.createWS(JSON.stringify([val]))
+                          this.getDocList(true);
+
                       }
                     }
                   }, '拟制'),
                 ]);
-              }else if(params.row.NZZT=='审核通过') {
+              }else if(params.row.NZZT=='审核通过'||params.row.NZZT=='待审核') {
+                if(params.row.NZZT=='审核通过'&& !params.row.GKBWJLJ) {
+                  return;
+                }
                 return h('div', [
                   h('span', {
                     props: {
@@ -198,8 +197,9 @@
                     },
                     on: {
                       click: () => {
-                        console.log("查看");
-                        this.$router.push({path:'/look',query:{title:params.row.docName}});
+                        let val = this.originalData[params.index];
+                        val = JSON.parse(JSON.stringify(val));
+                        invoker.browseWS(JSON.stringify([val]));
                       }
                     }
                   }, '查看'),
@@ -217,24 +217,6 @@
                   //     }
                   //   }
                   // }, '导出')
-                ]);
-              }else if(params.row.NZZT=='已拟制待审核') {
-                return h('div', [
-                  h('span', {
-                    props: {
-                      size: 'small',
-                    },
-                    style: {
-                      marginRight: '5px',
-                      cursor: 'pointer',
-                      color: '#3B7AFF',
-                    },
-                    on: {
-                      click: () => {
-                        this.$router.push({path:'/look',query:{title:params.row.docName}});
-                      }
-                    }
-                  }, '查看')
                 ]);
               }
 
@@ -266,7 +248,6 @@
           this.nzzt = '';
         }else if(this.status=='待拟制') {
           this.nzzt = 1;
-          this.showBtnNum = 1;
         }if(this.status=='已拟制待审核') {
           this.nzzt = 2;
         }if(this.status=='案管审核退回') {
@@ -274,7 +255,8 @@
         }if(this.status=='审核通过') {
           this.nzzt = 8;
         }
-        this.showBtnNum = 0;
+        this.pageNum = 1;
+        this.getDocList(true);
       },
       setDate(fmtDate) {//设置时间
         if(fmtDate){
@@ -294,6 +276,30 @@
       changePageSize(size) {//改变每页条数
         this.pageSize = size;
         this.getDocList();
+      },
+      getBatchList() {//批量拟制列表
+        let _this = this;
+        this.$Message.info('获取数据中');
+        this.axios.get(webApi.WSPB.CBR_GetWSSLs.format({
+          startTimeStr: '1970-01-01 00:00:00',
+          endTimeStr: _this.getCurrentTime(),
+          nzzt: 1,//拟制状态(拟制状态 1:待拟制 2:已拟制待审核 4:案管审核退回 8:审核通过;支持位域)
+          wslb: '',//文书类型
+          pageNum: 1,
+          pageSize: Math.pow(10,7)
+        })).then(async function(res){
+          if(res.data.code==0){
+            let data = res.data.data;//数据
+            if(data.length > 0) {
+              await invoker.createWS(JSON.stringify(data));
+              _this.getDocList(true);
+            }else {
+              _this.$Message.info('暂无可批量操作数据!');
+            }
+          }
+        }).catch(function(err){
+          console.log(err)
+        })
       },
       /*
       * getCount: 是否获取当前选择条件下的公开信息数量
@@ -319,11 +325,11 @@
           ;
           if(res.data.code==0){
             let data = res.data.data;//表数据
+            _this.originalData = JSON.parse(JSON.stringify(data));
             data.forEach(function(item,index){ //添加序号
               item.order = (_this.pageNum -1) * _this.pageSize +  index + 1;
             });
             if(data.length>0) {
-              _this.originalData = [].concat(data);
               _this.getExamineList(data,getAll);//获取审核内容
             }else {
               _this.infoData = data;
@@ -337,7 +343,7 @@
       },
       getCount() {//获取文书数量
         let _this = this;
-        this.setNzzt();
+        // this.setNzzt();
         this.axios.get(webApi.WSPB.CBR_CountWSSL.format({
           startTimeStr: _this.dateValue[0],
           endTimeStr: _this.dateValue[1],
@@ -368,7 +374,7 @@
             wsbh: item.WSBH
           })).then(function(res){
             if(res.data.code==0){
-              item.examine = res.data.data[0];
+              item.examine = res.data.data[0]?res.data.data[0].SHJL:"";
               count++;
             }
             if(count==data.length) {

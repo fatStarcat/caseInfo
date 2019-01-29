@@ -225,7 +225,7 @@
             break;
           }
         }
-        console.log(status,statusCode)
+        //console.log(status,statusCode)
       },
       /*改变一页条数*/
       changePageSize(size) {

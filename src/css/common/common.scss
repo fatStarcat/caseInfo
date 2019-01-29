@@ -3,7 +3,7 @@
 @mixin m-btn-style($styleBgColor,$style-shadowColor) {/*按钮默认基础样式*/
   height: 40px;
   font-size: 18px;
-  font-family: 'PingFang-SC-Medium';
+  font-family: 'PingFang-SC-Medium','Microsoft YaHei';
   color: rgba(255,255,255,1);
   border-radius: 20px;
   border: none;
@@ -23,11 +23,11 @@
 }
 .btn-export {/*导出全部按钮样式*/
   width: 120px;
-  @include m-btn-style(#65E0FA,rgba(15,184,247,0.22));
+  @include m-btn-style(#24adf1,rgba(7,143,210,0.22));
 }
 .btn-export-large {
   width: 140px;
-  @include m-btn-style(#65E0FA,rgba(15,184,247,0.22));
+  @include m-btn-style(#24adf1,rgba(7,143,210,0.22));
 }
 
 .btn-tabDefault {/*默认*/
@@ -49,6 +49,10 @@
 }
 .btn-reset {/*重置*/
   width: 120px;
+  @include m-btn-style(rgba(231,139,40,1),rgba(214,129,37,0.22));
+}
+.btn-batch {/*批量*/
+  width: 140px;
   @include m-btn-style(rgba(231,139,40,1),rgba(214,129,37,0.22));
 }
 .btn-reset-not {/*重置未激活状态*/

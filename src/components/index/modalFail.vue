@@ -38,7 +38,7 @@
   #modalFail {
     width: 400px;
     height: 279px;
-    position: relative;
+    position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%,-50%);
@@ -56,7 +56,7 @@
       font-size:24px;
       height: 180px;
       padding-top: 50px;
-      font-family:'PingFang-SC-Bold';
+      font-family:'PingFang-SC-Bold','Microsoft YaHei';
       p {
         line-height: 100%;
       }
@@ -65,7 +65,6 @@
       }
       p:nth-child(2){
         font-size:16px;
-        font-family:'MicrosoftYaHei';
         font-weight:400;
         margin-top: 25px;
       }
@@ -104,7 +103,7 @@
         button {
           width: 110px;
           height: 30px;
-          line-height: 30px;
+          /*line-height: 30px;*/
           border: 1px solid rgba(69,137,253,1);
           border-radius: 14px;
           font-size: 20px;

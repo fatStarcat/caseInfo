@@ -9,11 +9,11 @@
         <!--填写内容-->
         <div class="main-modal-fill">
           <div class="main-modal-item">
-            <span>短信内容:</span>
+            <span class="modal-span-top">短信内容 : </span>
             <span><textarea v-model="msgContent"></textarea></span>
           </div>
           <div class="main-modal-item">
-            <span>发送时间:</span>
+            <span>发送时间 : </span>
             <span>
                   <DatePicker @on-change="setDate" :value="dateTime" type="datetime" format="yyyy-MM-dd HH:mm:ss" placeholder="请选择发送时间" ></DatePicker>
             </span>
@@ -27,7 +27,7 @@
             <!--</span>-->
           <!--</div>-->
           <div class="main-modal-item">
-            <span>已选联系人:</span>
+            <span class="modal-span-top">已选联系人 : </span>
             <span>
                   <textarea></textarea>
             </span>

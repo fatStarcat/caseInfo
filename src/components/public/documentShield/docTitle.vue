@@ -49,7 +49,7 @@
   #docTitle {//标题
     text-align: center;
     font-size:24px;
-    font-family: 'PingFang-SC-Bold';
+    font-family: 'PingFang-SC-Bold','Microsoft YaHei';
     font-weight:bold;
     color: rgba(85,85,85,1);
     margin-bottom: 20px;

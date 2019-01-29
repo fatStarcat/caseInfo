@@ -55,8 +55,7 @@
       font-size:24px;
       height: 146px;
       padding-top: 62px;
-      font-family:'PingFang-SC-Bold';
-      font-weight: bold;
+      font-family:'PingFang-SC-Bold','Microsoft YaHei';
       color: rgba(255,254,254,1);
       background:url('../../../../static/images/index/bg.jpg') no-repeat;
       background-size: cover;
@@ -79,11 +78,11 @@
         button {
           width: 92px;
           height: 28px;
-          line-height: 28px;
+          /*line-height: 28px;*/
           border: 1px solid rgba(69,137,253,1);
           border-radius: 14px;
           font-size: 20px;
-          font-family:'PingFang-SC-Regular';
+          font-family:'PingFang-SC-Regular','Microsoft YaHei';
           font-weight:400;
           color:rgba(51,51,51,1);
           background-color: transparent;

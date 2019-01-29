@@ -5,7 +5,7 @@
         <div class="main-sItem">
           <span class="sItem-name">发送时间 :</span>
           <span>
-            <DatePicker @on-change="setDate" :value="dateTime" type="datetimerange" format="yyyy-MM-dd" placeholder="请选择发送时间" clearable></DatePicker>
+            <DatePicker split-panels @on-change="setDate" :value="dateTime" type="daterange" format="yyyy-MM-dd" placeholder="请选择发送时间" clearable></DatePicker>
           </span>
         </div>
         <div class="main-sItem">

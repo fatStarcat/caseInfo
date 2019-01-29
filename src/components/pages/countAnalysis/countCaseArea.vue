@@ -224,14 +224,14 @@
         infoData: [//表格数据
         ],
         pieData: {
-          data:[
-            {value:2000, name: '已公开'},
-            {value:1899, name: '不公开'},
-            {value:100, name: '本系统已公开统一系统未公开'},
-          ],
-          legend: [],
-          title: '案件公开比例',
-          color: ['#4589FD','#34ABFE','#8BB3F7']
+          // data:[
+          //   {value:2000, name: '已公开'},
+          //   {value:1899, name: '不公开'},
+          //   {value:100, name: '本系统已公开统一系统未公开'},
+          // ],
+          // legend: [],
+          // title: '案件公开比例',
+          // color: ['#4589FD','#34ABFE','#8BB3F7']
         },
         chartData: [],//图表数据
         //父组件传递数据

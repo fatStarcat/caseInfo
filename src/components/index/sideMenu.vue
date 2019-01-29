@@ -46,7 +46,6 @@
                 if(res.data.code==0) {
                   localStorage.setItem('AJLX',JSON.stringify(res.data.data));
                 }
-                ;
               })
               .catch(function(err){
                 console.log(err);
@@ -58,7 +57,6 @@
                 if(res.data.code==0) {
                   localStorage.setItem('WSLX',JSON.stringify(res.data.data));
                 }
-                ;
               })
               .catch(function(err){
                 console.log(err);
@@ -95,7 +93,7 @@
             this.currNum = '1';
           }else if(this.$route.path == "/infoExport") {
             this.currNum = 'infoExport';
-          }else if(this.$route.path == "/messagePush") {
+          }else if(this.$route.path == "/messagePush" ||this.$route.path == "/CaseAllotNotice"||this.$route.path == "/CaseConcludeNotice"||this.$route.path == "/CustomMessageSend"||this.$route.path == "/MailListManage"||this.$route.path == "/MsgTemplateManage") {
             this.currNum = 'messagePush';
           }else if(this.$route.path == "/countAnalysis"||this.$route.path == "/countCaseArea"||this.$route.path == "/countCaseType" || this.$route.path == "/countCaseInquisitor" || this.$route.path == "/countDocArea" ||this.$route.path == "/countDocType" || this.$route.path == "/countDocInquisitor") {
             this.currNum = 'countAnalysis';

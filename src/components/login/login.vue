@@ -171,7 +171,7 @@
             _this.isLoading = false;
           }
         }).catch(function(err){
-          _this.$Message.warning('登录失败!');
+          // _this.$Message.warning('登录失败!');
           _this.isLoading = false;
           console.log(err)
         })
@@ -258,7 +258,7 @@
               border-bottom: 1px solid rgba(220,220,220,1);
               background: transparent;
               font-size: 16px;
-              font-family: 'PingFang-SC-Regular';
+              font-family: 'PingFang-SC-Regular','Microsoft YaHei';
               font-weight:400;
               color:rgba(85,85,85,1);
               &:first-child {
@@ -298,7 +298,7 @@
         .check-login {
           width: 297px;
           margin: 44px auto 0;
-          font-family: 'PingFang-SC-Regular';
+          font-family: 'PingFang-SC-Regular','Microsoft YaHei';
           font-weight: 400;
           color: rgba(70,70,70,1);
           .checkBtn {
@@ -341,7 +341,7 @@
             width: 125px;
             height: 40px;
             font-size: 18px;
-            font-family: 'PingFang-SC-Medium';
+            font-family: 'PingFang-SC-Medium','Microsoft YaHei';
             font-weight: 500;
             border-radius: 20px;
             border: none;

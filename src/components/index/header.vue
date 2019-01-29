@@ -14,8 +14,8 @@
       <!--用户信息-->
       <div class="infoItem">
         <img src="../../assets/index/user.png" alt="">
-        <!--<span>欢迎您，{{userName}}</span>-->
-        <span>欢迎您，王豪</span>
+        <span>欢迎您，{{userName}}</span>
+        <!--<span>欢迎您，王豪</span>-->
       </div>
       <!--消息-->
       <!--<div class="infoItem">-->
@@ -28,7 +28,6 @@
         <!--<img src="../../assets/index/toggle.png" alt="">-->
         <!--<span>切换用户</span>-->
       <!--</div>-->
-
     </div>
     <!--关闭-->
     <span class="close forms-btn" @click="close">
@@ -53,13 +52,12 @@
           let msg = this.$Message.loading('切换用户');
           this.axios.get(webApi.Host + webApi.Auth.Logout)
             .then(function(res){
-              ;
               localStorage.setItem('token','');
               invoker.reLogin();
               setTimeout(msg, 100);
             })
             .catch(function(err) {
-              console.log(err)
+              console.log(err);
               localStorage.setItem('token','');
               invoker.reLogin();
               setTimeout(msg, 100);
@@ -67,7 +65,7 @@
 
         },
         close() {//退出
-          this.$emit('modShow')
+          this.$emit('modShow');
         },
         minSize() {//最小化窗口
           invoker.minimize();
@@ -103,7 +101,7 @@
        }
        #logo-text {
          height: 100%;
-         font-family: 'fangzheng_GBK';
+         font-family: 'fangzheng_GBK' !important;
        }
      }
      /*info*/
@@ -119,10 +117,6 @@
         display: table-cell;
         vertical-align: middle;
         padding: 0 20px;
-         /*&:hover {*/
-           /*background: rgba(6,14,128,0.5);*/
-           /*cursor: pointer;*/
-         /*}*/
          &:nth-child(3) {
            cursor: pointer;
          }
@@ -144,7 +138,7 @@
      }
      .small {
        right: 64px;
-       top: 2px;
+       top: 5px;
      }
 
    }

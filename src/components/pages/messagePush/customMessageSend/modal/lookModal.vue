@@ -9,17 +9,17 @@
         <!--填写内容-->
         <div class="main-modal-fill">
           <div class="main-modal-item">
-            <span>短信内容 :</span>
-            <span>
+            <span class="modal-span-top">短信内容 : </span>
+            <span >
                   <textarea>{{lookInfo.content}}</textarea>
               </span>
           </div>
           <div class="main-modal-item">
-            <span>发送时间 :</span>
+            <span>发送时间 : </span>
             <span>{{lookInfo.sendTime}}</span>
           </div>
           <div class="main-modal-item">
-            <span>联系人 :</span>
+            <span>联系人 : </span>
             <span>{{lookInfo.contacts}}</span>
           </div>
 
