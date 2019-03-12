@@ -58,6 +58,7 @@
   export default {
     data() {
       return {
+        isExamine: false,//是否批量审核中
         clearable: false,//显示清除按钮
         tableHeight: '',//表格高度
         dateValue:[this.getStartTime(),this.getCurrentTime()],
@@ -242,6 +243,12 @@
       },
       getBatchList() {//批量审核列表
         let _this = this;
+        if(this.isExamine) {//正在获取数据中
+          this.$Message.info('获取数据中,请勿重复点击!');
+          return;
+        }else {
+          this.isExamine = true;
+        }
         this.$Message.info('获取数据中');
         this.axios.get(webApi.WSPB.AG_GetWSSLs.format({
           startTimeStr: '1970-01-01 00:00:00',
@@ -259,6 +266,7 @@
             }else {
               _this.$Message.info('暂无可批量操作数据!');
             }
+            _this.isExamine = false;
           }
         }).catch(function(err){
           console.log(err)

@@ -31,7 +31,7 @@
 
 <script>
     import headerBar from './header'
-    import footerBar from './footer'
+    // import footerBar from './footer'
     import sideMenu from './sideMenu'
     import reLogin from './modalReLogin'
     import reFail from './modalFail'
